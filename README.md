@@ -1,13 +1,13 @@
 # Python Mariachi Website
-*Learning-Focused Full-Stack Python Development for Mariachi Esencia*
+*Learning-Focused Full-Stack Python Development for Mariachi Todo Terreno*
 
 ## 🎯 Project Overview
 
-This is a comprehensive Python web development project to create a professional website for Mariachi Esencia. The project serves dual purposes: providing a real-world application for the mariachi band and offering hands-on learning experience in modern Python web development, security engineering, and DevOps practices.
+This is a comprehensive Python web development project to create a professional website for Mariachi Todo Terreno. The project serves dual purposes: providing a real-world application for the mariachi band and offering hands-on learning experience in modern Python web development, security engineering, and DevOps practices.
 
-## 🎵 About Mariachi Esencia
+## 🎵 About Mariachi Todo Terreno
 
-Mariachi Esencia is a professional mariachi group led by Gerry Ochoa (trumpet). This website will serve both business needs (customer engagement, bookings) and internal band management (practice coordination, music library, scheduling).
+Mariachi Todo Terreno is a professional mariachi group led by Gerry Ochoa (trumpet). This website will serve both business needs (customer engagement, bookings) and internal band management (practice coordination, music library, scheduling).
 
 ## 🏗️ Project Structure
 
@@ -118,7 +118,7 @@ All project documentation is centralized in the `/docs/` directory:
 
 ## 🔗 Related Projects
 
-This project is part of the broader Mariachi Esencia web presence, which includes:
+This project is part of the broader Mariachi Todo Terreno web presence, which includes:
 - **HTML/CSS/JS Version**: Currently live production website
 - **MEAN Stack Version**: Advanced application with Angular frontend
 - **Python Version**: This learning-focused project
@@ -131,4 +131,4 @@ This project is part of the broader Mariachi Esencia web presence, which include
 
 ---
 
-*This project emphasizes learning, security, and professional development while creating a real-world application for Mariachi Esencia.*
+*This project emphasizes learning, security, and professional development while creating a real-world application for Mariachi Todo Terreno.*

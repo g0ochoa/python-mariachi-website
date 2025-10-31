@@ -22,7 +22,7 @@
 4. **Project Name**: `Python Mariachi Website`
 5. **Project Description**: 
    ```
-   Learning-focused Python web development project for Mariachi Esencia. 
+   Learning-focused Python web development project for Mariachi Todo Terreno. 
    Building professional website with public content and private musicians portal.
    Focus: Python frameworks, security engineering, Infrastructure as Code, CI/CD.
    ```
@@ -328,7 +328,7 @@ For each task with dependencies:
 ```
 Welcome to the Python Mariachi Website project! 
 
-This is our learning-focused development project for Mariachi Esencia. 
+This is our learning-focused development project for Mariachi Todo Terreno. 
 Please review the original-requirements.md and asana-project-breakdown.md 
 files in our GitHub repo for complete project context.
 

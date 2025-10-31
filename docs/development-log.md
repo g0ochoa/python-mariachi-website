@@ -4,7 +4,7 @@
 ---
 
 ## 📋 **Project Overview**
-This log tracks all development activities, decisions, and learning outcomes for the Python-based Mariachi Esencia website project.
+This log tracks all development activities, decisions, and learning outcomes for the Python-based Mariachi Todo Terreno website project.
 
 **Project Start Date**: October 29, 2025  
 **Current Phase**: Initial Setup and Planning  
@@ -217,6 +217,55 @@ touch docs/development-environment-setup.md
 - Streamlit's rapid development capabilities could accelerate MVP delivery for learning validation
 - Framework diversity helps team understand different Python web development approaches
 - Decision matrix must balance traditional web development learning vs rapid prototyping benefits
+
+### **Session 3 - October 30, 2025**
+**Duration**: In Progress  
+**Participants**: Gerry Ochoa  
+**Objectives**: GitHub repository setup and project corrections
+
+#### **Activities Completed**
+1. **Shell Environment Setup**
+   - Successfully switched from bash 3.2 to zsh for modern shell features
+   - Resolved terminal prompt issues and improved development experience
+   - Configured proper development environment for team consistency
+
+2. **GitHub Repository Creation**
+   - Installed GitHub CLI using Homebrew
+   - Authenticated with GitHub using existing SSH keys
+   - Created public repository: `python-mariachi-website`
+   - Successfully pushed initial project commits to GitHub
+
+3. **Project Name Correction**
+   - Corrected mariachi group name from "Mariachi Esencia" to "Mariachi Todo Terreno"
+   - Updated all project documentation files with correct band name
+   - Maintained consistency across README, requirements, and setup instructions
+
+#### **Technical Setup Completed**
+- **Repository URL**: `https://github.com/g0ochoa/python-mariachi-website`
+- **Initial Commit**: 8 files, 2175+ lines of comprehensive project setup
+- **Documentation**: Complete requirements, timeline, and task breakdown
+- **Version Control**: Proper `.gitignore` configured for Python development
+
+#### **Commands Executed**
+```bash
+# Shell environment
+chsh -s /bin/zsh
+exec zsh
+
+# GitHub CLI setup
+brew install gh
+gh auth login
+gh repo create python-mariachi-website --public --source=. --push --description "Learning-focused Python web development for Mariachi Todo Terreno website"
+
+# Project corrections
+# Updated multiple .md files with correct mariachi name
+```
+
+#### **Learning Notes** *(GitHub & Version Control)*
+- GitHub CLI significantly streamlines repository creation and management
+- SSH key integration provides secure, passwordless authentication
+- Proper `.gitignore` setup prevents accidental commits of sensitive files
+- Initial commit should capture complete project foundation and planning documentation
 
 ---
 

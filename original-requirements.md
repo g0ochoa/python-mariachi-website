@@ -6,7 +6,7 @@
 ## 🎯 **Project Purpose & Goals**
 
 ### **Primary Objective**
-Develop a real-world mariachi band website using Python to gain hands-on experience with Python web development, while creating a production-ready application for Mariachi Esencia.
+Develop a real-world mariachi band website using Python to gain hands-on experience with Python web development, while creating a production-ready application for Mariachi Todo Terreno.
 
 ### **Learning Outcomes**
 - Master Python web development frameworks and best practices
@@ -78,7 +78,7 @@ Secure, authenticated area exclusively for band members:
 
 ### **Authentication & Authorization**
 - **Single Sign-On (SSO)**: Google Workspace integration preferred
-- **Organization Membership**: Musicians must be verified members of Mariachi Esencia organization
+- **Organization Membership**: Musicians must be verified members of Mariachi Todo Terreno organization
 - **Role-Based Access Control**: Different permission levels for different user types
 - **Session Management**: Secure session handling and timeout policies
 - **Multi-Factor Authentication**: Additional security layer for sensitive operations
@@ -198,7 +198,7 @@ python-mariachi-website/
 - [ ] Real-world application of CI/CD principles
 
 ### **Business Objectives**
-- [ ] Professional website enhancing Mariachi Esencia's online presence
+- [ ] Professional website enhancing Mariachi Todo Terreno's online presence
 - [ ] Efficient practice organization tools for band members
 - [ ] Streamlined customer interaction and booking system
 - [ ] Scalable platform for future enhancements
@@ -206,7 +206,7 @@ python-mariachi-website/
 ---
 
 ## 🎵 **Domain Context**
-**Mariachi Esencia** is a professional mariachi group led by Gerry Ochoa (trumpet). The website serves dual purposes: promoting the band's services to potential clients and providing practical tools for band management and practice coordination.
+**Mariachi Todo Terreno** is a professional mariachi group led by Gerry Ochoa (trumpet). The website serves dual purposes: promoting the band's services to potential clients and providing practical tools for band management and practice coordination.
 
 ---
 

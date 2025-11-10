@@ -35,7 +35,7 @@ python-mariachi-website/
 ## 🛠️ Tech Stack (Planned)
 
 ### Backend
-- **Framework**: Django/Flask/FastAPI (selection in progress)
+- **Framework**: Django/Flask/FastAPI/Streamlit (selection in progress)
 - **Database**: PostgreSQL or MongoDB
 - **Authentication**: Google Workspace SSO integration
 - **API**: RESTful API design
@@ -86,25 +86,31 @@ python-mariachi-website/
 
 ## 📋 Current Status
 
-**Phase**: Initial Setup and Planning  
-**Started**: October 29, 2025  
-**Team**: Gerry Ochoa (Project Manager) + Learning Group
+**Phase**: Sprint 1 - Technology Stack & Architecture Decisions  
+**Official Kickoff**: November 10, 2025  
+**Team**: Gerry Ochoa (Project Manager), Paco "Sensei" Cisneros, Carlos Cortes, Juan Marin  
+**Meeting Schedule**: Weekly Mondays on Microsoft Teams
 
 ### Completed
 - [x] Project requirements documentation
 - [x] Clean project structure setup
 - [x] Documentation organization standards
-- [x] Initial development log creation
+- [x] GitHub repository initialization
+- [x] Team formation and role assignments
 
-### In Progress
-- [ ] Python framework selection (Django/Flask/FastAPI)
+### In Progress (Sprint 1)
+- [ ] Python framework selection (Django/Flask/FastAPI/Streamlit)
+- [ ] Database technology selection (PostgreSQL/MongoDB)
 - [ ] Local development environment setup
 - [ ] Architecture design documentation
 
-### Upcoming
-- [ ] GitHub repository initialization
-- [ ] Framework installation and configuration
-- [ ] Initial authentication system design
+### Sprint 1 Framework Research Assignments
+- **Paco Cisneros**: Django Framework Research
+- **Carlos Cortes**: FastAPI Framework Research
+- **Gerry Ochoa**: Streamlit Framework Research + Decision Matrix
+- **Juan Marin**: Flask Framework Research
+
+**Research Deadline**: November 17, 2025
 
 ## 📚 Documentation
 

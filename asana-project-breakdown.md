@@ -6,14 +6,30 @@
 ## 🎯 **Project Information**
 **Project Name**: Python Mariachi Website  
 **Project Manager**: Gerry Ochoa  
-**Start Date**: October 29, 2025  
+**Project Start**: October 29, 2025 (Planning Phase)  
+**Official Kickoff**: November 10, 2025 (Team Launch)  
 **Methodology**: Agile/Scrum with Sprint-based development  
 **Sprint Duration**: 2 weeks  
-**Team**: Learning group with collaborative development
+**Team**: Gerry Ochoa, Paco "Sensei" Cisneros, Carlos Cortes, Juan Marin  
+**Meeting Schedule**: Weekly Mondays on Microsoft Teams
 
 ---
 
-## 📊 **Epic Overview & Timeline**
+## � **Sprint 1 Team Assignments** *(Framework Research)*
+
+### **Research Task Distribution**
+- **🥋 Paco "Sensei" Cisneros**: Django Framework Research (Task 1.1.1)
+- **💻 Carlos Cortes**: FastAPI Framework Research (Task 1.1.3)  
+- **🎯 Gerry Ochoa**: Streamlit Framework Research (Task 1.1.4) + Decision Matrix (Task 1.1.5)
+- **🌱 Juan Marin**: Flask Framework Research (Task 1.1.2)
+
+**Deadline**: November 17, 2025 (Monday meeting)  
+**Deliverable**: Each member presents framework research findings  
+**Decision**: Framework selection finalized by November 20, 2025
+
+---
+
+## �📊 **Epic Overview & Timeline**
 
 | Epic | Priority | Estimated Duration | Dependencies |
 |------|----------|-------------------|--------------|
@@ -49,7 +65,7 @@
     - Assess Google Workspace SSO integration capabilities
     - Review security features and best practices
   - **Estimated Hours**: 4
-  - **Assignee**: Gerry Ochoa
+  - **Assignee**: Paco "Sensei" Cisneros
   - **Labels**: research, django, critical
 
 - **Task 1.1.2**: Research Flask Framework
@@ -60,7 +76,7 @@
     - Assess security implementation requirements
     - Review deployment and scaling considerations
   - **Estimated Hours**: 4
-  - **Assignee**: Team Member TBD
+  - **Assignee**: Juan Marin
   - **Labels**: research, flask, critical
 
 - **Task 1.1.3**: Research FastAPI Framework
@@ -71,7 +87,7 @@
     - Assess authentication and security implementations
     - Review learning curve and documentation quality
   - **Estimated Hours**: 4
-  - **Assignee**: Team Member TBD
+  - **Assignee**: Carlos Cortes
   - **Labels**: research, fastapi, critical
 
 - **Task 1.1.4**: Research Streamlit Framework
@@ -83,7 +99,7 @@
     - Review deployment options and production readiness
     - Analyze pros/cons for public website vs data dashboard use cases
   - **Estimated Hours**: 4
-  - **Assignee**: Team Member TBD
+  - **Assignee**: Gerry Ochoa
   - **Labels**: research, streamlit, critical
 
 - **Task 1.1.5**: Framework Decision Matrix & Selection

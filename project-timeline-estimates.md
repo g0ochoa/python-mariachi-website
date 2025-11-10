@@ -7,7 +7,9 @@
 
 ### **Key Assumptions**
 - **Team Availability**: 10-15 hours per week per person (evenings/weekends)
-- **Team Size**: 2-4 developers (Gerry + learning group friends)
+- **Team Size**: 4 developers (Gerry Ochoa, Paco Cisneros, Carlos Cortes, Juan Marin)
+- **Official Kickoff**: November 10, 2025
+- **Meeting Cadence**: Weekly Mondays on Microsoft Teams
 - **Work Constraints**: Full-time jobs, family commitments, holidays
 - **Learning Factor**: 25% additional time for research and skill development
 - **Buffer**: 20% contingency for unexpected challenges and iterations
@@ -37,9 +39,15 @@
 **Part-Time Effort**: 30-45 hours total team effort
 
 #### **Weekly Breakdown**
-- **Week 1** (Oct 30 - Nov 5): Framework research (Django/Flask/FastAPI)
-- **Week 2** (Nov 6 - Nov 12): Database research (PostgreSQL/MongoDB) + Authentication planning
-- **Week 3** (Nov 13 - Nov 19): Decision finalization + Sprint 2 planning
+- **Week 1** (Oct 30 - Nov 9): Project setup and preparation ✅
+- **Week 2** (Nov 10 - Nov 16): Official kickoff + Framework research (Django/Flask/FastAPI/Streamlit)
+- **Week 3** (Nov 17 - Nov 20): Research presentations + Decision finalization + Sprint 2 planning
+
+#### **Framework Research Assignments**
+- **Paco "Sensei" Cisneros**: Django Framework Research
+- **Carlos Cortes**: FastAPI Framework Research  
+- **Gerry Ochoa**: Streamlit Framework Research + Decision Matrix
+- **Juan Marin**: Flask Framework Research
 
 **Buffer Rationale**: Research takes time when done properly; team needs consensus
 

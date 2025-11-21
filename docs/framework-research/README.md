@@ -1,27 +1,35 @@
-# Framework Research - Sprint 1
-*Python Web Framework Evaluation for Mariachi Todo Terreno Website*
+# Framework Research Directory
+*Individual research assignments for Python web framework evaluation*
 
 ---
 
 ## 🎯 **Research Objective**
-Evaluate and compare Python web frameworks to select the optimal technology for the Mariachi Todo Terreno website project, considering learning objectives, security requirements, and project-specific needs.
+Each team member researches ALL 4 Python web frameworks for comprehensive evaluation and comparison to select the optimal technology for the Mariachi Todo Terreno website project.
 
 ---
 
-## 👥 **Team Assignments** *(Updated After Kickoff - November 11, 2025)*
+## 📁 **New Organized Structure**
 
-### **Comprehensive Research Approach** *(NEW)*
-**Each team member researches ALL 4 frameworks for thorough comparison**
+### **Individual Research Folders**
+Each team member has their own folder with personalized research files:
 
-| Team Member | Assignment | Due Date | Status |
-|-------------|------------|----------|---------|
-| **🥋 Paco "Sensei" Cisneros** | All Frameworks (Django, Flask, FastAPI, Streamlit) | Nov 17, 2025 | 🔄 In Progress |
-| **💻 Carlos Cortes** | All Frameworks (Django, Flask, FastAPI, Streamlit) | Nov 17, 2025 | 🔄 In Progress |
-| **🎯 Gerry Ochoa** | All Frameworks (Django, Flask, FastAPI, Streamlit) + Decision Matrix | Nov 17, 2025 | 🔄 In Progress |
-| **🌱 Juan Marin** | All Frameworks (Django, Flask, FastAPI, Streamlit) + Website Design Mockup | Nov 17, 2025 | 🔄 In Progress |
+```
+framework-research/
+├── paco-cisneros/          # Paco's research files
+├── carlos-cortes/          # Carlos's research files  
+├── juan-marin/             # Juan's research files
+├── gerry-ochoa/            # Gerry's research files
+├── templates/              # Master template
+└── decision-matrix.md      # Final comparison
+```
 
-**Final Decision Meeting**: November 17, 2025 (Monday Teams Meeting)  
-**Additional Deliverable**: Juan presents website design mockup and recommendations
+### **Team Assignments**
+| Team Member | Research Files | Status |
+|-------------|---------------|---------|
+| **🥋 Paco "Sensei" Cisneros** | 4 files in `paco-cisneros/` folder | 📝 Ready to start |
+| **💻 Carlos Cortes** | 4 files in `carlos-cortes/` folder | 📝 Ready to start |
+| **🎯 Gerry Ochoa** | 4 files in `gerry-ochoa/` folder + Decision Matrix | 📝 Ready to start |
+| **🌱 Juan Marin** | 4 files in `juan-marin/` folder + Website Design | 📝 Ready to start |
 
 ---
 

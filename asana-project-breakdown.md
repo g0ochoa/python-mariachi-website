@@ -103,7 +103,7 @@ This document helps you understand what tasks to create in Asana.
   - Prepare design presentation for team meeting
 
 **[E1] [3] Database Technology Selection**
-- **Assign to**: Carlos Cortes
+- **Assign to**: Paco Cisneros
 - **Due date**: November 20, 2025
 - **Description**: Research and recommend database technology (PostgreSQL vs MongoDB) based on project needs.
 - **Subtasks**:

@@ -1,31 +1,56 @@
-# Python Mariachi Website - Asana Project Breakdown
-*Agile Project Management Tasks for Learning-Focused Development*
+# Python Mariachi Website - Task Planning
+*Simple task breakdown for Asana project management*
 
 ---
 
 ## 🎯 **Project Information**
 **Project Name**: Python Mariachi Website  
-**Project Manager**: Gerry Ochoa  
-**Project Start**: October 29, 2025 (Planning Phase)  
-**Official Kickoff**: November 10, 2025 (Team Launch)  
-**Methodology**: Agile/Scrum with Sprint-based development  
-**Sprint Duration**: 2 weeks  
-**Team**: Gerry Ochoa, Paco "Sensei" Cisneros, Carlos Cortes, Juan Marin  
-**Meeting Schedule**: Weekly Mondays on Microsoft Teams
+**Team Lead**: Gerry Ochoa  
+**Team**: Paco "Sensei" Cisneros, Carlos Cortes, Juan Marin, Gerry Ochoa  
+**Start Date**: November 10, 2025  
+**Meetings**: Weekly Mondays on Microsoft Teams  
+**Project Goal**: Learn Python web development while building mariachi website
 
 ---
 
-## � **Sprint 1 Team Assignments** *(Framework Research)*
+## 📋 **What This Document Is**
 
-### **Research Task Distribution**
-- **🥋 Paco "Sensei" Cisneros**: Django Framework Research (Task 1.1.1)
-- **💻 Carlos Cortes**: FastAPI Framework Research (Task 1.1.3)  
-- **🎯 Gerry Ochoa**: Streamlit Framework Research (Task 1.1.4) + Decision Matrix (Task 1.1.5)
-- **🌱 Juan Marin**: Flask Framework Research (Task 1.1.2)
+This document helps you understand what tasks to create in Asana. 
+
+**For Asana, we use simple structure:**
+- **Work Areas** (Asana Sections) = Epic 1, Epic 2, etc.
+- **Tasks** (Asana Tasks) = Individual work items with [E1] [8] format
+- **Subtasks** (Asana Subtasks) = Break down complex tasks
+
+**No complex hierarchy needed** - just organized sections and clear tasks!
+
+---
+
+## 🎯 **Sprint 1 Team Assignments** *(Updated After Kickoff - Nov 10, 2025)*
+
+### **Framework Research Task Distribution** *(Updated)*
+**New Approach**: Each team member researches ALL 4 frameworks for comprehensive evaluation
+
+- **🥋 Paco "Sensei" Cisneros**: All Frameworks Research (Django, Flask, FastAPI, Streamlit)
+- **💻 Carlos Cortes**: All Frameworks Research (Django, Flask, FastAPI, Streamlit)  
+- **🎯 Gerry Ochoa**: All Frameworks Research (Django, Flask, FastAPI, Streamlit) + Decision Matrix (Task 1.1.5)
+- **🌱 Juan Marin**: All Frameworks Research (Django, Flask, FastAPI, Streamlit) + **Website Design & Mockup** (NEW)
 
 **Deadline**: November 17, 2025 (Monday meeting)  
-**Deliverable**: Each member presents framework research findings  
+**Deliverable**: Each member presents comprehensive framework analysis + Juan presents design mockup  
 **Decision**: Framework selection finalized by November 20, 2025
+
+### **Additional Task - Website Design** *(NEW)*
+- **🌱 Juan Marin**: Website Design Research & Mockup Creation
+  - Research modern mariachi website designs
+  - Create visual mockup for public website and musicians portal
+  - Present design recommendations at November 17 meeting
+
+### **Current Status** *(November 13, 2025)*
+- **Days until presentations**: 4 days (presentations on November 17)
+- **Research progress**: In progress by all team members
+- **GitHub research files**: Available in `docs/framework-research/` directory
+- **Next milestone**: Monday, November 17 - Team presentations and discussion
 
 ---
 
@@ -45,314 +70,180 @@
 
 ---
 
-## 🚀 **Epic 1: Technology Stack & Architecture Decisions**
-**Estimated Duration**: 1-2 weeks  
-**Priority**: 🔴 Critical  
-**Sprint**: Foundation Sprint (Sprint 1)
+## 🏗️ **Work Area 1: Technology Stack (E1)**
 
-### **Story 1.1: Python Web Framework Selection** *(Updated with Streamlit)*
-**Epic**: Technology Stack & Architecture  
-**Priority**: 🔴 Critical  
-**Estimated Points**: 16 *(Increased due to additional framework research)*  
+**What to create in Asana**: Go to your "🏗️ Epic 1: Technology Stack (E1)" section and add these tasks:
 
-#### **Research & Decision Tasks**
+### **Tasks for Asana**
 
-- **Task 1.1.1**: Research Django Framework
-  - **Description**: Comprehensive analysis of Django for mariachi website requirements
-  - **Acceptance Criteria**: 
-    - Document Django pros/cons for our use case
-    - Evaluate built-in admin, ORM, and authentication features
-    - Assess Google Workspace SSO integration capabilities
-    - Review security features and best practices
-  - **Estimated Hours**: 4
-  - **Assignee**: Paco "Sensei" Cisneros
-  - **Labels**: research, django, critical
+**[E1] [8] Research Python Web Frameworks (Django, Flask, FastAPI, Streamlit)**
+- **Assign to**: Each team member gets their own copy (Asana creates duplicates)
+- **Due date**: November 17, 2025
+- **Description**: Research all 4 frameworks for comprehensive comparison. Document pros/cons, security features, learning curve, and Google SSO integration.
+- **Subtasks**: 
+  - Django framework research
+  - Flask framework research  
+  - FastAPI framework research
+  - Streamlit framework research
 
-- **Task 1.1.2**: Research Flask Framework
-  - **Description**: Analysis of Flask for lightweight, custom implementation approach
-  - **Acceptance Criteria**:
-    - Document Flask flexibility and learning benefits
-    - Evaluate extension ecosystem (Flask-Login, Flask-SQLAlchemy, etc.)
-    - Assess security implementation requirements
-    - Review deployment and scaling considerations
-  - **Estimated Hours**: 4
-  - **Assignee**: Juan Marin
-  - **Labels**: research, flask, critical
+**[E1] [5] Create Framework Decision Matrix**
+- **Assign to**: Gerry Ochoa
+- **Due date**: November 20, 2025  
+- **Description**: Compile team research into decision matrix with weighted criteria. Document final framework selection with rationale.
+- **Depends on**: Framework research task above
 
-- **Task 1.1.3**: Research FastAPI Framework
-  - **Description**: Modern API framework evaluation for performance and features
-  - **Acceptance Criteria**:
-    - Document FastAPI performance and async capabilities
-    - Evaluate automatic API documentation features
-    - Assess authentication and security implementations
-    - Review learning curve and documentation quality
-  - **Estimated Hours**: 4
-  - **Assignee**: Carlos Cortes
-  - **Labels**: research, fastapi, critical
+**[E1] [8] Website Design Research and Mockup**
+- **Assign to**: Juan Marin
+- **Due date**: November 17, 2025
+- **Description**: Research mariachi website designs and create mockup for our site. Include both public website and musicians portal designs.
+- **Subtasks**:
+  - Research 5-10 professional mariachi websites
+  - Create mockups for main pages (home, about, gallery, contact)
+  - Design musicians portal layout
+  - Prepare design presentation for team meeting
 
-- **Task 1.1.4**: Research Streamlit Framework
-  - **Description**: Rapid web app development framework evaluation for data-driven applications
-  - **Acceptance Criteria**:
-    - Document Streamlit's rapid development capabilities
-    - Evaluate suitability for mariachi website requirements
-    - Assess authentication options and multi-page applications
-    - Review deployment options and production readiness
-    - Analyze pros/cons for public website vs data dashboard use cases
-  - **Estimated Hours**: 4
-  - **Assignee**: Gerry Ochoa
-  - **Labels**: research, streamlit, critical
+**[E1] [3] Database Technology Selection**
+- **Assign to**: Carlos Cortes
+- **Due date**: November 20, 2025
+- **Description**: Research and recommend database technology (PostgreSQL vs MongoDB) based on project needs.
+- **Subtasks**:
+  - Analyze PostgreSQL for structured data needs
+  - Evaluate MongoDB for flexible schema requirements
+  - Create database selection recommendation
 
-- **Task 1.1.5**: Framework Decision Matrix & Selection
-  - **Description**: Create decision matrix and select optimal framework
-  - **Acceptance Criteria**:
-    - Complete comparison matrix with weighted criteria (Django/Flask/FastAPI/Streamlit)
-    - Consider learning objectives, security requirements, and scalability
-    - Document final framework selection with rationale
-    - Team consensus on chosen framework
-  - **Estimated Hours**: 3 *(Increased due to additional framework)*
-  - **Assignee**: Gerry Ochoa (Project Manager)
-  - **Labels**: decision, framework, critical
-
-### **Story 1.2: Database Technology Selection**
-**Epic**: Technology Stack & Architecture  
-**Priority**: 🔴 Critical  
-**Estimated Points**: 8
-
-#### **Database Decision Tasks**
-
-- **Task 1.2.1**: PostgreSQL Analysis for Mariachi Website
-  - **Description**: Evaluate PostgreSQL for relational data needs
-  - **Acceptance Criteria**:
-    - Assess PostgreSQL for user management and authentication
-    - Evaluate for structured data (scores, events, user profiles)
-    - Review Google Cloud PostgreSQL integration
-    - Document backup and scaling considerations
-  - **Estimated Hours**: 3
-  - **Labels**: research, postgresql, database
-
-- **Task 1.2.2**: MongoDB Analysis for Flexible Schema
-  - **Description**: Evaluate MongoDB for document-based approach
-  - **Acceptance Criteria**:
-    - Assess MongoDB for flexible score metadata storage
-    - Evaluate for user-generated content and file references
-    - Review Google Cloud MongoDB options
-    - Document performance implications
-  - **Estimated Hours**: 3
-  - **Labels**: research, mongodb, database
-
-- **Task 1.2.3**: Database Architecture Decision
-  - **Description**: Select database technology with architectural justification
-  - **Acceptance Criteria**:
-    - Final database selection with detailed rationale
-    - Database schema design approach documented
-    - Integration plan with chosen web framework
-    - Migration and backup strategy outlined
-  - **Estimated Hours**: 2
-  - **Labels**: decision, database, architecture
-
-### **Story 1.3: Authentication Architecture Planning**
-**Epic**: Technology Stack & Architecture  
-**Priority**: 🟡 High  
-**Estimated Points**: 5
-
-#### **Authentication Strategy Tasks**
-
-- **Task 1.3.1**: Google Workspace SSO Integration Research
-  - **Description**: Plan Google Workspace integration for musician authentication
-  - **Acceptance Criteria**:
-    - Research Google OAuth 2.0 implementation options
-    - Document organization membership verification approach
-    - Plan role-based access control integration
-    - Security assessment of SSO implementation
-  - **Estimated Hours**: 4
-  - **Labels**: research, sso, security, authentication
-
-- **Task 1.3.2**: Multi-Factor Authentication Planning
-  - **Description**: Plan MFA implementation for enhanced security
-  - **Acceptance Criteria**:
-    - Research MFA options compatible with chosen framework
-    - Plan integration with Google Workspace MFA policies
-    - Document fallback authentication methods
-    - Security risk assessment and mitigation
-  - **Estimated Hours**: 2
-  - **Labels**: planning, mfa, security
+**[E1] [5] Authentication Strategy Planning**
+- **Assign to**: Paco Cisneros
+- **Due date**: Sprint 2
+- **Description**: Research and plan Google Workspace SSO integration for musician authentication
+- **Subtasks**:
+  - Research Google OAuth 2.0 implementation
+  - Plan role-based access control
+  - Document MFA integration approach
 
 ---
 
-## 🔧 **Epic 2: Development Environment Setup**
-**Estimated Duration**: 1 week  
-**Priority**: 🔴 Critical  
-**Sprint**: Foundation Sprint (Sprint 1)
+## ⚙️ **Work Area 2: Development Environment (E2)**
 
-### **Story 2.1: Cross-Platform Development Environment** *(Updated with Confirmed Decisions)*
-**Epic**: Development Environment Setup  
-**Priority**: 🔴 Critical  
-**Estimated Points**: 6 *(Reduced due to confirmed tooling)*
+**What to create in Asana**: Go to your "⚙️ Epic 2: Environment Setup (E2)" section and add these tasks:
 
-#### **Environment Setup Tasks** *(Updated)*
+### **Tasks for Asana**
 
-- **Task 2.1.1**: Python + VS Code + uv Setup (Windows)**
-  - **Description**: Configure standardized Python development on Windows PC
-  - **Acceptance Criteria**:
-    - Python 3.11+ installed and configured
-    - **uv package manager** installed and verified working
-    - **VS Code** with Python extension pack installed
-    - **venv** virtual environment created and tested
-    - Cross-platform project structure established
-  - **Estimated Hours**: 1.5 *(Reduced - standardized tooling)*
-  - **Labels**: setup, python, windows, vscode, uv, venv
+**[E2] [3] Set Up Development Environment**
+- **Assign to**: Each team member (individual setup)
+- **Due date**: Sprint 2 Week 1
+- **Description**: Configure Python development environment with standardized tools
+- **Subtasks**:
+  - Install Python 3.11+ 
+  - Install uv package manager
+  - Configure VS Code with Python extensions
+  - Create virtual environment
 
-- **Task 2.1.2**: Python + VS Code + uv Setup (macOS)**
-  - **Description**: Configure matching Python development on macOS
-  - **Acceptance Criteria**:
-    - Python 3.11+ installed (avoiding system Python conflicts)
-    - **uv package manager** installed with same version as Windows
-    - **VS Code** configuration synced between environments
-    - **venv** virtual environment matching Windows setup
-    - Cross-platform compatibility verified
-  - **Estimated Hours**: 1.5 *(Reduced - standardized tooling)*
-  - **Labels**: setup, python, macos, vscode, uv, venv
+**[E2] [5] Database Development Setup**
+- **Assign to**: Carlos Cortes
+- **Due date**: Sprint 2 Week 1
+- **Description**: Set up local database for development based on framework decision
+- **Subtasks**:
+  - Install chosen database (PostgreSQL/MongoDB)
+  - Configure database GUI tools
+  - Create sample data setup scripts
 
-- **Task 2.1.3**: Database Development Setup**
-  - **Description**: Local database setup for development
-  - **Acceptance Criteria**:
-    - Local database installation (based on Epic 1 decision)
-    - Database GUI tools setup (pgAdmin/MongoDB Compass)
-    - Connection configuration and testing
-    - Sample data setup scripts
-  - **Estimated Hours**: 3
-  - **Labels**: setup, database, development
-
-- **Task 2.1.4**: Version Control & Collaboration Setup**
-  - **Description**: Git repository and collaboration tools setup
-  - **Acceptance Criteria**:
-    - GitHub repository created with proper structure
-    - Git workflows documented for team collaboration
-    - Branch protection and review policies configured
-    - Issue templates and project board setup
-  - **Estimated Hours**: 2
-  - **Labels**: setup, git, collaboration
-
-### **Story 2.2: Ubuntu Server Staging Environment**
-**Epic**: Development Environment Setup  
-**Priority**: 🟡 High  
-**Estimated Points**: 5
-
-#### **Staging Environment Tasks**
-
-- **Task 2.2.1**: Ubuntu Server Environment Preparation**
-  - **Description**: Prepare Ubuntu server for staging deployment
-  - **Acceptance Criteria**:
-    - Server access and security hardening completed
-    - Python runtime environment installed
-    - Database server installation and configuration
-    - SSL certificate setup for HTTPS
-  - **Estimated Hours**: 4
-  - **Labels**: setup, ubuntu, staging, server
-
-- **Task 2.2.2**: Staging Deployment Pipeline Setup**
-  - **Description**: Automated deployment to staging environment
-  - **Acceptance Criteria**:
-    - Deployment scripts for staging environment
-    - Environment variable management
-    - Database migration procedures
-    - Monitoring and logging setup
-  - **Estimated Hours**: 3
-  - **Labels**: deployment, staging, automation
+**[E2] [2] Git Workflow Setup**
+- **Assign to**: Gerry Ochoa
+- **Due date**: Sprint 2 Week 1
+- **Description**: Establish team Git workflow and repository structure
+- **Subtasks**:
+  - Document Git workflow for team
+  - Set up branch protection rules
+  - Create issue templates
 
 ---
 
-## 📋 **Epic 3: Project Foundation & Infrastructure**
-**Estimated Duration**: 2-3 weeks  
-**Priority**: 🟡 High  
-**Sprint**: Foundation Sprint (Sprint 2)
+## 🏠 **Work Area 3: Project Foundation (E3)**
 
-### **Story 3.1: Project Structure & Configuration**
-**Epic**: Project Foundation & Infrastructure  
-**Priority**: 🔴 Critical  
-**Estimated Points**: 8
+**What to create in Asana**: Go to your "🏠 Epic 3: Project Foundation (E3)" section and add these tasks:
 
-#### **Project Foundation Tasks**
+### **Tasks for Asana**
 
-- **Task 3.1.1**: Framework Project Initialization**
-  - **Description**: Initialize project with chosen framework
-  - **Acceptance Criteria**:
-    - Project structure created following framework best practices
-    - Configuration files setup (settings, requirements, etc.)
-    - Basic application skeleton with hello world endpoint
-    - Development server running successfully
-  - **Estimated Hours**: 3
-  - **Labels**: initialization, framework, setup
+**[E3] [8] Initialize Framework Project**
+- **Assign to**: Gerry Ochoa
+- **Due date**: Sprint 2 Week 2
+- **Description**: Initialize project with chosen framework and basic structure
+- **Subtasks**:
+  - Create project structure following framework best practices
+  - Set up configuration files (settings, requirements)
+  - Create basic hello world application
+  - Get development server running
 
-- **Task 3.1.2**: Project Configuration Management**
-  - **Description**: Environment-specific configuration setup
-  - **Acceptance Criteria**:
-    - Separate configurations for dev/staging/production
-    - Environment variable management system
-    - Secret management approach implemented
-    - Configuration validation and error handling
-  - **Estimated Hours**: 4
-  - **Labels**: configuration, environment, security
+**[E3] [5] Database Integration**
+- **Assign to**: Carlos Cortes
+- **Due date**: Sprint 2 Week 2
+- **Description**: Connect database and create initial models
+- **Subtasks**:
+  - Establish database connection
+  - Create User model with basic fields
+  - Set up migration system
+  - Test basic CRUD operations
 
-- **Task 3.1.3**: Database Integration & Models**
-  - **Description**: Database connection and initial model setup
-  - **Acceptance Criteria**:
-    - Database connection established and tested
-    - User model created with basic fields
-    - Migration system setup and documented
-    - Basic CRUD operations implemented and tested
-  - **Estimated Hours**: 5
-  - **Labels**: database, models, integration
+**[E3] [3] Configuration Management**
+- **Assign to**: Paco Cisneros
+- **Due date**: Sprint 2 Week 2
+- **Description**: Set up environment-specific configurations
+- **Subtasks**:
+  - Create dev/staging/production configs
+  - Implement environment variable management
+  - Set up secret management approach
 
 ---
 
-## 🛡️ **Decision Points & Blockers**
+## 📝 **Next Steps for Sprint 2**
 
-### **Critical Decisions Required (Sprint 1)**
-1. **Framework Selection**: Django vs Flask vs FastAPI
-2. **Database Choice**: PostgreSQL vs MongoDB
-3. **Authentication Strategy**: SSO implementation approach
-4. **Development Environment Standards**: Tool and configuration choices
+### **Immediate Tasks (Sprint 1 End - November 20, 2025)**
+1. **Complete framework decision** using research findings
+2. **Create Sprint 2 tasks** in Asana based on chosen framework
+3. **Update team assignments** for Sprint 2 work
+4. **Schedule Sprint 2 kickoff** meeting
 
-### **Dependencies**
-- Epic 2 depends on Epic 1 technology decisions
-- All subsequent epics depend on foundational choices
-- Staging environment setup requires framework selection
-
-### **Risk Factors**
-- **Learning Curve**: New framework adoption may extend timeline
-- **Integration Complexity**: Google Workspace SSO integration challenges
-- **Cross-Platform Development**: Environment consistency between Windows/macOS
-- **Security Requirements**: Zero-trust implementation complexity
+### **Sprint 2 Focus Areas**
+- **Week 1**: Development environment setup for all team members
+- **Week 2**: Project initialization and basic structure
+- **Goal**: Working "Hello World" application by end of Sprint 2
 
 ---
 
-## 📅 **Sprint Planning**
+## 📅 **Future Work Areas** *(For Later Sprints)*
 
-### **Sprint 1 (Weeks 1-2): Foundation & Decisions**
-- Complete Epic 1: Technology Stack & Architecture Decisions
-- Begin Epic 2: Development Environment Setup
-- Team formation and role assignment
+### **🔐 Work Area 4: Authentication & Security (E4)**
+- Google Workspace SSO implementation
+- Role-based access control
+- Security framework setup
 
-### **Sprint 2 (Weeks 3-4): Project Foundation**
-- Complete Epic 2: Development Environment Setup
-- Begin Epic 3: Project Foundation & Infrastructure
-- Initial framework implementation
+### **🌐 Work Area 5: Public Website (E5)**
+- Home, About, Gallery, Contact pages
+- Responsive design implementation
+- Content management
 
-### **Sprint 3 (Weeks 5-6): Security Framework**
-- Complete Epic 3: Project Foundation & Infrastructure  
-- Begin Epic 4: Authentication & Security Framework
-- SSO integration implementation
+### **🎵 Work Area 6: Musicians Portal (E6)**
+- Private login area
+- Score library
+- Practice tools
+
+### **✨ Work Area 7: Advanced Features (E7)**
+- File sharing
+- Event calendar
+- Audio recording tools
+
+### **☁️ Work Area 8: Deployment (E8)**
+- Production deployment
+- CI/CD pipeline
+- Monitoring setup
 
 ---
 
-## 📊 **Success Metrics**
-- **Technical Debt**: Maintain high code quality standards
-- **Learning Objectives**: Document knowledge gained each sprint
-- **Security Compliance**: Pass security reviews and audits
-- **Team Collaboration**: Effective Asana task completion rates
-- **Documentation Quality**: Comprehensive session and decision logs
+## ✅ **How to Use This Document**
 
----
+1. **Today (Sprint 1 End)**: Make framework decision using team research
+2. **Create Sprint 2 tasks**: Add Work Area 2 & 3 tasks to your Asana project
+3. **Assign team members**: Use the suggested assignments above
+4. **Future sprints**: Reference Work Areas 4-8 when ready to plan ahead
 
-*This breakdown will be updated as the project progresses and new requirements emerge.*
+**Remember**: This is a guide for creating Asana tasks - copy the [E#] [Points] task names exactly into Asana!

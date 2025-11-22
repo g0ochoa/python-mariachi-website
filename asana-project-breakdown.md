@@ -11,6 +11,18 @@
 **Meetings**: Weekly Mondays on Microsoft Teams  
 **Project Goal**: Learn Python web development while building mariachi website
 
+## 📅 **Sprint Timeline Overview**
+
+### **SPRINT 1: November 24 - December 4, 2025**
+- **Focus**: Technology research and framework decision
+- **Work Areas**: Epic 1 (Technology Stack)
+- **Deliverable**: Framework decision and team alignment
+
+### **SPRINT 2: December 9 - December 16, 2025**  
+- **Focus**: Development environment and project foundation
+- **Work Areas**: Epic 2 (Development Environment) + Epic 3 (Project Foundation)
+- **Deliverable**: Working "Hello World" application
+
 ---
 
 ## 📋 **What This Document Is**
@@ -70,13 +82,13 @@ This document helps you understand what tasks to create in Asana.
 
 ---
 
-## 🏗️ **Work Area 1: Technology Stack (E1)**
+## 🏗️ **Work Area 1: Technology Stack (E1)** - **SPRINT 1**
 
 **What to create in Asana**: Go to your "🏗️ Epic 1: Technology Stack (E1)" section and add these tasks:
 
 ### **Tasks for Asana**
 
-**[E1] [8] Research Python Web Frameworks (Django, Flask, FastAPI, Streamlit)**
+**[E1] [8] Research Python Web Frameworks (Django, Flask, FastAPI, Streamlit)** - **SPRINT 1**
 - **Assign to**: Each team member gets their own copy (Asana creates duplicates)
 - **Due date**: December 1, 2025
 - **Description**: Research all 4 frameworks for comprehensive comparison. Document pros/cons, security features, learning curve, and Google SSO integration.
@@ -86,13 +98,13 @@ This document helps you understand what tasks to create in Asana.
   - FastAPI framework research
   - Streamlit framework research
 
-**[E1] [5] Create Framework Decision Matrix**
+**[E1] [5] Create Framework Decision Matrix** - **SPRINT 1**
 - **Assign to**: Gerry Ochoa
 - **Due date**: December 4, 2025  
 - **Description**: Compile team research into decision matrix with weighted criteria. Document final framework selection with rationale.
 - **Depends on**: Framework research task above
 
-**[E1] [8] Website Design Research and Mockup**
+**[E1] [8] Website Design Research and Mockup** - **SPRINT 1**
 - **Assign to**: Juan Marin
 - **Due date**: December 1, 2025
 - **Description**: Research mariachi website designs and create mockup for our site. Include both public website and musicians portal designs.
@@ -102,7 +114,7 @@ This document helps you understand what tasks to create in Asana.
   - Design musicians portal layout
   - Prepare design presentation for team meeting
 
-**[E1] [3] Database Technology Selection**
+**[E1] [3] Database Technology Selection** - **SPRINT 1**
 - **Assign to**: Paco Cisneros
 - **Due date**: December 4, 2025
 - **Description**: Research and recommend database technology (PostgreSQL vs MongoDB) based on project needs.
@@ -111,7 +123,7 @@ This document helps you understand what tasks to create in Asana.
   - Evaluate MongoDB for flexible schema requirements
   - Create database selection recommendation
 
-**[E1] [5] Authentication Strategy Planning**
+**[E1] [5] Authentication Strategy Planning** - **SPRINT 2**
 - **Assign to**: Paco Cisneros
 - **Due date**: Sprint 2
 - **Description**: Research and plan Google Workspace SSO integration for musician authentication
@@ -122,13 +134,13 @@ This document helps you understand what tasks to create in Asana.
 
 ---
 
-## ⚙️ **Work Area 2: Development Environment (E2)**
+## ⚙️ **Work Area 2: Development Environment (E2)** - **SPRINT 1**
 
-**What to create in Asana**: Go to your "⚙️ Epic 2: Environment Setup (E2)" section and add these tasks:
+**What to create in Asana**: Go to your "⚙️ Epic 2: Development Environment (E2)" section and add these tasks:
 
 ### **Tasks for Asana**
 
-**[E2] [3] Set Up Development Environment**
+**[E2] [3] Set Up Development Environment** - **SPRINT 2**
 - **Assign to**: Each team member (individual setup)
 - **Due date**: Sprint 2 Week 1 (December 9, 2025)
 - **Description**: Configure Python development environment with standardized tools
@@ -138,7 +150,7 @@ This document helps you understand what tasks to create in Asana.
   - Configure VS Code with Python extensions
   - Create virtual environment
 
-**[E2] [5] Database Development Setup**
+**[E2] [5] Database Development Setup** - **SPRINT 2**
 - **Assign to**: Carlos Cortes
 - **Due date**: Sprint 2 Week 1 (December 9, 2025)
 - **Description**: Set up local database for development based on framework decision
@@ -147,7 +159,7 @@ This document helps you understand what tasks to create in Asana.
   - Configure database GUI tools
   - Create sample data setup scripts
 
-**[E2] [2] Git Workflow Setup**
+**[E2] [2] Git Workflow Setup** - **SPRINT 2**
 - **Assign to**: Gerry Ochoa
 - **Due date**: Sprint 2 Week 1 (December 9, 2025)
 - **Description**: Establish team Git workflow and repository structure
@@ -158,13 +170,13 @@ This document helps you understand what tasks to create in Asana.
 
 ---
 
-## 🏠 **Work Area 3: Project Foundation (E3)**
+## 🏠 **Work Area 3: Project Foundation (E3)** - **SPRINT 2**
 
 **What to create in Asana**: Go to your "🏠 Epic 3: Project Foundation (E3)" section and add these tasks:
 
 ### **Tasks for Asana**
 
-**[E3] [8] Initialize Framework Project**
+**[E3] [8] Initialize Framework Project** - **SPRINT 2**
 - **Assign to**: Gerry Ochoa
 - **Due date**: Sprint 2 Week 2 (December 16, 2025)
 - **Description**: Initialize project with chosen framework and basic structure
@@ -174,7 +186,7 @@ This document helps you understand what tasks to create in Asana.
   - Create basic hello world application
   - Get development server running
 
-**[E3] [5] Database Integration**
+**[E3] [5] Database Integration** - **SPRINT 2**
 - **Assign to**: Carlos Cortes
 - **Due date**: Sprint 2 Week 2 (December 16, 2025)
 - **Description**: Connect database and create initial models
@@ -184,7 +196,7 @@ This document helps you understand what tasks to create in Asana.
   - Set up migration system
   - Test basic CRUD operations
 
-**[E3] [3] Configuration Management**
+**[E3] [3] Configuration Management** - **SPRINT 2**
 - **Assign to**: Paco Cisneros
 - **Due date**: Sprint 2 Week 2 (December 16, 2025)
 - **Description**: Set up environment-specific configurations

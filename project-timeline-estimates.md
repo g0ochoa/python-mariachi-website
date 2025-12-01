@@ -20,7 +20,7 @@
 
 | **Phase** | **Duration** | **Start Date** | **End Date** | **Key Deliverables** |
 |-----------|-------------|----------------|--------------|---------------------|
-| **Phase 1**: Foundation | 6 weeks | Oct 30, 2025 | Dec 10, 2025 | Framework/DB selected, environment setup |
+| **Phase 1**: Foundation | 6 weeks | Nov 24, 2025 | Jan 4, 2026 | Framework/DB selected, environment setup |
 | **Phase 2**: Core Development | 12 weeks | Dec 11, 2025 | Mar 4, 2026 | Authentication, public site, musicians portal |
 | **Phase 3**: Integration | 8 weeks | Mar 5, 2026 | Apr 29, 2026 | Advanced features, security hardening |
 | **Phase 4**: Deployment | 6 weeks | Apr 30, 2026 | Jun 10, 2026 | Infrastructure, CI/CD, production launch |
@@ -39,8 +39,8 @@
 **Part-Time Effort**: 30-45 hours total team effort
 
 #### **Weekly Breakdown**
-- **Week 1** (Oct 30 - Nov 9): Project setup and preparation ✅
-- **Week 2** (Nov 10 - Nov 16): Official kickoff + Framework research (Django/Flask/FastAPI/Streamlit)
+- **Week 1** (Nov 24 - Dec 1): Project setup, Django initialization ✅
+- **Week 2** (Dec 2 - Dec 8): Database setup, basic models
 - **Week 3** (Nov 17 - Nov 20): Research presentations + Decision finalization + Sprint 2 planning
 
 #### **Framework Research Assignments**

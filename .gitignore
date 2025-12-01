@@ -204,14 +204,14 @@ uploads/
 media/private/
 scores/private/
 
-# Personal Development Files (Gerry's local use only)
-*SESSION_LOG*.md
-*COMMAND_LOG*.md
-*TEAM_MEMBER_PROFILES*.md
-*MEETING_STRUCTURE*.md
+# Personal Development Files (Gerry's local use only - not shared with team)
+# These files track personal learning, session notes, and internal planning
+SESSION_LOG.md
+COMMAND_LOG.md
+TEAM_MEMBER_PROFILES.md
+MEETING_STRUCTURE.md
 session-continuity-status.md
-DEVELOPMENT_LOG.md
+PERSONAL_NOTES.md
+docs/sessions/
+docs/learning/README.md
 LEARNING_LOG.md
-MEAN_STACK_*.md
-logs/personal/
-personal-notes/

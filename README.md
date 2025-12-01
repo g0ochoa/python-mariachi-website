@@ -32,25 +32,33 @@ python-mariachi-website/
     └── workflows/             # CI/CD pipeline definitions
 ```
 
-## 🛠️ Tech Stack (Planned)
+## 🛠️ Tech Stack
 
 ### Backend
-- **Framework**: Django/Flask/FastAPI/Streamlit (selection in progress)
-- **Database**: PostgreSQL or MongoDB
+- **Framework**: Django 5.x (Full-featured with built-in admin, ORM, authentication)
+- **Database**: PostgreSQL 15+ (Relational database with strong consistency)
 - **Authentication**: Google Workspace SSO integration
-- **API**: RESTful API design
+- **Python**: 3.11+
+
+### Frontend
+- **Templates**: Django Template Language
+- **Interactivity**: HTMX (Modern UX without page reloads)
+- **Styling**: HTML5, CSS3, JavaScript (vanilla)
+- **Design**: Mobile-first responsive design
 
 ### Infrastructure & DevOps
 - **Cloud Platform**: Google Cloud Platform
 - **Infrastructure as Code**: Terraform
 - **CI/CD**: GitHub Actions
 - **Containerization**: Docker
+- **Database**: Cloud SQL (PostgreSQL)
 
 ### Security
 - **Zero Trust Architecture**
 - **Least Privilege Principles**
 - **Multi-Factor Authentication**
 - **Secure Session Management**
+- **Django Security Features**: CSRF, XSS, SQL injection protection
 
 ## 🎯 Learning Objectives
 
@@ -86,10 +94,16 @@ python-mariachi-website/
 
 ## 📋 Current Status
 
-**Phase**: Sprint 1 - Technology Stack & Architecture Decisions  
-**Official Kickoff**: November 10, 2025  
+**Phase**: Sprint 1 - Django Project Setup & PostgreSQL Configuration  
+**Project Start**: November 24, 2025  
 **Team**: Gerry Ochoa (Project Manager), Paco "Sensei" Cisneros, Carlos Cortes, Juan Marin  
 **Meeting Schedule**: Weekly Mondays on Microsoft Teams
+
+### Tech Stack Decisions Made ✅
+- [x] **Framework**: Django (Full-featured with built-in admin, ORM, authentication)
+- [x] **Database**: PostgreSQL (Relational database with strong consistency)
+- [x] Team assignments finalized
+- [x] Project structure planned
 
 ### Completed
 - [x] Project requirements documentation
@@ -97,20 +111,21 @@ python-mariachi-website/
 - [x] Documentation organization standards
 - [x] GitHub repository initialization
 - [x] Team formation and role assignments
+- [x] Framework decision (Django)
+- [x] Database decision (PostgreSQL)
 
 ### In Progress (Sprint 1)
-- [ ] Python framework selection (Django/Flask/FastAPI/Streamlit)
-- [ ] Database technology selection (PostgreSQL/MongoDB)
-- [ ] Local development environment setup
-- [ ] Architecture design documentation
+- [ ] Django project initialization
+- [ ] PostgreSQL database configuration (Paco)
+- [ ] Frontend mockups and design (Juan)
+- [ ] Learning documentation structure setup
+- [ ] Development environment standardization
 
-### Sprint 1 Framework Research Assignments
-- **Paco Cisneros**: Django Framework Research
-- **Carlos Cortes**: FastAPI Framework Research
-- **Gerry Ochoa**: Streamlit Framework Research + Decision Matrix
-- **Juan Marin**: Flask Framework Research
-
-**Research Deadline**: November 17, 2025
+### Current Team Assignments
+- **Gerry Ochoa**: Django project setup and backend development
+- **Paco "Sensei" Cisneros**: PostgreSQL research and database configuration
+- **Carlos Cortes**: Backend development support
+- **Juan Marin**: Frontend mockups and design research
 
 ## 📚 Documentation
 

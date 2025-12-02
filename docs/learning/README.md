@@ -9,100 +9,95 @@ This learning guide documents our journey building a professional mariachi websi
 
 ### **01 - Foundations**
 Core development tools and practices
-- [Git & Version Control](01-foundations/git-version-control.md)
-- [Virtual Environments](01-foundations/virtual-environments.md)
-- [Python Package Management](01-foundations/python-package-management.md)
+- Git & Version Control *(Coming soon)*
+- Virtual Environments *(Coming soon)*
+- Python Package Management *(Coming soon)*
 
 ### **02 - Backend Development**
 Django framework and Python backend
-- [Django Setup - Complete Guide](02-backend/django-setup-complete-guide.md) ⭐ **NEW**
-- [Django Basics](02-backend/django-basics.md)
-- [Django Models & ORM](02-backend/django-orm.md)
-- [Django Views & Templates](02-backend/django-views-templates.md)
-- [Django Authentication](02-backend/django-authentication.md)
-- [RESTful API Design](02-backend/rest-api-design.md)
+- ⭐ [Django Setup - Complete Guide](02-backend/django-setup-complete-guide.md) **Available now!**
+- Django Basics *(Coming soon)*
+- Django Models & ORM *(Coming soon)*
+- Django Views & Templates *(Coming soon)*
+- Django Authentication *(Coming soon)*
+- RESTful API Design *(Coming soon)*
 
 ### **03 - Frontend Development**
 HTML, CSS, JavaScript, and Django Templates
-- [HTML & CSS Fundamentals](03-frontend/html-css-fundamentals.md)
-- [Django Template Language](03-frontend/django-templates.md)
-- [JavaScript Essentials](03-frontend/javascript-essentials.md)
-- [Responsive Design](03-frontend/responsive-design.md)
+- HTML & CSS Fundamentals *(Coming soon)*
+- Django Template Language *(Coming soon)*
+- JavaScript Essentials *(Coming soon)*
+- Responsive Design *(Coming soon)*
 
 ### **04 - Database**
 PostgreSQL and database design
-- [PostgreSQL Basics](04-database/postgresql-basics.md)
-- [Database Design](04-database/database-design.md)
-- [SQL Fundamentals](04-database/sql-fundamentals.md)
-- [Django Migrations](04-database/django-migrations.md)
+- PostgreSQL Basics *(Coming soon - Paco's guide)*
+- Database Design *(Coming soon)*
+- SQL Fundamentals *(Coming soon)*
+- Django Migrations *(Coming soon)*
 
 ### **05 - DevOps & Infrastructure**
 Deployment, containers, and infrastructure
-- [Docker Basics](05-devops/docker.md)
-- [Environment Variables](05-devops/environment-variables.md)
-- [Google Cloud Platform](05-devops/gcp.md)
-- [Terraform IaC](05-devops/terraform.md)
-- [CI/CD Pipelines](05-devops/cicd.md)
+- Docker Basics *(Coming soon)*
+- Environment Variables *(Coming soon)*
+- Google Cloud Platform *(Coming soon)*
+- Terraform IaC *(Coming soon)*
+- CI/CD Pipelines *(Coming soon)*
 
 ### **06 - Security**
 Security best practices and implementation
-- [Web Security Fundamentals](06-security/web-security.md)
-- [Django Security Features](06-security/django-security.md)
-- [OAuth & SSO](06-security/oauth-sso.md)
-- [Zero Trust Architecture](06-security/zero-trust.md)
-
-## 📅 Session Logs
-
-Chronological development sessions with complete context:
-- [Session Index](../sessions/README.md)
+- Web Security Fundamentals *(Coming soon)*
+- Django Security Features *(Coming soon)*
+- OAuth & SSO *(Coming soon)*
+- Zero Trust Architecture *(Coming soon)*
 
 ## 🛤️ Learning Paths
 
-### **Path 1: Django Fundamentals** (Start Here)
-1. Virtual Environments
-2. **Django Setup - Complete Guide** ⭐ **Start here for Django**
-3. Django Models & ORM
-4. Django Views & Templates
-5. PostgreSQL Basics
+### **Path 1: Django Fundamentals** (Start Here) ⭐
+1. **Django Setup - Complete Guide** ✅ **Available now!**
+2. Virtual Environments *(Coming soon)*
+3. Django Models & ORM *(Coming soon)*
+4. Django Views & Templates *(Coming soon)*
+5. PostgreSQL Basics *(Paco's guide - Coming soon)*
 
 ### **Path 2: Full-Stack Development**
 1. Django Fundamentals (Path 1)
-2. Django Template Language
-3. HTML & CSS Fundamentals
-4. JavaScript Essentials
-5. RESTful API Design
+2. Django Template Language *(Coming soon)*
+3. HTML & CSS Fundamentals *(Coming soon)*
+4. JavaScript Essentials *(Coming soon)*
+5. RESTful API Design *(Coming soon)*
 
 ### **Path 3: Security Engineering**
 1. Django Fundamentals (Path 1)
-2. Web Security Fundamentals
-3. Django Security Features
-4. Django Authentication
-5. OAuth & SSO
-6. Zero Trust Architecture
+2. Web Security Fundamentals *(Coming soon)*
+3. Django Security Features *(Coming soon)*
+4. Django Authentication *(Coming soon)*
+5. OAuth & SSO *(Coming soon)*
+6. Zero Trust Architecture *(Coming soon)*
 
 ### **Path 4: DevOps & Deployment**
-1. Docker Basics
-2. Environment Variables
-3. PostgreSQL Basics
-4. Google Cloud Platform
-5. Terraform IaC
-6. CI/CD Pipelines
+1. Docker Basics *(Coming soon)*
+2. Environment Variables *(Coming soon)*
+3. PostgreSQL Basics *(Paco's guide - Coming soon)*
+4. Google Cloud Platform *(Coming soon)*
+5. Terraform IaC *(Coming soon)*
+6. CI/CD Pipelines *(Coming soon)*
 
 ## 🔧 Tech Stack Summary
 
-**Backend**: Django 5.x + Python 3.11+  
-**Database**: PostgreSQL 15+  
-**Frontend**: Django Templates, HTML5, CSS3, JavaScript  
-**Infrastructure**: Docker, Google Cloud Platform, Terraform  
-**Authentication**: Google Workspace SSO  
-**Version Control**: Git + GitHub
+**Backend**: Django 5.2.8 ✅ + Python 3.13.7 ✅  
+**Database**: SQLite (dev) ✅ / PostgreSQL 15+ (production - planned)  
+**Frontend**: Django Templates + HTMX 1.27.0 ✅  
+**Infrastructure**: Docker, Google Cloud Platform, Terraform *(Coming soon)*  
+**Authentication**: Custom User model with roles ✅ / Google Workspace SSO *(Coming soon)*  
+**Version Control**: Git + GitHub ✅
 
 ## 📖 How to Use This Guide
 
-1. **New to the project?** Start with Path 1: Django Fundamentals
-2. **Looking for specific topics?** Use the category navigation above
-3. **Want chronological context?** Check the session logs
-4. **Need quick reference?** Each guide includes command references and code examples
+1. **New to the project?** Start with [Django Setup - Complete Guide](02-backend/django-setup-complete-guide.md) ⭐
+2. **Looking for specific topics?** Use the category navigation above (most guides coming soon)
+3. **Want to contribute?** Create guides as you learn and add them to the appropriate category
+4. **Need quick reference?** The Django guide includes command references and troubleshooting
 
 ## 🎓 Learning Philosophy
 

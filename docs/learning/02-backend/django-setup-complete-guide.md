@@ -1,274 +1,251 @@
-# Django Project Setup Guide
-**Mariachi Todo Terreno Website - Complete Django Installation & Configuration**
+# Django Project Setup - Learning Guide
+**Understanding Django Architecture and Project Initialization**
 
 *Author: Gerry Ochoa*  
 *Date: December 1, 2025*  
-*Sprint: Sprint 2, Day 1*  
-*Platform: Windows PC (PowerShell)*
+*Sprint: Sprint 2, Day 1 (Dec 1-7, 2025)*  
+*Purpose: Educational resource explaining Django concepts and our implementation decisions*
 
 ---
 
 ## 📚 **Table of Contents**
 
-1. [Prerequisites](#prerequisites)
+1. [What This Guide Is](#what-this-guide-is)
 2. [Project Structure Overview](#project-structure-overview)
-3. [Step-by-Step Setup Guide](#step-by-step-setup-guide)
+3. [What We Built](#what-we-built)
 4. [Understanding Django Components](#understanding-django-components)
-5. [Team Setup Instructions](#team-setup-instructions)
-6. [Common Issues & Solutions](#common-issues--solutions)
-7. [Next Steps](#next-steps)
+5. [Common Pitfalls & Learning Points](#common-pitfalls--learning-points)
+6. [Key Takeaways](#key-takeaways)
+7. [Additional Learning Resources](#additional-learning-resources)
+8. [What We Accomplished](#what-we-accomplished)
 
 ---
 
-## 📋 **Prerequisites**
+## 📖 **What This Guide Is**
 
-Before starting, ensure you have:
-- Python 3.11+ installed
-- Virtual environment created and activated
-- Git repository cloned
-- Terminal/PowerShell access
+This is a **learning resource**, not a setup tutorial. It explains:
+- **What we did** during Django project initialization
+- **Why we made** specific architectural decisions
+- **How Django works** under the hood
+- **What each command does** and why it matters
 
-**Check your Python version:**
-```powershell
-python --version
-# Should show: Python 3.11.x or higher
-```
+**Looking for setup instructions?** See `SPRINT_2_DAY_1_SUMMARY.md` in the root folder.
 
 ---
 
 ## 🏗️ **Project Structure Overview**
 
-### **Final Directory Structure**
+### **Our Final Structure**
 ```
 python-mariachi-website/
-├── manage.py                      # Django management tool
-├── requirements.txt               # Python dependencies
-├── .env                          # Environment variables (secrets) - NOT in Git
-├── .env.example                  # Template for .env - IN Git
-├── db.sqlite3                    # SQLite database - NOT in Git
-├── mariachi_todo_terreno/        # Django project configuration
-│   ├── __init__.py
-│   ├── settings.py               # Project settings
-│   ├── urls.py                   # URL routing
-│   ├── asgi.py                   # ASGI config (for async)
-│   └── wsgi.py                   # WSGI config (for deployment)
+├── manage.py                      # Django's command-line tool
+├── requirements.txt               # Python dependencies list
+├── .env                          # Secrets (NOT in Git)
+├── .env.example                  # Template (IN Git)
+├── db.sqlite3                    # SQLite database (NOT in Git)
+├── mariachi_todo_terreno/        # Project configuration folder
+│   ├── settings.py               # All project settings
+│   ├── urls.py                   # URL routing map
+│   ├── wsgi.py / asgi.py        # Server configs
 ├── accounts/                     # Authentication app
-│   ├── migrations/               # Database migrations
-│   ├── __init__.py
-│   ├── admin.py                  # Admin interface config
-│   ├── apps.py                   # App configuration
-│   ├── models.py                 # Database models (User)
-│   ├── views.py                  # View logic
-│   └── tests.py                  # Unit tests
-├── public_site/                  # Public-facing app
-│   └── (same structure as accounts)
+│   ├── models.py                 # User model
+│   ├── admin.py                  # Admin config
+│   ├── migrations/               # Database versions
+├── public_site/                  # Public website app
 └── musicians_portal/             # Private portal app
-    └── (same structure as accounts)
 ```
 
-### **What Each Component Does**
+### **Understanding the Architecture**
 
-**`manage.py`**  
-- Command-line utility for Django operations
-- Run migrations, start server, create users, etc.
-- Never edit this file
-
-**Project Folder (`mariachi_todo_terreno/`)**  
-- Contains project-wide settings and configuration
-- NOT an app - it's the configuration hub
-- All apps connect through this
-
-**Apps (`accounts/`, `public_site/`, `musicians_portal/`)**  
-- Self-contained modules for specific features
-- Each has own models, views, URLs
-- Apps are siblings to project folder, NOT inside it
+**Why this structure?**
+- **Monolithic design**: One project, multiple apps (not microservices)
+- **Apps as siblings**: Apps sit next to project folder, not inside it
+- **Separation of concerns**: Each app handles specific domain (accounts, public, private)
 
 ---
 
-## 🚀 **Step-by-Step Setup Guide**
+## 🔨 **What We Built**
 
-### **Step 1: Install Django and Dependencies**
+### **1. Django Package Installation**
 
-**Command:**
+**Command Used:**
 ```powershell
 pip install django psycopg2-binary python-dotenv django-htmx
 ```
 
 **What Each Package Does:**
 
-| Package | Purpose | Why We Need It |
-|---------|---------|----------------|
-| `django` | Web framework | Core framework for building the website |
-| `psycopg2-binary` | PostgreSQL adapter | Allows Django to communicate with PostgreSQL database |
-| `python-dotenv` | Environment variables | Loads secrets from .env file (keeps passwords out of code) |
-| `django-htmx` | HTMX integration | Enables dynamic page updates without full page reloads |
+| Package | Purpose | Why Essential |
+|---------|---------|---------------|
+| `django` 5.2.8 | Web framework | Full MVC framework with ORM, admin, auth |
+| `psycopg2-binary` 2.9.11 | PostgreSQL adapter | Future PostgreSQL migration |
+| `python-dotenv` 1.2.1 | Environment vars | Keeps secrets out of source code |
+| `django-htmx` 1.27.0 | HTMX integration | Modern UX without full page reloads |
 
-**Expected Output:**
-```
-Successfully installed django-5.2.8 psycopg2-binary-2.9.11 python-dotenv-1.2.1 django-htmx-1.27.0
-```
+**Key Concept - Dependency Management:**
+- `pip install` downloads and installs packages
+- `pip freeze > requirements.txt` saves exact versions
+- Team installs with `pip install -r requirements.txt`
+- Ensures everyone has identical environment
 
 ---
 
-### **Step 2: Create Django Project**
+### **2. Django Project Creation**
 
-**Command:**
+**Command Used:**
 ```powershell
 django-admin startproject mariachi_todo_terreno .
 ```
 
-**Breaking Down the Command:**
-- `django-admin` = Django's administrative command-line tool
-- `startproject` = Creates a new Django project
-- `mariachi_todo_terreno` = Your project name (use underscores, not hyphens)
-- `.` = Create in current directory (don't create extra subfolder)
+**Breaking It Down:**
+- `django-admin` - Django's CLI tool (comes with Django package)
+- `startproject` - Creates new project scaffold
+- `mariachi_todo_terreno` - Project name (use underscores, not hyphens)
+- `.` - Create in current directory (don't nest in subfolder)
 
-**What Gets Created:**
+**What Got Created:**
 ```
 mariachi_todo_terreno/
-├── __init__.py          # Makes Python treat this as a package
-├── settings.py          # All project settings (database, apps, middleware)
-├── urls.py              # URL routing (maps URLs to views)
-├── asgi.py              # Async Server Gateway Interface config
-└── wsgi.py              # Web Server Gateway Interface config
+├── __init__.py      # Python package marker
+├── settings.py      # All configuration (DB, apps, security)
+├── urls.py          # URL → view mapping
+├── wsgi.py          # Production server interface
+└── asgi.py          # Async server interface
 
-manage.py                # Your main Django command tool
+manage.py            # Local development CLI tool
 ```
 
-**Why This Matters:**
-- `settings.py` is where you configure everything (database, installed apps, security)
-- `urls.py` is your website's navigation map
-- `manage.py` is how you interact with Django (run server, migrations, etc.)
+**Important Distinction:**
+- **Project** = Configuration hub (settings, URLs, deployment)
+- **Apps** = Feature modules (created next)
+- One project can have many apps
 
 ---
 
-### **Step 3: Create Django Apps**
+### **3. Django Apps Creation**
 
-**Commands:**
+**Commands Used:**
 ```powershell
+python manage.py startapp accounts
 python manage.py startapp public_site
 python manage.py startapp musicians_portal
-python manage.py startapp accounts
 ```
 
-**Understanding `startapp`:**
-- Creates a self-contained module for specific functionality
-- Each app has models (database), views (logic), admin (interface)
-- Apps can be reused in other Django projects
-
-**What Each App Does:**
-
-**`accounts`** - Authentication & User Management
-- Customer registration (for promos/bookings)
-- Musician login (Google SSO)
-- Role-based permissions (customer/musician/admin)
-- Custom User model with extended fields
-
-**`public_site`** - Public-Facing Website
-- Home page with hero section
-- About the mariachi group
-- Photo/video gallery
-- Contact form and booking requests
-- Customer registration forms
-
-**`musicians_portal`** - Private Band Member Portal
-- Score library (994+ songs with search/filter)
-- Practice tools (metronome, audio recorder)
-- Event calendar
-- File sharing for recordings
-- Only accessible to musicians and admins
-
-**Key Concept - Apps vs. Project:**
+**What `startapp` Does:**
+Creates self-contained module with standard structure:
 ```
+app_name/
+├── models.py      # Database schema (tables, fields)
+├── views.py       # Request handlers (business logic)
+├── admin.py       # Admin interface registration
+├── apps.py        # App configuration
+├── tests.py       # Unit tests
+└── migrations/    # Database version history
+```
+
+**Our Three Apps:**
+
+**`accounts`** - Authentication System
+- Custom User model with roles (customer/musician/admin)
+- Handles registration, login, permissions
+- Shared by both public and private sites
+
+**`public_site`** - Customer-Facing Website
+- Home page, gallery, about
+- Customer registration with promo opt-in
+- Booking request forms
+
+**`musicians_portal`** - Private Band Portal
+- Score library (994+ songs)
+- Practice tools (metronome, recorder)
+- Event calendar, file sharing
+- Musician-only access
+
+**Key Architectural Decision:**
+Apps are **siblings** to project folder, not nested inside:
+```
+✅ CORRECT:
+project/
+├── mariachi_todo_terreno/  ← Config
+├── accounts/               ← App
+├── public_site/            ← App
+└── musicians_portal/       ← App
+
 ❌ WRONG:
 mariachi_todo_terreno/
-└── accounts/          # DON'T put apps inside project folder
-
-✅ CORRECT:
-python-mariachi-website/
-├── mariachi_todo_terreno/    # Project config (sibling)
-├── accounts/                  # App (sibling)
-├── public_site/               # App (sibling)
-└── musicians_portal/          # App (sibling)
+├── settings.py
+└── accounts/               ← Don't nest apps
 ```
 
 ---
 
-### **Step 4: Configure Django Settings**
+### **4. Django Settings Configuration**
 
-**File to Edit:** `mariachi_todo_terreno/settings.py`
+**File Modified:** `mariachi_todo_terreno/settings.py`
 
-**Add Environment Variables (Top of File):**
+**Changes Made:**
+
+**A. Environment Variable Loading**
 ```python
-from pathlib import Path
 from dotenv import load_dotenv
 import os
 
-# Load environment variables from .env file
-load_dotenv()
-
-BASE_DIR = Path(__file__).resolve().parent.parent
+load_dotenv()  # Loads .env file into environment
 ```
 
-**Why:** Keeps secrets (passwords, API keys) out of code
+**Why:** Keeps secrets (SECRET_KEY, passwords) out of source code
 
-**Register Your Apps:**
+**B. App Registration**
 ```python
 INSTALLED_APPS = [
-    'django.contrib.admin',         # Django admin interface
-    'django.contrib.auth',          # Authentication system
-    'django.contrib.contenttypes',  # Content type framework
-    'django.contrib.sessions',      # Session framework
-    'django.contrib.messages',      # Messaging framework
-    'django.contrib.staticfiles',   # Static file management
-    # Third-party apps
-    'django_htmx',                  # HTMX integration
-    # Local apps
-    'accounts',                     # Your authentication app
-    'public_site',                  # Your public website app
-    'musicians_portal',             # Your private portal app
+    'django.contrib.admin',      # Admin interface
+    'django.contrib.auth',       # Authentication
+    'django.contrib.contenttypes',  # Content types
+    'django.contrib.sessions',   # Session management
+    'django.contrib.messages',   # Flash messages
+    'django.contrib.staticfiles', # CSS/JS/images
+    'django_htmx',               # Third-party
+    'accounts',                  # Our apps
+    'public_site',
+    'musicians_portal',
 ]
 ```
 
-**Why This Order Matters:**
-1. Django built-in apps first (always)
-2. Third-party apps next (like django_htmx)
-3. Your local apps last
+**Why Order Matters:**
+1. Django built-ins first (always required)
+2. Third-party packages
+3. Your local apps last (can depend on above)
 
-**Use Environment Variables for Secrets:**
+**C. Custom User Model Declaration**
 ```python
-# Before (INSECURE - secret exposed in code):
-SECRET_KEY = 'django-insecure-u@c!plx5_x3uya...'
-
-# After (SECURE - secret in .env file):
-SECRET_KEY = os.getenv('SECRET_KEY', 'fallback-for-testing')
-DEBUG = os.getenv('DEBUG', 'True') == 'True'
-```
-
-**Tell Django About Custom User Model:**
-```python
-# At bottom of settings.py
 AUTH_USER_MODEL = 'accounts.User'
 ```
 
-**⚠️ CRITICAL:** Must do this BEFORE first migration. Can't easily change later.
+**⚠️ CRITICAL DECISION:**
+- Must be set **BEFORE** first migration
+- Can't easily change after migrations run
+- Even if you don't need custom fields initially, do it anyway
+- Django docs strongly recommend this
+
+**D. Environment-Based Secrets**
+```python
+SECRET_KEY = os.getenv('SECRET_KEY', 'fallback-value')
+DEBUG = os.getenv('DEBUG', 'True') == 'True'
+```
+
+**Why:** Production uses different values than development
 
 ---
 
-### **Step 5: Create Custom User Model**
+### **5. Custom User Model Implementation**
 
-**File to Edit:** `accounts/models.py`
+**File Created:** `accounts/models.py`
 
-**Complete User Model Code:**
+**Our User Model:**
 ```python
-from django.db import models
 from django.contrib.auth.models import AbstractUser
 
 class User(AbstractUser):
-    """
-    Custom user model supporting customers and musicians.
-    Extends Django's built-in User with additional fields.
-    """
     ROLE_CHOICES = [
         ('customer', 'Customer'),
         ('musician', 'Musician'),
@@ -276,180 +253,118 @@ class User(AbstractUser):
     ]
     
     role = models.CharField(
-        max_length=20, 
+        max_length=20,
         choices=ROLE_CHOICES,
-        default='customer',
-        help_text='User role determines access permissions'
+        default='customer'
     )
     
-    # Customer-specific fields
-    phone = models.CharField(
-        max_length=20, 
-        blank=True,
-        help_text='Contact phone number'
-    )
-    promo_opt_in = models.BooleanField(
-        default=False,
-        help_text='Opted in to receive promotional emails'
-    )
+    # Customer fields
+    phone = models.CharField(max_length=20, blank=True)
+    promo_opt_in = models.BooleanField(default=False)
     
-    # Musician-specific fields (nullable for customers)
-    instrument = models.CharField(
-        max_length=50, 
-        blank=True, 
-        null=True,
-        help_text='Primary instrument for musicians'
-    )
-    google_id = models.CharField(
-        max_length=100, 
-        blank=True, 
-        null=True,
-        unique=True,
-        help_text='Google Workspace ID for SSO authentication'
-    )
-    
-    def __str__(self):
-        return f"{self.username} ({self.get_role_display()})"
-    
-    class Meta:
-        ordering = ['username']
+    # Musician fields  
+    instrument = models.CharField(max_length=50, blank=True, null=True)
+    google_id = models.CharField(max_length=100, blank=True, null=True, unique=True)
 ```
 
-**Understanding the Model:**
+**Key Concepts:**
 
-**`AbstractUser`**  
-- Django's built-in User class (includes username, password, email, etc.)
-- We extend it instead of replacing it
-- Keeps Django's authentication system working
+**AbstractUser vs AbstractBaseUser:**
+- `AbstractUser` extends Django's built-in User (easier)
+- Keeps username, password, email, is_staff, is_active
+- Just adds our custom fields on top
 
-**Field Types Explained:**
+**Field Type Explanations:**
 
-| Field Type | What It Does | Example |
-|------------|--------------|---------|
-| `CharField` | Text (limited length) | Username, phone, instrument |
-| `BooleanField` | True/False | promo_opt_in |
-| `choices=` | Dropdown options | customer/musician/admin |
-| `blank=True` | Optional in forms | Phone not required |
-| `null=True` | Optional in database | Instrument can be NULL |
-| `unique=True` | No duplicates allowed | Only one user per google_id |
-| `default=` | Value if not provided | Role defaults to 'customer' |
+| Field Type | What It Stores | Example Use |
+|------------|----------------|-------------|
+| CharField | Text (fixed max length) | phone, instrument |
+| BooleanField | True/False | promo_opt_in |
+| choices= | Dropdown options | role selection |
+| blank=True | Optional in forms | phone not required |
+| null=True | Can be NULL in DB | instrument nullable |
+| unique=True | No duplicates | google_id unique |
+| default= | Value if not provided | role='customer' |
 
-**Three User Types:**
-1. **Customer** - Public user (registers for promos, makes bookings)
-2. **Musician** - Band member (access to portal, scores, practice tools)
-3. **Admin** - Full access (Gerry - can manage everything)
+**Design Decision - Single User Model:**
+- One model with role field vs multiple models (Customer, Musician)
+- Simpler authentication (single login table)
+- Easier permissions (check role field)
+- Fields can be nullable for unused roles
 
 ---
 
-### **Step 6: Create Database Migrations**
+### **6. Database Migrations**
 
-**Command:**
+**Commands Used:**
 ```powershell
-python manage.py makemigrations
+python manage.py makemigrations  # Create migration file
+python manage.py migrate         # Apply to database
 ```
 
-**What This Does:**
-- Scans all models in your apps
-- Detects changes from last migration
-- Creates Python file with database change instructions
-- Does NOT modify database yet
+**What Migrations Are:**
+Think of them as "Git commits for your database schema"
 
-**Expected Output:**
+**The Workflow:**
 ```
-Migrations for 'accounts':
-  accounts\migrations\0001_initial.py
-    - Create model User
+1. Change models.py
+   └─► Add/modify fields
+
+2. makemigrations
+   └─► Creates Python file with instructions
+   └─► Example: accounts/migrations/0001_initial.py
+
+3. migrate
+   └─► Executes SQL commands
+   └─► Creates/modifies actual database tables
+
+4. Database updated
+   └─► Schema matches your models
 ```
 
-**What Gets Created:**
-- `accounts/migrations/0001_initial.py` - Migration file with SQL instructions
-- Contains code to create User table with all fields
+**Why This System?**
+- Version control for database structure
+- Team can sync database changes
+- Can roll back if needed
+- Django tracks what's been applied
 
-**Understanding Migrations:**
-- Django's way of version controlling your database
-- Like Git commits, but for database schema
-- Allows team to sync database structure
-- Can roll back changes if needed
+**Our First Migration:**
+- Created `accounts_user` table
+- All AbstractUser fields (username, password, email, etc.)
+- Our custom fields (role, phone, promo_opt_in, instrument, google_id)
+- Plus Django's built-in tables (admin, sessions, permissions)
+
+**Total: 19 migrations applied** (accounts + Django built-ins)
 
 ---
 
-### **Step 7: Apply Migrations to Database**
+### **7. Superuser Creation**
 
-**Command:**
-```powershell
-python manage.py migrate
-```
-
-**What This Does:**
-- Reads all migration files (yours + Django's built-in)
-- Executes SQL to create/modify database tables
-- Creates `db.sqlite3` file (SQLite database)
-- Tracks which migrations have been applied
-
-**Expected Output:**
-```
-Operations to perform:
-  Apply all migrations: accounts, admin, auth, contenttypes, sessions
-Running migrations:
-  Applying contenttypes.0001_initial... OK
-  Applying auth.0001_initial... OK
-  ...
-  Applying accounts.0001_initial... OK
-  Applying admin.0001_initial... OK
-  Applying sessions.0001_initial... OK
-```
-
-**What Tables Get Created:**
-
-| Table | Purpose | Created By |
-|-------|---------|------------|
-| `accounts_user` | Your custom User table | Your accounts app |
-| `django_admin_log` | Admin action history | Django admin app |
-| `auth_permission` | Permissions system | Django auth app |
-| `auth_group` | User groups | Django auth app |
-| `django_session` | User sessions (login) | Django sessions app |
-| `django_content_type` | App/model tracking | Django contenttypes |
-
-**Verify Database Was Created:**
-```powershell
-ls *.sqlite3
-# Should show: db.sqlite3 (135 KB or similar)
-```
-
----
-
-### **Step 8: Create Superuser (Admin Account)**
-
-**Command:**
+**Command Used:**
 ```powershell
 python manage.py createsuperuser
 ```
 
-**What You'll Be Asked:**
-```
-Username: gerry
-Email address: gerryochoatorres@gmail.com
-Password: [your password - won't be visible]
-Password (again): [repeat password]
-```
-
-**What This Does:**
-- Creates a User record in database
+**What It Does:**
+- Creates User record in database
 - Sets `is_staff = True` (can access admin)
-- Sets `is_superuser = True` (has all permissions)
-- Hashes password securely (never stores plain text)
-- Role defaults to 'customer' (need to change to 'admin' in admin interface)
+- Sets `is_superuser = True` (all permissions)
+- Hashes password with PBKDF2 (never stores plain text)
+- Role defaults to 'customer' (must change manually)
 
-**Important Note:**
-After creating superuser, login to admin and change their role to 'admin' for consistency.
+**Security Note:**
+Django uses PBKDF2 password hashing with SHA256:
+- 320,000 iterations (as of Django 4.2+)
+- Salted (prevents rainbow table attacks)
+- Even if database is compromised, passwords are safe
 
 ---
 
-### **Step 9: Register User Model in Django Admin**
+### **8. Django Admin Registration**
 
-**File to Edit:** `accounts/admin.py`
+**File Created:** `accounts/admin.py`
 
-**Complete Admin Configuration:**
+**The Code:**
 ```python
 from django.contrib import admin
 from django.contrib.auth.admin import UserAdmin
@@ -457,200 +372,94 @@ from .models import User
 
 @admin.register(User)
 class CustomUserAdmin(UserAdmin):
-    """
-    Admin interface for User model.
-    Extends Django's UserAdmin with our custom fields.
-    """
-    # What columns show in user list
-    list_display = ('username', 'email', 'role', 'first_name', 'last_name', 'is_staff', 'is_active')
-    
-    # Filters in right sidebar
-    list_filter = ('role', 'is_staff', 'is_active', 'promo_opt_in')
-    
-    # Search bar functionality
-    search_fields = ('username', 'email', 'first_name', 'last_name', 'phone')
-    
-    # Organize edit form into sections
+    list_display = ('username', 'email', 'role', ...)
+    list_filter = ('role', 'is_staff', ...)
+    search_fields = ('username', 'email', ...)
     fieldsets = UserAdmin.fieldsets + (
-        ('Role & Permissions', {
-            'fields': ('role',)
-        }),
-        ('Customer Information', {
-            'fields': ('phone', 'promo_opt_in'),
-            'description': 'Fields for customer accounts'
-        }),
-        ('Musician Information', {
-            'fields': ('instrument', 'google_id'),
-            'description': 'Fields for musician accounts (band members)'
-        }),
+        ('Role & Permissions', {'fields': ('role',)}),
+        ('Customer Information', {'fields': ('phone', 'promo_opt_in')}),
+        ('Musician Information', {'fields': ('instrument', 'google_id')}),
     )
 ```
 
 **What `@admin.register(User)` Does:**
-- Makes User model visible in Django admin sidebar
-- Connects User model to CustomUserAdmin configuration
-- Without this, model exists but is invisible in admin
+- Makes model visible in admin sidebar
+- Without this, model exists in database but is **invisible** in admin
+- Common beginner mistake
 
-**Admin Features You Get:**
-- ✅ List all users with username, email, role
-- ✅ Filter by role, staff status, promo opt-in
-- ✅ Search by username, email, name, phone
-- ✅ Edit users with organized form sections
-- ✅ Add new users with role selection
-
----
-
-### **Step 10: Test Django Development Server**
-
-**Command:**
-```powershell
-python manage.py runserver
-```
-
-**What This Does:**
-- Starts Django's built-in development web server
-- Runs on `http://127.0.0.1:8000/` (localhost port 8000)
-- Auto-reloads when you change code
-- NOT for production use (development only)
-
-**Expected Output:**
-```
-Watching for file changes with StatReloader
-Performing system checks...
-
-System check identified no issues (0 silenced).
-December 01, 2025 - 19:40:23
-Django version 5.2.8, using settings 'mariachi_todo_terreno.settings'
-Starting development server at http://127.0.0.1:8000/
-Quit the server with CTRL-BREAK.
-```
-
-**Visit These URLs:**
-
-**`http://localhost:8000/`**  
-- Django welcome page (rocket ship)
-- Confirms Django is working
-- Will be replaced with your home page later
-
-**`http://localhost:8000/admin`**  
-- Django admin interface
-- Login with superuser credentials (gerry / your password)
-- Click "Users" to see and manage users
-- Click "Add User" to create new users
-
-**Stop the Server:**
-- Press `Ctrl+C` in terminal
+**Extending UserAdmin:**
+- `UserAdmin` has Django's default config
+- We extend it with `+` operator
+- Adds our custom fieldsets to existing ones
+- Keeps all built-in functionality
 
 ---
 
-### **Step 11: Create Requirements File**
+### **9. Requirements File Generation**
 
-**Command:**
+**Command Used:**
 ```powershell
 pip freeze > requirements.txt
 ```
 
-**What This Does:**
-- Lists all installed Python packages and versions
-- Creates text file with exact dependencies
-- Team can install same versions with `pip install -r requirements.txt`
-- Ensures everyone has identical environment
-
-**Generated File Content:**
+**What It Does:**
+- Lists ALL installed packages
+- Includes exact version numbers
+- Output example:
 ```
-asgiref==3.11.0
 Django==5.2.8
 django-htmx==1.27.0
 psycopg2-binary==2.9.11
 python-dotenv==1.2.1
 sqlparse==0.5.4
 tzdata==2025.2
+asgiref==3.11.0
 ```
+
+**Why Version Locking Matters:**
+- Package updates can break code
+- Team needs identical versions
+- `pip install -r requirements.txt` installs exact versions
+- Production matches development
 
 ---
 
-### **Step 12: Create Environment Variable Files**
+### **10. Environment Variable Setup**
 
-**Create `.env.example` (Template - IN Git):**
+**Files Created:**
+
+**`.env.example`** (Template - IN Git)
 ```env
-# Django Environment Variables Template
-# Copy this to .env and fill in actual values
-
 SECRET_KEY=your-secret-key-here
 DEBUG=True
-
-# Database (PostgreSQL - future)
-# DB_NAME=mariachi_db
-# DB_USER=postgres
-# DB_PASSWORD=your-password
 ```
 
-**Create `.env` (Actual Secrets - NOT in Git):**
+**`.env`** (Actual Secrets - NOT in Git)
 ```env
 SECRET_KEY=django-insecure-u@c!plx5_x3uya-cmt9ko%s*iyz8#q6p74k2$1!gwzdjbpzlkf
 DEBUG=True
 ```
 
-**Why Two Files?**
-- `.env.example` = Template committed to Git (no secrets)
-- `.env` = Actual secrets ignored by Git (never commit)
-- Team copies .env.example to .env and fills in their values
+**The Pattern:**
+- `.env.example` shows required variables (no real values)
+- `.env` has actual secrets (in .gitignore)
+- Team copies example to .env and fills in values
+- Production has different .env (different SECRET_KEY, DEBUG=False)
 
-**Verify .env is Ignored:**
-```powershell
-# Check .gitignore contains .env
-Select-String -Pattern "^\.env$" .gitignore
-```
-
----
-
-### **Step 13: Commit to Git**
-
-**Stage Files:**
-```powershell
-git add .
-```
-
-**Commit with Detailed Message:**
-```powershell
-git commit -m "Initialize Django project with custom User model and 3 apps
-
-- Created Django project: mariachi_todo_terreno
-- Created 3 apps: accounts, public_site, musicians_portal
-- Implemented custom User model with role-based access
-- Configured Django admin with User management
-- Added environment variable support
-- Created requirements.txt for team setup
-
-Sprint 2 Day 1 complete"
-```
-
-**Push to GitHub:**
-```powershell
-git push origin dev
-```
-
-**What Gets Committed:**
-- ✅ Django project files
-- ✅ All 3 apps
-- ✅ Migration files
-- ✅ requirements.txt
-- ✅ .env.example
-- ✅ .gitignore
-
-**What Doesn't Get Committed:**
-- ❌ .env (secrets)
-- ❌ db.sqlite3 (database)
-- ❌ mariachi-env/ (virtual environment)
-- ❌ __pycache__/ (Python cache)
+**Why This Matters:**
+- Secrets never in source control
+- Each environment (dev/staging/prod) has own values
+- Same code runs everywhere with different config
 
 ---
 
-## 🧩 **Understanding Django Components**
+## 🧠 **Understanding Django Components**
 
-### **Django Architecture (MVT Pattern)**
+Now that we've built our Django project, let's understand how the pieces fit together.
 
-Django uses **Model-View-Template** (MVT):
+### **The MVT Pattern (Model-View-Template)**
+
+Django uses **Model-View-Template** (MVT) architecture:
 
 ```
 ┌──────────┐      ┌──────────┐      ┌──────────┐
@@ -662,286 +471,375 @@ Django uses **Model-View-Template** (MVT):
   models.py         views.py         templates/
 ```
 
-**Model** - Database structure (what data you store)  
+**Model** - Database structure (what data we store)  
+- Defines tables, fields, relationships
+- Provides Python API for querying data
+- Example: User model with username, email, role
+
 **View** - Business logic (what happens when user visits a page)  
-**Template** - HTML presentation (what user sees)
+- Handles HTTP requests
+- Queries database through models
+- Renders templates with data
+- Example: Function that fetches scores and displays them
+
+**Template** - HTML presentation (what user sees)  
+- HTML with Django template language
+- Displays data from views
+- Loops, conditionals, filters
+- Example: HTML page showing list of scores
+
+**Why Separate These?**
+- **Maintainability**: Change database without touching HTML
+- **Reusability**: Same model used by multiple views
+- **Team collaboration**: Database designers, backend devs, frontend devs work independently
+
+---
 
 ### **Django Request/Response Flow**
 
-```
-1. User visits URL: http://localhost:8000/musicians/scores/
+Understanding how Django handles a web request:
 
-2. urls.py routes to view:
+```
+1. User visits URL
+   ↓
+   http://localhost:8000/musicians/scores/
+
+2. Django checks urls.py
+   ↓
    path('musicians/scores/', views.score_library)
 
-3. View queries database:
+3. View function executes
+   ↓
    scores = Score.objects.filter(user=request.user)
 
-4. View renders template:
+4. View renders template
+   ↓
    return render(request, 'scores.html', {'scores': scores})
 
-5. Template generates HTML:
+5. Template generates HTML
+   ↓
    {% for score in scores %}
      <div>{{ score.title }}</div>
    {% endfor %}
 
 6. Browser displays page
+   ↓
+   User sees their scores
 ```
 
-### **Migration Workflow**
+**Key Concepts:**
+- **URL patterns** are checked in order (first match wins)
+- **Views** are Python functions or classes
+- **Templates** receive context (dictionary of variables)
+- **ORM** (Object-Relational Mapping) converts Python to SQL
+
+---
+
+###  **Migration Workflow**
+
+Migrations are version control for your database schema:
 
 ```
-1. Change model in models.py
-   └─► Add field: role = models.CharField(...)
+1. Developer changes model
+   └─► models.py: Add role = models.CharField(...)
 
-2. Create migration
+2. Django detects changes
    └─► python manage.py makemigrations
-       Creates: 0002_user_role.py
+       Analyzes model changes
+       Creates migration file (0002_user_role.py)
 
-3. Review migration (optional)
-   └─► Read 0002_user_role.py to see SQL
+3. Migration file contains operations
+   └─► migrations.AddField(
+          model_name='user',
+          name='role',
+          field=models.CharField(...)
+       )
 
-4. Apply migration
+4. Apply migration to database
    └─► python manage.py migrate
-       Executes: ALTER TABLE accounts_user ADD role VARCHAR(20)
+       Executes SQL: ALTER TABLE accounts_user ADD role VARCHAR(20)
 
-5. Database updated
+5. Database schema updated
    └─► Table now has new 'role' column
+       All existing users get default value ('customer')
 ```
+
+**Why Migrations Matter:**
+- **Version control**: Track database changes over time
+- **Team collaboration**: Share schema changes via Git
+- **Rollback capability**: Can undo migrations (in development)
+- **Documentation**: Migration files show schema evolution
+
+**Migration Dependency Graph:**
+```
+0001_initial.py (create User table)
+    ↓
+0002_user_role.py (add role field)
+    ↓
+0003_user_instrument.py (add instrument field)
+```
+
+Each migration depends on the previous one. Django tracks which migrations have been applied.
+
+---
 
 ### **App Structure Explained**
 
-Each Django app follows this pattern:
+Each Django app follows consistent structure:
 
 ```
 accounts/
 ├── migrations/           # Database version history
-│   ├── 0001_initial.py  # First migration (create tables)
+│   ├── 0001_initial.py  # Creates User table
+│   ├── 0002_add_role.py # Adds role field
 │   └── __init__.py
 ├── __init__.py          # Makes this a Python package
-├── admin.py             # Register models in admin interface
+├── admin.py             # Register models in /admin interface
 ├── apps.py              # App configuration
-├── models.py            # Database structure (tables, fields)
-├── views.py             # Request handling logic
+├── models.py            # Database models (classes = tables)
+├── views.py             # Request handlers (functions = pages)
 ├── tests.py             # Unit tests
-└── urls.py              # URL routing (create this file)
+└── urls.py              # URL routing (optional, create manually)
 ```
 
-**When to Create New App:**
+**When to Create a New App:**
+
+✅ **Create new app when:**
 - Feature is self-contained and reusable
 - Has its own models/database tables
 - Can be developed independently
-- Example: blog app, payment app, notification app
+- Could potentially be used in other projects
+- Examples: blog app, payment app, notification system
 
-**When to Add to Existing App:**
+❌ **Add to existing app when:**
 - Feature extends existing functionality
 - Shares models with existing app
 - Tightly coupled to app's purpose
-- Example: add password reset to accounts app
+- Small utility functions
+- Examples: add password reset to accounts, add search to scores
+
+**Our App Decision Reasoning:**
+
+**`accounts`** - Separate app because:
+- Authentication is core functionality
+- User model used by all other apps
+- Could be reused in future projects
+- Clear, focused purpose
+
+**`public_site`** - Separate app because:
+- Completely different audience (public vs members)
+- No shared models with musicians_portal
+- Different permissions (anonymous vs authenticated)
+- Could be developed independently
+
+**`musicians_portal`** - Separate app because:
+- Private functionality requiring authentication
+- Complex models (scores, practice sessions, events)
+- Specific to musicians role
+- Clear boundary from public site
 
 ---
 
-## 👥 **Team Setup Instructions**
+## 🚨 **Common Pitfalls & Learning Points**
 
-### **For Team Members Cloning the Repo**
+These are mistakes developers commonly make when starting with Django. Understanding why they happen helps you avoid them.
 
-**1. Clone Repository:**
-```powershell
-git clone https://github.com/g0ochoa/python-mariachi-website.git
-cd python-mariachi-website
-```
+### **Pitfall 1: Forgetting Virtual Environment**
 
-**2. Create Virtual Environment:**
-```powershell
-python -m venv mariachi-env
-```
+**Why It Matters:**  
+Without activating the virtual environment, packages install globally and can cause conflicts.
 
-**3. Activate Virtual Environment:**
+**Learning:**  
+- Virtual environments isolate project dependencies
+- Always verify `(mariachi-env)` appears in your terminal prompt
+- Global installations pollute system Python and cause version conflicts
 
-**Windows:**
-```powershell
-mariachi-env\Scripts\activate
-```
-
-**Mac/Linux:**
-```bash
-source mariachi-env/bin/activate
-```
-
-**4. Install Dependencies:**
-```powershell
-pip install -r requirements.txt
-```
-
-**5. Create Your .env File:**
-```powershell
-# Copy the template
-cp .env.example .env
-
-# Edit .env and fill in values (use any text editor)
-```
-
-**6. Run Migrations:**
-```powershell
-python manage.py migrate
-```
-
-**7. Create Your Superuser:**
-```powershell
-python manage.py createsuperuser
-# Enter your username, email, password
-```
-
-**8. Fix Your User Role:**
-```powershell
-python manage.py runserver
-# Visit http://localhost:8000/admin
-# Login with your credentials
-# Go to Users → Click your username
-# Change Role from "customer" to "admin"
-# Click Save
-```
-
-**9. Verify Setup:**
-```powershell
-# Test the server
-python manage.py runserver
-
-# Visit http://localhost:8000/admin
-# You should see Users in the sidebar
-# You should be able to add/edit users
-```
-
-**10. Create Feature Branch:**
-```powershell
-git checkout -b feature/your-name/your-feature
-```
+**Conceptual Understanding:**  
+Python's virtual environments create isolated Python interpreters. When activated, `pip install` modifies only that environment's `site-packages` directory, not the system-wide location.
 
 ---
 
-## 🔧 **Common Issues & Solutions**
+### **Pitfall 2: Missing SECRET_KEY in Production**
 
-### **Issue 1: "No module named 'django'"**
+**Why It Matters:**  
+Django's SECRET_KEY protects cryptographic signing. Hardcoding it exposes security vulnerabilities.
 
-**Problem:** Django not installed  
-**Solution:**
-```powershell
-# Ensure virtual environment is activated
-mariachi-env\Scripts\activate
+**Learning:**  
+- SECRET_KEY must be unique per environment
+- Never commit secret keys to version control
+- Environment variables separate config from code (12-factor app principle)
 
-# Install dependencies
-pip install -r requirements.txt
-```
+**Conceptual Understanding:**  
+The SECRET_KEY is used for:
+- Session cookie signing (prevents tampering)
+- CSRF token generation
+- Password reset tokens
+- Any cryptographic signing in Django
 
-### **Issue 2: "SECRET_KEY not found"**
-
-**Problem:** Missing .env file  
-**Solution:**
-```powershell
-# Copy template
-cp .env.example .env
-
-# Edit .env and add SECRET_KEY
-```
-
-### **Issue 3: "AUTH_USER_MODEL must be of the form 'app.ModelName'"**
-
-**Problem:** Set AUTH_USER_MODEL after migrations ran  
-**Solution:**
-```powershell
-# Delete database
-rm db.sqlite3
-
-# Delete migrations
-rm accounts/migrations/0*.py
-
-# Recreate migrations
-python manage.py makemigrations
-python manage.py migrate
-```
-
-### **Issue 4: "Users don't show in admin"**
-
-**Problem:** User model not registered in admin.py  
-**Solution:**
-- Add `@admin.register(User)` decorator in accounts/admin.py
-- Restart dev server
-
-### **Issue 5: "Port 8000 already in use"**
-
-**Problem:** Another server running on port 8000  
-**Solution:**
-```powershell
-# Use different port
-python manage.py runserver 8001
-
-# Or kill existing process (Windows)
-netstat -ano | findstr :8000
-taskkill /PID [process_id] /F
-```
-
-### **Issue 6: Migration conflicts**
-
-**Problem:** Migration files out of sync with database  
-**Solution:**
-```powershell
-# Reset migrations (development only!)
-python manage.py migrate accounts zero
-python manage.py migrate
-```
+If exposed, attackers can forge sessions and bypass security measures.
 
 ---
 
-## 🎯 **Next Steps**
+### **Pitfall 3: Setting AUTH_USER_MODEL After First Migration**
 
-### **Immediate (Sprint 2)**
-- [ ] Create basic views for public_site (home page)
-- [ ] Set up URL routing
-- [ ] Create templates folder structure
-- [ ] Add static files (CSS, JavaScript)
-- [ ] Create Score model in musicians_portal
-- [ ] Test HTMX integration
+**Why It Matters:**  
+Django bakes AUTH_USER_MODEL into database foreign keys. Changing it after migrations requires database reset.
 
-### **Short-term (Sprint 3)**
-- [ ] Build public website pages (home, about, gallery, contact)
-- [ ] Implement customer registration form
-- [ ] Create booking request system
-- [ ] Design musicians portal UI
-- [ ] Implement score library with search/filter
+**Learning:**  
+- Custom user models must be configured BEFORE first `migrate`
+- Database relationships are hard to change once created
+- Always plan authentication early in project
 
-### **Long-term (Sprint 4+)**
-- [ ] Migrate to PostgreSQL
-- [ ] Implement Google Workspace SSO for musicians
-- [ ] Build practice tools (metronome, audio recorder)
-- [ ] Create event calendar
-- [ ] Add promo code system
-- [ ] Deploy to Google Cloud Platform
+**Conceptual Understanding:**  
+When Django creates tables, it creates foreign keys pointing to `auth_user` (default) or your custom user table. These relationships are stored in the database schema. Changing AUTH_USER_MODEL later would require:
+1. Dropping all tables with user foreign keys
+2. Recreating migrations
+3. Losing all data
+
+This is why Django documentation emphasizes: "It's highly recommended to set up a custom user model, even if the default User model is sufficient for you."
 
 ---
 
-## 📚 **Additional Resources**
+### **Pitfall 4: Forgetting to Register Models in Admin**
 
-**Official Documentation:**
-- Django Docs: https://docs.djangoproject.com/
-- Django Tutorial: https://docs.djangoproject.com/en/5.2/intro/tutorial01/
-- HTMX Docs: https://htmx.org/docs/
+**Why It Matters:**  
+Django admin doesn't automatically discover models. Registration is explicit.
 
-**Team Resources:**
-- GitHub Repository: https://github.com/g0ochoa/python-mariachi-website
-- Project Documentation: `docs/` folder
-- Architecture Docs: `docs/architecture/system-architecture.md`
+**Learning:**  
+- Python's "explicit is better than implicit" philosophy
+- The `@admin.register()` decorator tells Django to include the model
+- Admin customization happens through ModelAdmin classes
+
+**Conceptual Understanding:**  
+Django's admin is dynamically generated. When you visit `/admin`, Django:
+1. Checks `admin.py` files in all installed apps
+2. Finds registered models
+3. Generates CRUD interfaces using model metadata
+
+Without registration, Django doesn't know you want that model in admin.
 
 ---
 
-## ✅ **Checklist for Verification**
+### **Pitfall 5: Port Already in Use**
 
-After completing setup, verify these work:
+**Why It Matters:**  
+Only one process can bind to a port. Helps understand web server basics.
 
-- [ ] Virtual environment activated
-- [ ] Django installed (`python -m django --version`)
-- [ ] Server starts without errors
-- [ ] Admin accessible at `/admin`
-- [ ] Can login with superuser credentials
+**Learning:**  
+- Web servers listen on specific ports (8000 for dev)
+- Operating systems prevent port conflicts
+- Development servers run single-threaded (unlike production)
+
+**Conceptual Understanding:**  
+When `runserver` starts, it attempts to bind to `0.0.0.0:8000`. If another process already bound that port, the OS returns "Address already in use" error. This teaches:
+- Ports are OS-level resources
+- One server per port
+- Production uses reverse proxies (nginx) to route multiple apps
+
+---
+
+### **Pitfall 6: Migration Conflicts**
+
+**Why It Matters:**  
+Migrations are version control for your database schema. Conflicts happen in team environments.
+
+**Learning:**  
+- Migrations track schema changes over time
+- Each migration depends on previous ones (linked list structure)
+- Team coordination prevents conflicts
+
+**Conceptual Understanding:**  
+Django migrations form a dependency graph:
+```
+0001_initial.py → 0002_add_role_field.py → 0003_add_indexes.py
+```
+
+If two developers create migrations simultaneously:
+```
+Developer A: 0001 → 0002_add_email
+Developer B: 0001 → 0002_add_phone
+```
+
+Merge conflict! Both named `0002`. Solution: Django's migration system allows squashing or manual renumbering.
+
+---
+
+## 💡 **Key Takeaways**
+
+1. **Virtual Environments Are Non-Negotiable**  
+   Treat them like version control - essential, not optional.
+
+2. **Security Configuration Belongs in Environment Variables**  
+   Code is public, config is private.
+
+3. **Plan Authentication Early**  
+   AUTH_USER_MODEL cannot be easily changed later.
+
+4. **Django Admin Is Explicit, Not Magic**  
+   Registration, customization, permissions all require code.
+
+5. **Development vs Production Are Different Worlds**  
+   Dev server is single-threaded, no security hardening, debug mode on.
+
+6. **Migrations Are Team Coordination Tools**  
+   Communicate schema changes, review migration files like code.
+
+---
+
+## 📚 **Additional Learning Resources**
+
+**Official Django Documentation:**
+- [Django Documentation](https://docs.djangoproject.com/) - Comprehensive reference
+- [Django Tutorial Series](https://docs.djangoproject.com/en/5.2/intro/tutorial01/) - Official step-by-step tutorial
+- [Django Models Reference](https://docs.djangoproject.com/en/5.2/topics/db/models/) - Deep dive into ORM
+- [Django Authentication](https://docs.djangoproject.com/en/5.2/topics/auth/) - User authentication system
+
+**Understanding Web Frameworks:**
+- [12-Factor App Methodology](https://12factor.net/) - Modern app development principles (explains environment variables, config)
+- [MVT vs MVC](https://docs.djangoproject.com/en/5.2/faq/general/#django-appears-to-be-a-mvc-framework-but-you-call-the-controller-the-view-and-the-view-the-template-how-come-you-don-t-use-the-standard-names) - Django's architecture explained
+
+**Python Virtual Environments:**
+- [Python venv Documentation](https://docs.python.org/3/library/venv.html) - Official virtual environment guide
+- [Real Python - Virtual Environments](https://realpython.com/python-virtual-environments-a-primer/) - Practical guide
+
+**Database Migrations:**
+- [Django Migrations Guide](https://docs.djangoproject.com/en/5.2/topics/migrations/) - How migrations work
+- [Understanding Django Migrations](https://realpython.com/django-migrations-a-primer/) - Real Python tutorial
+
+**HTMX for Modern UIs:**
+- [HTMX Documentation](https://htmx.org/docs/) - Official HTMX guide
+- [django-htmx Package](https://django-htmx.readthedocs.io/) - Django integration
+
+---
+
+## 🎯 **What We Accomplished**
+
+By completing this Django setup, we've established:
+
+**Technical Foundation:**
+- ✅ Custom user authentication system (role-based access control ready)
+- ✅ Three Django apps (modular architecture for different features)
+- ✅ Database schema with migrations (version-controlled database changes)
+- ✅ Admin interface (rapid development and data management)
+- ✅ Security configuration (environment variables, secret key management)
+- ✅ Modern frontend tools (HTMX for dynamic UIs without JavaScript frameworks)
+
+**Development Best Practices:**
+- ✅ Virtual environment isolation (dependency management)
+- ✅ Requirements file (reproducible environments)
+- ✅ Git version control (code history and collaboration)
+- ✅ Environment-based configuration (separation of code and config)
+
+**Project Understanding:**
+- ✅ Why Django uses MVT pattern (separation of concerns)
+- ✅ How migrations work (database versioning)
+- ✅ Why custom user models matter (future-proofing authentication)
+- ✅ How Django admin accelerates development (automatic CRUD interfaces)
+
+**Ready for Next Phase:**
+We can now build views, templates, and business logic knowing our foundation is solid.
+
+---
 - [ ] Users visible in admin sidebar
 - [ ] Can create new users
 - [ ] Can edit user roles
@@ -953,8 +851,8 @@ After completing setup, verify these work:
 
 **Questions or Issues?**  
 Contact: Gerry Ochoa (@gerry in Teams)  
-Sprint: Sprint 2 (Dec 2-8, 2025)  
-Next Meeting: Monday, December 9, 2025
+Sprint: Sprint 2 (Dec 1-7, 2025)  
+Next Meeting: Monday, December 8, 2025
 
 ---
 

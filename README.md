@@ -13,52 +13,61 @@ Mariachi Todo Terreno is a professional mariachi group led by Gerry Ochoa (trump
 
 ```
 python-mariachi-website/
-├── README.md                    # This file
-├── original-requirements.md     # Comprehensive project requirements
-├── docs/                       # Documentation directory
-│   ├── development-log.md      # Consolidated development activities
-│   ├── architecture/           # System design and architecture docs
-│   ├── deployment/            # Deployment guides and procedures
-│   └── security/              # Security implementation documentation
-├── src/                       # Source code (to be created)
-│   ├── backend/               # Python backend application
-│   ├── frontend/              # Frontend components
-│   └── shared/                # Shared utilities and types
-├── infrastructure/            # Infrastructure as Code (to be created)
-│   └── terraform/             # Terraform configurations
-├── tests/                     # Test suite (to be created)
-├── scripts/                   # Utility scripts (to be created)
-└── .github/                   # GitHub workflows (to be created)
-    └── workflows/             # CI/CD pipeline definitions
+├── README.md                      # This file
+├── original-requirements.md       # Comprehensive project requirements
+├── asana-project-breakdown.md     # Epic/Task breakdown for Asana
+├── LEARNING_LOG.md                # Learning resources index
+├── SPRINT_2_DAY_1_SUMMARY.md      # Latest sprint summary
+├── requirements.txt               # Python dependencies
+├── .env.example                   # Environment variables template
+├── manage.py                      # Django management tool
+├── mariachi_todo_terreno/         # Django project configuration
+│   ├── settings.py                # Project settings
+│   ├── urls.py                    # URL routing
+│   ├── wsgi.py                    # WSGI config
+│   └── asgi.py                    # ASGI config
+├── accounts/                      # Authentication app
+│   ├── models.py                  # Custom User model
+│   ├── admin.py                   # Admin configuration
+│   ├── views.py                   # View logic
+│   └── migrations/                # Database migrations
+├── public_site/                   # Public-facing website app
+├── musicians_portal/              # Private band member portal app
+├── docs/                          # Documentation
+│   ├── architecture/              # System design documents
+│   │   └── system-architecture.md
+│   ├── learning/                  # Learning guides by topic
+│   │   ├── README.md              # Learning guide index
+│   │   └── 02-backend/
+│   │       └── django-setup-complete-guide.md
+│   ├── sessions/                  # Development session logs
+│   │   ├── session-01-2025-11-30.md
+│   │   └── session-02-2025-12-01.md
+│   └── website-design/            # Design research and mockups
+└── mariachi-env/                  # Virtual environment (local only)
 ```
 
-## 🛠️ Tech Stack
+## 🛠️ Tech Stack (Current Implementation)
 
 ### Backend
-- **Framework**: Django 5.x (Full-featured with built-in admin, ORM, authentication)
-- **Database**: PostgreSQL 15+ (Relational database with strong consistency)
-- **Authentication**: Google Workspace SSO integration
-- **Python**: 3.11+
+- **Framework**: Django 5.2.8 ✅
+- **Database**: SQLite (development) → PostgreSQL 15+ (production)
+- **Authentication**: Custom User model with role-based access
+- **Packages**: django-htmx 1.27.0, psycopg2-binary 2.9.11, python-dotenv 1.2.1
+- **Python**: 3.13.7
 
 ### Frontend
 - **Templates**: Django Template Language
-- **Interactivity**: HTMX (Modern UX without page reloads)
+- **Interactivity**: HTMX (Progressive enhancement)
 - **Styling**: HTML5, CSS3, JavaScript (vanilla)
 - **Design**: Mobile-first responsive design
 
 ### Infrastructure & DevOps
-- **Cloud Platform**: Google Cloud Platform
-- **Infrastructure as Code**: Terraform
-- **CI/CD**: GitHub Actions
-- **Containerization**: Docker
-- **Database**: Cloud SQL (PostgreSQL)
-
-### Security
-- **Zero Trust Architecture**
-- **Least Privilege Principles**
-- **Multi-Factor Authentication**
-- **Secure Session Management**
-- **Django Security Features**: CSRF, XSS, SQL injection protection
+- **Cloud Platform**: Google Cloud Platform (planned)
+- **Version Control**: GitHub
+- **Environment Management**: Python virtual environments
+- **Development Database**: SQLite
+- **Production Database**: PostgreSQL (planned)
 
 ## 🎯 Learning Objectives
 
@@ -74,15 +83,23 @@ python-mariachi-website/
 - Professional mariachi showcase
 - Video gallery and performance media
 - Event calendar and availability
-- Customer booking request system
-- About page with band philosophy
+- Customer registration with promo opt-in
+- Booking request system
+- Contact information
 
 ### Musicians Portal (Private)
 - Secure authentication for band members
-- Digital scores library with search
+- Custom User model with role-based permissions
+- Digital scores library (994+ songs planned)
 - Practice scheduling and organization
-- Professional sheet music display
-- Member dashboard and tools
+- Member dashboard
+- File sharing for recordings
+
+### Django Admin Interface
+- User management with role assignment
+- Customer information tracking
+- Musician profile management
+- Content management capabilities
 
 ## 🚀 Development Approach
 
@@ -94,48 +111,59 @@ python-mariachi-website/
 
 ## 📋 Current Status
 
-**Phase**: Sprint 1 - Django Project Setup & PostgreSQL Configuration  
+**Sprint**: Sprint 2 (Dec 1-7, 2025) - Day 1 Complete ✅  
 **Project Start**: November 24, 2025  
 **Team**: Gerry Ochoa (Project Manager), Paco "Sensei" Cisneros, Carlos Cortes, Juan Marin  
-**Meeting Schedule**: Weekly Mondays on Microsoft Teams
+**Meeting Schedule**: Mondays on Microsoft Teams  
+**Next Meeting**: Monday, December 8, 2025
 
-### Tech Stack Decisions Made ✅
-- [x] **Framework**: Django (Full-featured with built-in admin, ORM, authentication)
-- [x] **Database**: PostgreSQL (Relational database with strong consistency)
+### Sprint 2 Progress (Week 2)
+- [x] Django project created (mariachi_todo_terreno)
+- [x] 3 Django apps created (accounts, public_site, musicians_portal)
+- [x] Custom User model with role-based access (customer/musician/admin)
+- [x] Database migrations created and applied
+- [x] Django admin configured with User management
+- [x] Superuser account created
+- [x] Requirements.txt generated
+- [x] Environment variables configured (.env, .env.example)
+- [x] Comprehensive Django setup guide created
+- [x] All code committed to GitHub (dev branch)
+
+### Sprint 1 Completed (Nov 24-30)
+- [x] Framework decision: Django
+- [x] Database decision: PostgreSQL
 - [x] Team assignments finalized
-- [x] Project structure planned
+- [x] Project requirements documented
+- [x] Repository initialized
 
-### Completed
-- [x] Project requirements documentation
-- [x] Clean project structure setup
-- [x] Documentation organization standards
-- [x] GitHub repository initialization
-- [x] Team formation and role assignments
-- [x] Framework decision (Django)
-- [x] Database decision (PostgreSQL)
-
-### In Progress (Sprint 1)
-- [ ] Django project initialization
-- [ ] PostgreSQL database configuration (Paco)
-- [ ] Frontend mockups and design (Juan)
-- [ ] Learning documentation structure setup
-- [ ] Development environment standardization
-
-### Current Team Assignments
-- **Gerry Ochoa**: Django project setup and backend development
-- **Paco "Sensei" Cisneros**: PostgreSQL research and database configuration
-- **Carlos Cortes**: Backend development support
-- **Juan Marin**: Frontend mockups and design research
+### Current Team Assignments (Sprint 2)
+- **Gerry Ochoa**: Django project setup ✅, Basic views and URL routing (next)
+- **Paco "Sensei" Cisneros**: PostgreSQL configuration guide (due Dec 7)
+- **Carlos Cortes**: Development environment setup (due Dec 7)
+- **Juan Marin**: Frontend mockups for 4 pages (due Dec 7)
 
 ## 📚 Documentation
 
-All project documentation is centralized in the `/docs/` directory:
+All project documentation is organized in `/docs/`:
 
-- **[Development Log](docs/development-log.md)**: Consolidated development activities and decisions
-- **[Original Requirements](original-requirements.md)**: Complete project requirements and specifications
-- **Architecture**: System design and technical architecture (to be created)
-- **Deployment**: Infrastructure and deployment procedures (to be created)
-- **Security**: Security implementations and best practices (to be created)
+- **[Learning Guides](docs/learning/README.md)**: Complete learning resources organized by topic
+  - [Django Setup Guide](docs/learning/02-backend/django-setup-complete-guide.md) - Step-by-step Django installation
+  - Foundations, Backend, Frontend, Database, DevOps, Security
+- **[Architecture](docs/architecture/system-architecture.md)**: System design and technical architecture
+- **[Original Requirements](original-requirements.md)**: Complete project specifications
+- **[Asana Task Breakdown](asana-project-breakdown.md)**: Epic/Story/Task structure for project management
+- **[Sprint Summaries](SPRINT_2_DAY_1_SUMMARY.md)**: Sprint progress and team updates
+
+## 🚀 Quick Start for Team Members
+
+1. **Clone repository**: `git clone https://github.com/g0ochoa/python-mariachi-website.git`
+2. **Follow setup guide**: [Django Setup Complete Guide](docs/learning/02-backend/django-setup-complete-guide.md)
+3. **Install dependencies**: `pip install -r requirements.txt`
+4. **Configure environment**: Copy `.env.example` to `.env`
+5. **Run migrations**: `python manage.py migrate`
+6. **Create superuser**: `python manage.py createsuperuser`
+7. **Start server**: `python manage.py runserver`
+8. **Access admin**: http://localhost:8000/admin
 
 ## 🔗 Related Projects
 

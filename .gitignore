@@ -208,9 +208,6 @@ scores/private/
 # These files track personal session notes and internal planning
 SESSION_LOG.md
 COMMAND_LOG.md
-TEAM_MEMBER_PROFILES.md
-MEETING_STRUCTURE.md
 session-continuity-status.md
 PERSONAL_NOTES.md
 docs/sessions/
-LEARNING_LOG.md

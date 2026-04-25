@@ -69,17 +69,19 @@ This document helps you understand what tasks to create in Asana.
 
 ## �📊 **Epic Overview & Timeline**
 
-| Epic | Priority | Estimated Duration | Dependencies |
-|------|----------|-------------------|--------------|
-| **Epic 1**: Technology Stack & Architecture | 🔴 Critical | 1-2 weeks | None |
-| **Epic 2**: Development Environment Setup | 🔴 Critical | 1 week | Epic 1 |
-| **Epic 3**: Project Foundation & Infrastructure | 🟡 High | 2-3 weeks | Epic 2 |
-| **Epic 4**: Authentication & Security Framework | 🟡 High | 2-3 weeks | Epic 3 |
-| **Epic 5**: Public Website Development | 🟢 Medium | 3-4 weeks | Epic 4 |
-| **Epic 6**: Musicians Portal Development | 🟢 Medium | 4-5 weeks | Epic 5 |
-| **Epic 7**: Advanced Features & Integration | 🟡 High | 3-4 weeks | Epic 6 |
-| **Epic 8**: Infrastructure as Code & Deployment | 🟡 High | 3-4 weeks | Epic 7 |
-| **Epic 9**: CI/CD Pipeline & Production | 🔴 Critical | 2-3 weeks | Epic 8 |
+| Epic | Priority | Estimated Duration | Dependencies | Status |
+|------|----------|-------------------|--------------|--------|
+| **Epic 1**: Technology Stack & Architecture | 🔴 Critical | 1-2 weeks | None | ✅ COMPLETE |
+| **Epic 2**: Development Environment Setup | 🔴 Critical | 1 week | Epic 1 | ✅ COMPLETE |
+| **Epic 3**: Project Foundation & Infrastructure | 🟡 High | 2-3 weeks | Epic 2 | ✅ COMPLETE |
+| **Epic 3.5**: Frontend Development (Bootstrap) | 🟡 High | 1-2 weeks | Epic 3 | ✅ COMPLETE |
+| **Epic 3.6**: Staging Deployment Setup | 🟢 Medium | 1 week | Epic 3.5 | 🔄 IN PROGRESS |
+| **Epic 4**: Authentication & Security Framework | 🟡 High | 2-3 weeks | Epic 3 | 🔜 NEXT |
+| **Epic 5**: Public Website Development | 🟢 Medium | 3-4 weeks | Epic 4 | Not Started |
+| **Epic 6**: Musicians Portal Development | 🟢 Medium | 4-5 weeks | Epic 5 | Not Started |
+| **Epic 7**: Advanced Features & Integration | 🟡 High | 3-4 weeks | Epic 6 | Not Started |
+| **Epic 8**: Infrastructure as Code & Deployment | 🟡 High | 3-4 weeks | Epic 7 | Not Started |
+| **Epic 9**: CI/CD Pipeline & Production | 🔴 Critical | 2-3 weeks | Epic 8 | Not Started |
 
 ---
 
@@ -134,7 +136,138 @@ This document helps you understand what tasks to create in Asana.
   - Document MFA integration approach
 
 ---
+## 🎨 **Work Area 3.5: Frontend Development (E3.5)** - **COMPLETED JAN 5-6, 2026**
 
+**What to create in Asana**: Go to your "🎨 Epic 3.5: Frontend Development (E3.5)" section and add these tasks:
+
+### **Tasks for Asana**
+
+**[E3.5] [5] Bootstrap 5 Integration** - **COMPLETED**
+- **Assigned to**: Gerry Ochoa
+- **Completed**: January 5, 2026
+- **Description**: Integrate Bootstrap 5 CSS framework via CDN for responsive design
+- **Subtasks**:
+  - Add Bootstrap CSS and JS to base template ✅
+  - Include Bootstrap Icons library ✅
+  - Add Google Fonts (Playfair Display, Open Sans) ✅
+  - Configure static files in Django settings ✅
+
+**[E3.5] [8] Base Template with Navigation** - **COMPLETED**
+- **Assigned to**: Gerry Ochoa
+- **Completed**: January 5, 2026
+- **Description**: Create reusable base template with responsive navigation and footer
+- **Subtasks**:
+  - Build base.html with template inheritance blocks ✅
+  - Implement responsive Bootstrap navbar ✅
+  - Add footer with contact info and social links ✅
+  - Configure Django messages/alerts display ✅
+
+**[E3.5] [13] Home Page Implementation** - **COMPLETED**
+- **Assigned to**: Gerry Ochoa
+- **Completed**: January 5, 2026
+- **Description**: Build complete home page with all sections using Bootstrap components
+- **Deliverables**:
+  - Hero section with gradient background ✅
+  - About section (2-column layout) ✅
+  - Services cards (3 cards with icons) ✅
+  - Gallery preview (3-column grid) ✅
+  - Events calendar (2 upcoming events) ✅
+  - Contact form (non-functional HTML) ✅
+
+**[E3.5] [5] Custom CSS Styling** - **COMPLETED**
+- **Assigned to**: Gerry Ochoa (with Juan's design input)
+- **Completed**: January 5, 2026
+- **Description**: Create custom CSS for mariachi theme and branding
+- **Subtasks**:
+  - Define CSS variables for color palette ✅
+  - Style typography (headers and body) ✅
+  - Create custom button styles (btn-gold) ✅
+  - Add card hover effects ✅
+  - Implement responsive adjustments ✅
+
+**[E3.5] [3] Custom JavaScript** - **COMPLETED**
+- **Assigned to**: Gerry Ochoa
+- **Completed**: January 5, 2026
+- **Description**: Add JavaScript for smooth scrolling and interactivity
+- **Subtasks**:
+  - Implement smooth scrolling for anchor links ✅
+  - Add navbar scroll shadow effect ✅
+  - Auto-dismiss alerts after 5 seconds ✅
+
+**[E3.5] [3] URL Routing Configuration** - **COMPLETED**
+- **Assigned to**: Gerry Ochoa
+- **Completed**: January 5, 2026
+- **Description**: Set up URL patterns for public site
+- **Subtasks**:
+  - Create public_site/urls.py ✅
+  - Add home view function ✅
+  - Include public_site URLs in project urls.py ✅
+
+---
+
+## 🚀 **Work Area 3.6: Staging Deployment (E3.6)** - **IN PROGRESS JAN 6, 2026**
+
+**What to create in Asana**: Go to your "🚀 Epic 3.6: Staging Deployment (E3.6)" section and add these tasks:
+
+### **Tasks for Asana**
+
+**[E3.6] [5] Production Requirements File** - **COMPLETED**
+- **Assigned to**: Gerry Ochoa
+- **Completed**: January 6, 2026
+- **Description**: Create production-specific requirements.txt with additional packages
+- **Subtasks**:
+  - Add gunicorn==21.2.0 for WSGI server ✅
+  - Add whitenoise==6.6.0 for static file serving ✅
+  - Document differences from development requirements ✅
+
+**[E3.6] [8] Deployment Infrastructure Files** - **COMPLETED**
+- **Assigned to**: Gerry Ochoa
+- **Completed**: January 6, 2026
+- **Description**: Create configuration files for Ubuntu staging server deployment
+- **Deliverables**:
+  - Gunicorn configuration (deployment/gunicorn_config.py) ✅
+  - Nginx reverse proxy config (deployment/nginx.conf) ✅
+  - Systemd service file (deployment/mariachi-website.service) ✅
+  - Automated deployment script (deployment/deploy.sh) ✅
+
+**[E3.6] [8] Deploy to Ubuntu Staging Server** - **IN PROGRESS**
+- **Assigned to**: Gerry Ochoa
+- **Due date**: January 7, 2026
+- **Description**: Execute deployment to Ubuntu server for testing and visual progress tracking
+- **Subtasks**:
+  - Run deployment script to clone/update repository
+  - Set up Python virtual environment on server
+  - Install production dependencies
+  - Configure environment variables (.env file)
+  - Run database migrations
+  - Collect static files
+  - Configure and start systemd service
+  - Configure and restart nginx
+  - Test accessibility from network
+
+**[E3.6] [3] Deployment Documentation** - **NOT STARTED**
+- **Assigned to**: Gerry Ochoa
+- **Due date**: January 8, 2026
+- **Description**: Document deployment process and server configuration for team
+- **Subtasks**:
+  - Document deployment steps
+  - Create troubleshooting guide
+  - Add server access instructions
+  - Document rollback procedure
+
+**[E3.6] [5] Create Deployment Learning Guide** - **NOT STARTED**
+- **Assigned to**: Paco Cisneros
+- **Due date**: January 10, 2026
+- **Description**: Create comprehensive learning guide about manual Linux deployment
+- **Topics to cover**:
+  - Gunicorn and WSGI servers
+  - Nginx reverse proxy concepts
+  - Systemd service management
+  - Linux file permissions and users
+  - Environment variable management
+  - Static file serving in production
+
+---
 ## ⚙️ **Work Area 2: Development Environment (E2)** - **SPRINT 1**
 
 **What to create in Asana**: Go to your "⚙️ Epic 2: Development Environment (E2)" section and add these tasks:

@@ -1,0 +1,146 @@
+{% extends "base.html" %}
+
+{% block content %}
+<div class="container py-4">
+
+  <!-- Header -->
+  <div class="d-flex justify-content-between align-items-center mb-4">
+    <div>
+      <h1 class="h3 mb-0">
+        <i class="bi bi-music-note-list text-danger me-2"></i>Scores Library
+      </h1>
+      <small class="text-muted">{{ songs.count }} result{% if songs.count != 1 %}s{% endif %} of {{ total }} songs</small>
+    </div>
+    <a href="{% url 'portal_dashboard' %}" class="btn btn-outline-secondary btn-sm">
+      <i class="bi bi-arrow-left me-1"></i>Back to Portal
+    </a>
+  </div>
+
+  <!-- Search & Filter -->
+  <form method="get" class="card card-body mb-4 bg-dark border-secondary">
+    <div class="row g-3 align-items-end">
+
+      <div class="col-md-4">
+        <label class="form-label small text-muted">Search by title</label>
+        <input type="text" name="q" value="{{ query }}"
+               class="form-control form-control-sm"
+               placeholder="e.g. Cielito Lindo…">
+      </div>
+
+      <div class="col-md-3">
+        <label class="form-label small text-muted">Genre</label>
+        <select name="genre" class="form-select form-select-sm">
+          <option value="">All genres</option>
+          {% for val, label in genres %}
+            <option value="{{ val }}" {% if genre == val %}selected{% endif %}>{{ label }}</option>
+          {% endfor %}
+        </select>
+      </div>
+
+      <div class="col-md-2">
+        <label class="form-label small text-muted">Difficulty</label>
+        <select name="difficulty" class="form-select form-select-sm">
+          <option value="">All levels</option>
+          {% for val, label in difficulties %}
+            <option value="{{ val }}" {% if difficulty == val %}selected{% endif %}>{{ label }}</option>
+          {% endfor %}
+        </select>
+      </div>
+
+      <div class="col-md-2">
+        <label class="form-label small text-muted">Audio</label>
+        <select name="has_audio" class="form-select form-select-sm">
+          <option value="">Any</option>
+          <option value="1" {% if has_audio == '1' %}selected{% endif %}>Has audio</option>
+        </select>
+      </div>
+
+      <div class="col-md-1 d-flex gap-2">
+        <button type="submit" class="btn btn-danger btn-sm w-100">
+          <i class="bi bi-search"></i>
+        </button>
+        {% if query or genre or difficulty or has_audio %}
+          <a href="{% url 'portal_scores' %}" class="btn btn-outline-secondary btn-sm w-100" title="Clear filters">
+            <i class="bi bi-x-lg"></i>
+          </a>
+        {% endif %}
+      </div>
+
+    </div>
+  </form>
+
+  <!-- Results Table -->
+  {% if songs %}
+  <div class="table-responsive">
+    <table class="table table-dark table-hover table-sm align-middle">
+      <thead class="table-secondary text-dark">
+        <tr>
+          <th>#</th>
+          <th>Title</th>
+          <th>Genre</th>
+          <th>Difficulty</th>
+          <th class="text-center">Files</th>
+          <th class="text-center">Audio</th>
+          <th class="text-center">Score</th>
+          <th class="text-center">Open</th>
+        </tr>
+      </thead>
+      <tbody>
+        {% for song in songs %}
+        <tr>
+          <td class="text-muted small">{{ forloop.counter }}</td>
+          <td><strong>{{ song.title }}</strong></td>
+          <td>
+            {% if song.genre != 'other' %}
+              <span class="badge bg-secondary">{{ song.get_genre_display }}</span>
+            {% else %}
+              <span class="text-muted small">—</span>
+            {% endif %}
+          </td>
+          <td>
+            {% if song.difficulty == 'easy' %}
+              <span class="badge bg-success">Easy</span>
+            {% elif song.difficulty == 'hard' %}
+              <span class="badge bg-danger">Hard</span>
+            {% else %}
+              <span class="badge bg-warning text-dark">Medium</span>
+            {% endif %}
+          </td>
+          <td class="text-center text-muted small">{{ song.file_count }}</td>
+          <td class="text-center">
+            {% if song.has_audio %}
+              <i class="bi bi-volume-up-fill text-success" title="Has audio"></i>
+            {% else %}
+              <span class="text-muted">—</span>
+            {% endif %}
+          </td>
+          <td class="text-center">
+            {% if song.has_score %}
+              <i class="bi bi-file-earmark-music-fill text-info" title="Has score"></i>
+            {% else %}
+              <span class="text-muted">—</span>
+            {% endif %}
+          </td>
+          <td class="text-center">
+            <a href="https://mariachiesencia.com/scores/{{ song.folder_name }}/"
+               target="_blank" rel="noopener"
+               class="btn btn-outline-danger btn-sm py-0 px-2">
+              <i class="bi bi-folder2-open"></i>
+            </a>
+          </td>
+        </tr>
+        {% endfor %}
+      </tbody>
+    </table>
+  </div>
+
+  {% else %}
+  <div class="text-center py-5 text-muted">
+    <i class="bi bi-search display-4 mb-3 d-block"></i>
+    <p>No songs found matching your filters.</p>
+    <a href="{% url 'portal_scores' %}" class="btn btn-outline-danger btn-sm">Clear filters</a>
+  </div>
+  {% endif %}
+
+</div>
+{% endblock %}

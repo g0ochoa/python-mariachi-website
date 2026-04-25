@@ -1,0 +1,99 @@
+{% extends "base.html" %}
+
+{% block content %}
+<div class="container py-5">
+
+    <!-- Welcome Header -->
+    <div class="row mb-4">
+        <div class="col">
+            <h1 class="fw-bold">
+                <i class="bi bi-music-note-list text-danger"></i>
+                Musicians Portal
+            </h1>
+            <p class="text-muted lead">
+                Welcome back, <strong>{{ user.get_full_name|default:user.username }}</strong>!
+                {% if user.role == 'admin' %}
+                    <span class="badge bg-danger ms-2">Administrator</span>
+                {% else %}
+                    <span class="badge bg-secondary ms-2">Musician</span>
+                    {% if user.instrument %}
+                        &mdash; {{ user.instrument }}
+                    {% endif %}
+                {% endif %}
+            </p>
+        </div>
+        <div class="col-auto">
+            <form method="post" action="{% url 'logout' %}">
+                {% csrf_token %}
+                <button type="submit" class="btn btn-outline-secondary btn-sm">
+                    <i class="bi bi-box-arrow-right"></i> Sign Out
+                </button>
+            </form>
+        </div>
+    </div>
+
+    <!-- Quick Access Cards -->
+    <div class="row g-4 mb-5">
+
+        <div class="col-md-4">
+            <div class="card h-100 border-0 shadow-sm">
+                <div class="card-body text-center p-4">
+                    <i class="bi bi-music-note-beamed display-4 text-danger mb-3"></i>
+                    <h5 class="card-title fw-bold">Scores Library</h5>
+                    <p class="card-text text-muted">Access the full repertoire of 994+ songs — sheet music, chord charts, and more.</p>
+                    <a href="{% url 'portal_scores' %}" class="btn btn-danger btn-sm mt-2">
+                        Browse Library
+                    </a>
+                </div>
+            </div>
+        </div>
+
+        <div class="col-md-4">
+            <div class="card h-100 border-0 shadow-sm">
+                <div class="card-body text-center p-4">
+                    <i class="bi bi-calendar-event display-4 text-danger mb-3"></i>
+                    <h5 class="card-title fw-bold">Event Calendar</h5>
+                    <p class="card-text text-muted">View upcoming gigs, rehearsals, and important dates.</p>
+                    <a href="#" class="btn btn-outline-danger btn-sm mt-2 disabled">
+                        Coming Soon
+                    </a>
+                </div>
+            </div>
+        </div>
+
+        <div class="col-md-4">
+            <div class="card h-100 border-0 shadow-sm">
+                <div class="card-body text-center p-4">
+                    <i class="bi bi-folder2-open display-4 text-danger mb-3"></i>
+                    <h5 class="card-title fw-bold">File Sharing</h5>
+                    <p class="card-text text-muted">Share recordings, notes, and practice sessions with the band.</p>
+                    <a href="#" class="btn btn-outline-danger btn-sm mt-2 disabled">
+                        Coming Soon
+                    </a>
+                </div>
+            </div>
+        </div>
+
+    </div>
+
+    <!-- Admin-only panel -->
+    {% if user.role == 'admin' %}
+    <div class="row mb-4">
+        <div class="col-12">
+            <div class="card border-danger">
+                <div class="card-header bg-danger text-white fw-semibold">
+                    <i class="bi bi-shield-lock-fill"></i> Admin Panel
+                </div>
+                <div class="card-body">
+                    <p class="mb-2">Manage the site from the Django admin panel:</p>
+                    <a href="/django-admin/" class="btn btn-danger btn-sm me-2" target="_blank">
+                        <i class="bi bi-gear-fill"></i> Open Admin Panel
+                    </a>
+                </div>
+            </div>
+        </div>
+    </div>
+    {% endif %}
+
+</div>
+{% endblock %}

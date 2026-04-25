@@ -1,0 +1,68 @@
+name: Deploy to Staging
+
+# Triggers on every push to `main`
+on:
+  push:
+    branches:
+      - main
+
+jobs:
+  deploy:
+    name: Deploy to VPS Staging
+    runs-on: ubuntu-latest
+    environment: staging   # optional: requires environment approval in GitHub
+
+    steps:
+      # ── 1. Checkout the repo ──────────────────────────────────────────────
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      # ── 2. Set up SSH agent with the deploy key ───────────────────────────
+      - name: Configure SSH
+        uses: webfactory/ssh-agent@v0.9.0
+        with:
+          ssh-private-key: ${{ secrets.STAGING_SSH_KEY }}
+
+      # Add the VPS host to known_hosts so SSH doesn't prompt
+      - name: Add server to known_hosts
+        run: |
+          ssh-keyscan -H ${{ secrets.STAGING_HOST }} >> ~/.ssh/known_hosts
+
+      # ── 3. Sync code to the VPS via rsync ────────────────────────────────
+      # Excludes secrets, virtualenv, compiled assets, and local DBs
+      - name: Sync files to server
+        run: |
+          rsync -avz --delete \
+            --exclude='.git/' \
+            --exclude='.env' \
+            --exclude='venv/' \
+            --exclude='venv-mac/' \
+            --exclude='staticfiles/' \
+            --exclude='db.sqlite3' \
+            --exclude='db.sqlite3.backup' \
+            --exclude='__pycache__/' \
+            --exclude='*.pyc' \
+            --exclude='mariachi-env/' \
+            ./ ${{ secrets.STAGING_USER }}@${{ secrets.STAGING_HOST }}:${{ secrets.STAGING_PROJECT_PATH }}/
+
+      # ── 4. Post-deploy: install deps, migrate, collectstatic, restart ─────
+      - name: Run post-deploy commands
+        run: |
+          ssh ${{ secrets.STAGING_USER }}@${{ secrets.STAGING_HOST }} << 'EOF'
+            set -e
+            cd ${{ secrets.STAGING_PROJECT_PATH }}
+
+            echo "--- Installing Python dependencies ---"
+            venv/bin/pip install -q -r requirements.txt
+
+            echo "--- Running database migrations ---"
+            venv/bin/python manage.py migrate --noinput
+
+            echo "--- Collecting static files ---"
+            venv/bin/python manage.py collectstatic --noinput --clear
+
+            echo "--- Restarting Gunicorn ---"
+            sudo systemctl restart mariachi-django
+
+            echo "--- Deployment complete ✓ ---"
+          EOF

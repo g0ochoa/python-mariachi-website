@@ -1,0 +1,26 @@
+# Systemd service file for Mariachi Todo Terreno Django app
+# Place this file in: /etc/systemd/system/mariachi-website.service
+
+[Unit]
+Description=Mariachi Todo Terreno Django Application
+After=network.target
+
+[Service]
+Type=notify
+User=www-data
+Group=www-data
+RuntimeDirectory=mariachi-website
+WorkingDirectory=/var/www/mariachi-website
+Environment="PATH=/var/www/mariachi-website/venv/bin"
+ExecStart=/var/www/mariachi-website/venv/bin/gunicorn \
+          --config /var/www/mariachi-website/deployment/gunicorn_config.py \
+          mariachi_todo_terreno.wsgi:application
+ExecReload=/bin/kill -s HUP $MAINPID
+KillMode=mixed
+TimeoutStopSec=5
+PrivateTmp=true
+Restart=on-failure
+RestartSec=10s
+
+[Install]
+WantedBy=multi-user.target

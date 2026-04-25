@@ -1,0 +1,17 @@
+# Production Requirements for Python Mariachi Website
+# Use this file for deployment to staging/production servers
+
+# Core Django (from requirements.txt)
+asgiref==3.11.0
+Django==5.2.8
+django-htmx==1.27.0
+psycopg2-binary==2.9.11
+python-dotenv==1.2.1
+sqlparse==0.5.4
+tzdata==2025.2
+
+# Production Server
+gunicorn==21.2.0
+
+# Static file serving
+whitenoise==6.6.0

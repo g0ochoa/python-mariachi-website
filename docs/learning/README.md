@@ -15,19 +15,17 @@ Core development tools and practices
 
 ### **02 - Backend Development**
 Django framework and Python backend
-- ⭐ [Django Setup - Complete Guide](02-backend/django-setup-complete-guide.md) **Available now!**
-- Django Basics *(Coming soon)*
-- Django Models & ORM *(Coming soon)*
+- ⭐ [Django Setup - Complete Guide](02-backend/django-setup-complete-guide.md) **Available**
+- ⭐ [Django Models, Forms & The Contact Form](02-backend/django-models-forms-guide.md) **Available**
 - Django Views & Templates *(Coming soon)*
-- Django Authentication *(Coming soon)*
 - RESTful API Design *(Coming soon)*
 
 ### **03 - Frontend Development**
 HTML, CSS, JavaScript, and Django Templates
+- ⭐ [Bootstrap 5 & Django Templates - Complete Guide](03-frontend/bootstrap-django-templates-guide.md) **Available now!**
 - HTML & CSS Fundamentals *(Coming soon)*
-- Django Template Language *(Coming soon)*
 - JavaScript Essentials *(Coming soon)*
-- Responsive Design *(Coming soon)*
+- Advanced Django Templates *(Coming soon)*
 
 ### **04 - Database**
 PostgreSQL and database design
@@ -38,14 +36,16 @@ PostgreSQL and database design
 
 ### **05 - DevOps & Infrastructure**
 Deployment, containers, and infrastructure
+- Manual Deployment to Linux *(In progress - Session 3)*
+- Gunicorn & Nginx Setup *(In progress - Session 3)*
 - Docker Basics *(Coming soon)*
-- Environment Variables *(Coming soon)*
 - Google Cloud Platform *(Coming soon)*
 - Terraform IaC *(Coming soon)*
 - CI/CD Pipelines *(Coming soon)*
 
 ### **06 - Security**
 Security best practices and implementation
+- ⭐ [Django Authentication Deep Dive](06-security/django-authentication-guide.md) **Available**
 - Web Security Fundamentals *(Coming soon)*
 - Django Security Features *(Coming soon)*
 - OAuth & SSO *(Coming soon)*

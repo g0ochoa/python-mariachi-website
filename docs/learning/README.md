@@ -36,12 +36,12 @@ PostgreSQL and database design
 
 ### **05 - DevOps & Infrastructure**
 Deployment, containers, and infrastructure
-- Manual Deployment to Linux *(In progress - Session 3)*
-- Gunicorn & Nginx Setup *(In progress - Session 3)*
+- Manual Deployment to Linux *(In progress)*
+- Gunicorn & Nginx Setup *(In progress)*
+- ⭐ [CI/CD Pipelines with GitHub Actions](05-devops/cicd-github-actions-guide.md) **Available**
 - Docker Basics *(Coming soon)*
 - Google Cloud Platform *(Coming soon)*
 - Terraform IaC *(Coming soon)*
-- CI/CD Pipelines *(Coming soon)*
 
 ### **06 - Security**
 Security best practices and implementation

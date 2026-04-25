@@ -26,7 +26,7 @@ jobs:
       # Add the VPS host to known_hosts so SSH doesn't prompt
       - name: Add server to known_hosts
         run: |
-          ssh-keyscan -H ${{ secrets.STAGING_HOST }} >> ~/.ssh/known_hosts
+          ssh-keyscan -H ${{ vars.STAGING_HOST }} >> ~/.ssh/known_hosts
 
       # ── 3. Sync code to the VPS via rsync ────────────────────────────────
       # Excludes secrets, virtualenv, compiled assets, and local DBs
@@ -43,14 +43,14 @@ jobs:
             --exclude='__pycache__/' \
             --exclude='*.pyc' \
             --exclude='mariachi-env/' \
-            ./ ${{ secrets.STAGING_USER }}@${{ secrets.STAGING_HOST }}:${{ secrets.STAGING_PROJECT_PATH }}/
+            ./ ${{ vars.STAGING_USER }}@${{ vars.STAGING_HOST }}:${{ vars.STAGING_PROJECT_PATH }}/
 
       # ── 4. Post-deploy: install deps, migrate, collectstatic, restart ─────
       - name: Run post-deploy commands
         run: |
-          ssh ${{ secrets.STAGING_USER }}@${{ secrets.STAGING_HOST }} << 'EOF'
+          ssh ${{ vars.STAGING_USER }}@${{ vars.STAGING_HOST }} << 'EOF'
             set -e
-            cd ${{ secrets.STAGING_PROJECT_PATH }}
+            cd ${{ vars.STAGING_PROJECT_PATH }}
 
             echo "--- Installing Python dependencies ---"
             venv/bin/pip install -q -r requirements.txt

@@ -108,16 +108,53 @@
     background: #fff;
   }
 
-  /* Mobile: stack panels vertically — file list compact on top, viewer fills the rest */
+  /* ── Mobile full-screen PDF mode ──────────────────────────── */
+  /* Floating back button — hidden by default, shown in full-screen mode */
+  #mobile-back-btn {
+    display: none;
+  }
+
   @media (max-width: 767px) {
+    /* Default mobile: file list visible, viewer hidden */
     #song-panels   { flex-direction: column; }
-    #file-list-col { width: 100%; height: 190px; min-height: 190px; max-height: 190px;
-                     border-right: none; border-bottom: 1px solid #dee2e6;
-                     overflow-y: auto; flex-shrink: 0; }
-    #viewer-col    { flex: 1 1 0; min-height: 0; overflow: hidden; }
-    #viewer-area   { overflow: hidden; }  /* scroll handled by #pdf-scroll-wrap */
+    #viewer-col    { display: none; }
+
+    /* Full-screen mode: triggered by JS when a file is tapped */
+    body.pdf-fullscreen .navbar          { display: none !important; }
+    body.pdf-fullscreen #song-header     { display: none !important; }
+    body.pdf-fullscreen #file-list-col   { display: none !important; }
+    body.pdf-fullscreen #viewer-col      { display: flex !important; }
+    body.pdf-fullscreen #song-app        { height: 100dvh; }
+    body.pdf-fullscreen #song-panels     { flex: 1 1 0; }
+
+    /* Floating pill to go back to file list */
+    body.pdf-fullscreen #mobile-back-btn {
+      display: flex;
+      align-items: center;
+      gap: .4rem;
+      position: fixed;
+      top: 12px;
+      left: 12px;
+      z-index: 9999;
+      background: rgba(0,0,0,.55);
+      color: #fff;
+      border: none;
+      border-radius: 999px;
+      padding: .35rem .85rem;
+      font-size: .8rem;
+      font-weight: 600;
+      backdrop-filter: blur(6px);
+      -webkit-backdrop-filter: blur(6px);
+      box-shadow: 0 2px 8px rgba(0,0,0,.35);
+      cursor: pointer;
+    }
   }
 </style>
+
+<!-- Floating back-to-list button (mobile full-screen PDF mode only) -->
+<button id="mobile-back-btn" onclick="exitPdfFullscreen()" aria-label="Back to file list">
+  <i class="bi bi-chevron-left"></i> Files
+</button>
 
 <div id="song-app">
 
@@ -222,6 +259,13 @@
 pdfjsLib.GlobalWorkerOptions.workerSrc =
   'https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.worker.min.js';
 
+function enterPdfFullscreen() {
+  document.body.classList.add('pdf-fullscreen');
+}
+function exitPdfFullscreen() {
+  document.body.classList.remove('pdf-fullscreen');
+}
+
 async function renderPDF(url, area) {
   // Create a scrollable wrapper that fills the viewer area
   area.innerHTML = '<div id="pdf-scroll-wrap"><p class="text-center text-white py-4"><span class="spinner-border spinner-border-sm me-2"></span>Loading score...</p></div>';
@@ -262,6 +306,11 @@ function openFile(btn, url, kind) {
   const name = btn.querySelector('.fname').textContent.trim();
 
   if (kind === 'pdf') {
+    // On mobile: show viewer full-screen so the score fills the entire screen
+    if (window.matchMedia('(max-width: 767px)').matches) {
+      document.getElementById('viewer-col').style.display = 'flex';
+      enterPdfFullscreen();
+    }
     renderPDF(url, area);
 
   } else if (kind === 'audio') {

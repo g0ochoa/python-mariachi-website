@@ -82,14 +82,18 @@
           <th class="text-center">Files</th>
           <th class="text-center">Audio</th>
           <th class="text-center">Score</th>
-          <th class="text-center">Open</th>
         </tr>
       </thead>
       <tbody>
         {% for song in songs %}
-        <tr>
+        <tr style="cursor:pointer;" onclick="window.location='{% url 'portal_song_detail' song.id %}'">
           <td class="text-muted small">{{ forloop.counter }}</td>
-          <td><strong>{{ song.title }}</strong></td>
+          <td>
+            <a href="{% url 'portal_song_detail' song.id %}"
+               class="text-white fw-semibold text-decoration-none stretched-link">
+              {{ song.title }}
+            </a>
+          </td>
           <td>
             {% if song.genre != 'other' %}
               <span class="badge bg-secondary">{{ song.get_genre_display }}</span>
@@ -120,13 +124,6 @@
             {% else %}
               <span class="text-muted">—</span>
             {% endif %}
-          </td>
-          <td class="text-center">
-            <a href="https://mariachiesencia.com/scores/{{ song.folder_name }}/"
-               target="_blank" rel="noopener"
-               class="btn btn-outline-danger btn-sm py-0 px-2">
-              <i class="bi bi-folder2-open"></i>
-            </a>
           </td>
         </tr>
         {% endfor %}

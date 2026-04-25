@@ -114,9 +114,33 @@
       <i class="bi bi-arrow-left me-1"></i>Library
     </a>
 
+    {% if prev_song %}
+      <a href="{% url 'portal_song_detail' prev_song.id %}"
+         class="btn btn-sm btn-outline-secondary flex-shrink-0"
+         title="Previous: {{ prev_song.title }}">
+        <i class="bi bi-chevron-left"></i>
+      </a>
+    {% else %}
+      <button class="btn btn-sm btn-outline-secondary flex-shrink-0" disabled>
+        <i class="bi bi-chevron-left"></i>
+      </button>
+    {% endif %}
+
     <h6 class="mb-0 fw-bold flex-grow-1 text-truncate" title="{{ song.title }}">
       {{ song.title }}
     </h6>
+
+    {% if next_song %}
+      <a href="{% url 'portal_song_detail' next_song.id %}"
+         class="btn btn-sm btn-outline-secondary flex-shrink-0"
+         title="Next: {{ next_song.title }}">
+        <i class="bi bi-chevron-right"></i>
+      </a>
+    {% else %}
+      <button class="btn btn-sm btn-outline-secondary flex-shrink-0" disabled>
+        <i class="bi bi-chevron-right"></i>
+      </button>
+    {% endif %}
 
     <div class="d-flex align-items-center gap-1 flex-shrink-0">
       {% if song.genre != 'other' %}
@@ -233,6 +257,17 @@ function openFile(btn, url, kind) {
 document.addEventListener('DOMContentLoaded', () => {
   const firstPdf = document.querySelector('.file-btn[onclick*=\'pdf\']');
   if (firstPdf) firstPdf.click();
+});
+
+// Keyboard left/right arrow navigation between songs
+document.addEventListener('keydown', (e) => {
+  if (e.target.tagName === 'INPUT' || e.target.tagName === 'TEXTAREA') return;
+  {% if prev_song %}
+  if (e.key === 'ArrowLeft') window.location = '{% url "portal_song_detail" prev_song.id %}';
+  {% endif %}
+  {% if next_song %}
+  if (e.key === 'ArrowRight') window.location = '{% url "portal_song_detail" next_song.id %}';
+  {% endif %}
 });
 </script>
 {% endblock %}

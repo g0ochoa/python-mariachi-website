@@ -126,9 +126,14 @@ def song_detail(request, song_id):
     song  = get_object_or_404(Song, id=song_id, is_active=True)
     files = _scan_song_folder(song.folder_name)
 
+    prev_song = Song.objects.filter(is_active=True, title__lt=song.title).order_by('-title').first()
+    next_song = Song.objects.filter(is_active=True, title__gt=song.title).order_by('title').first()
+
     context = {
         'page_title': song.title,
         'song':       song,
         'files':      files,
+        'prev_song':  prev_song,
+        'next_song':  next_song,
     }
     return render(request, 'musicians_portal/song_detail.html', context)

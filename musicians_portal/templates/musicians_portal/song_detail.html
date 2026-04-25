@@ -90,11 +90,22 @@
     position: relative;
     overflow: hidden;
   }
-  #viewer-area iframe {
-    display: block;
-    width: 100%;
+  /* PDF.js canvas pages */
+  #pdf-scroll-wrap {
     height: 100%;
-    border: none;
+    overflow-y: auto;
+    overflow-x: hidden;
+    -webkit-overflow-scrolling: touch;
+    background: #525659;
+    padding: 8px;
+    box-sizing: border-box;
+  }
+  #pdf-scroll-wrap canvas {
+    display: block;
+    width: 100% !important;   /* force fit-to-width regardless of rendered size */
+    height: auto  !important;
+    margin-bottom: 6px;
+    background: #fff;
   }
 
   /* Mobile: stack panels vertically — file list compact on top, viewer fills the rest */
@@ -104,8 +115,7 @@
                      border-right: none; border-bottom: 1px solid #dee2e6;
                      overflow-y: auto; flex-shrink: 0; }
     #viewer-col    { flex: 1 1 0; min-height: 0; overflow: hidden; }
-    #viewer-area   { overflow: hidden; }  /* no page-level horizontal scroll */
-    #viewer-area iframe { height: 100%; width: 100%; }
+    #viewer-area   { overflow: hidden; }  /* scroll handled by #pdf-scroll-wrap */
   }
 </style>
 
@@ -207,7 +217,44 @@
   </div><!-- /panels -->
 </div><!-- /song-app -->
 
+<script src="https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.min.js"
+        integrity="sha512-q+4liFwdPC/bNdhUpZx6aXDx/h77yEQtn4I2slHalmFiMkPCm65B4X48wDGkaRI9rUUDvLFCXi0r8NkJRtEVQ=="
+        crossorigin="anonymous" referrerpolicy="no-referrer"></script>
 <script>
+pdfjsLib.GlobalWorkerOptions.workerSrc =
+  'https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.worker.min.js';
+
+async function renderPDF(url, area) {
+  // Create a scrollable wrapper that fills the viewer area
+  area.innerHTML = '<div id="pdf-scroll-wrap"><p class="text-center text-white py-4"><span class="spinner-border spinner-border-sm me-2"></span>Loading score...</p></div>';
+  const wrap = area.querySelector('#pdf-scroll-wrap');
+  try {
+    const pdf = await pdfjsLib.getDocument(url).promise;
+    wrap.innerHTML = '';
+    for (let i = 1; i <= pdf.numPages; i++) {
+      const page  = await pdf.getPage(i);
+      // Scale to container width at 2x device pixel ratio for sharp rendering
+      const vp0   = page.getViewport({ scale: 1 });
+      const scale = (wrap.clientWidth / vp0.width) * (window.devicePixelRatio || 1);
+      const vp    = page.getViewport({ scale });
+      const canvas     = document.createElement('canvas');
+      canvas.width     = vp.width;
+      canvas.height    = vp.height;
+      wrap.appendChild(canvas);
+      await page.render({ canvasContext: canvas.getContext('2d'), viewport: vp }).promise;
+    }
+  } catch (err) {
+    wrap.innerHTML = `
+      <div class="d-flex flex-column align-items-center justify-content-center gap-3 p-4">
+        <i class="bi bi-exclamation-triangle text-warning" style="font-size:3rem;"></i>
+        <p class="text-white mb-0">Could not render PDF.</p>
+        <a href="${url}" class="btn btn-danger" target="_blank" rel="noopener">
+          <i class="bi bi-file-earmark-pdf me-1"></i>Open PDF
+        </a>
+      </div>`;
+  }
+}
+
 function openFile(btn, url, kind) {
   // Highlight selected button
   document.querySelectorAll('.file-btn').forEach(b => b.classList.remove('active'));
@@ -217,9 +264,7 @@ function openFile(btn, url, kind) {
   const name = btn.querySelector('.fname').textContent.trim();
 
   if (kind === 'pdf') {
-    // #view=FitH tells the PDF renderer to scale the page to fit the viewport width.
-    // On mobile this means scroll only vertically — no horizontal scrolling at a gig.
-    area.innerHTML = `<iframe src="${url}#view=FitH" title="Score viewer"></iframe>`;
+    renderPDF(url, area);
 
   } else if (kind === 'audio') {
     area.innerHTML = `

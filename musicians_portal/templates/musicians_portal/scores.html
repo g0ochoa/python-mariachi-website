@@ -16,61 +16,18 @@
     </a>
   </div>
 
-  <!-- Search & Filter -->
-  <form method="get" class="card card-body mb-4 bg-dark border-secondary">
-    <div class="row g-3 align-items-end">
-
-      <div class="col-md-4">
-        <label class="form-label small text-muted">Search by title</label>
-        <input type="text" name="q" value="{{ query }}"
-               class="form-control form-control-sm"
-               placeholder="e.g. Cielito Lindo…">
-      </div>
-
-      <div class="col-md-3">
-        <label class="form-label small text-muted">Genre</label>
-        <select name="genre" class="form-select form-select-sm">
-          <option value="">All genres</option>
-          {% for val, label in genres %}
-            <option value="{{ val }}" {% if genre == val %}selected{% endif %}>{{ label }}</option>
-          {% endfor %}
-        </select>
-      </div>
-
-      <div class="col-md-2">
-        <label class="form-label small text-muted">Difficulty</label>
-        <select name="difficulty" class="form-select form-select-sm">
-          <option value="">All levels</option>
-          {% for val, label in difficulties %}
-            <option value="{{ val }}" {% if difficulty == val %}selected{% endif %}>{{ label }}</option>
-          {% endfor %}
-        </select>
-      </div>
-
-      <div class="col-md-2">
-        <label class="form-label small text-muted">Audio</label>
-        <select name="has_audio" class="form-select form-select-sm">
-          <option value="">Any</option>
-          <option value="1" {% if has_audio == '1' %}selected{% endif %}>Has audio</option>
-        </select>
-      </div>
-
-      <div class="col-md-1 d-flex gap-2">
-        <button type="submit" class="btn btn-danger btn-sm w-100">
-          <i class="bi bi-search"></i>
-        </button>
-        {% if query or genre or difficulty or has_audio %}
-          <a href="{% url 'portal_scores' %}" class="btn btn-outline-secondary btn-sm w-100" title="Clear filters">
-            <i class="bi bi-x-lg"></i>
-          </a>
-        {% endif %}
-      </div>
-
+  <!-- Live Search -->
+  <div class="mb-3 d-flex gap-2 align-items-center">
+    <div class="flex-grow-1 position-relative">
+      <i class="bi bi-search position-absolute text-muted" style="top:50%;left:.75rem;transform:translateY(-50%);"></i>
+      <input id="score-search" type="search" autocomplete="off"
+             class="form-control ps-4" placeholder="Search songs…"
+             value="{{ query }}">
     </div>
-  </form>
+    <span id="match-count" class="text-muted small text-nowrap"></span>
+  </div>
 
-  <!-- A–Z Quick Nav -->
-  {% if not query and not genre and not difficulty and not has_audio %}
+  <!-- A–Z Quick Nav (hidden when searching) -->
   <div class="d-flex flex-wrap gap-1 mb-3" id="az-nav">
     <span class="text-muted small me-1 align-self-center">Jump to:</span>
     {% for letter in available_letters %}
@@ -81,7 +38,6 @@
       </a>
     {% endfor %}
   </div>
-  {% endif %}
 
   <!-- Results Table -->
   {% if songs %}
@@ -156,4 +112,64 @@
   {% endif %}
 
 </div>
+
+<script>
+(function () {
+  const input   = document.getElementById('score-search');
+  const azNav   = document.getElementById('az-nav');
+  const counter = document.getElementById('match-count');
+  const tbody   = document.querySelector('tbody');
+  if (!input || !tbody) return;
+
+  // Rows: song rows have a data-title attr (added below); separator rows have data-separator
+  // We tag them via JS on load from existing content
+  const allRows = Array.from(tbody.querySelectorAll('tr'));
+  allRows.forEach(tr => {
+    const titleCell = tr.querySelector('td.fw-semibold');
+    if (titleCell) tr.dataset.title = titleCell.textContent.trim().toLowerCase();
+  });
+
+  const total = allRows.filter(r => r.dataset.title).length;
+  counter.textContent = `${total} songs`;
+
+  function filter(q) {
+    const term = q.trim().toLowerCase();
+    const searching = term.length > 0;
+
+    // Hide/show A-Z nav
+    azNav.style.display = searching ? 'none' : '';
+
+    let visible = 0;
+    let lastSeparator = null;
+    let visibleSinceLastSep = 0;
+
+    allRows.forEach(tr => {
+      if (tr.dataset.title !== undefined) {
+        // Song row
+        const match = !searching || tr.dataset.title.includes(term);
+        tr.style.display = match ? '' : 'none';
+        if (match) { visible++; visibleSinceLastSep++; }
+      } else {
+        // Letter separator row
+        // Hide previous separator if it had no visible songs
+        if (lastSeparator && visibleSinceLastSep === 0) {
+          lastSeparator.style.display = 'none';
+        }
+        lastSeparator = tr;
+        visibleSinceLastSep = 0;
+        tr.style.display = searching ? 'none' : '';
+      }
+    });
+    // Handle last separator
+    if (lastSeparator && visibleSinceLastSep === 0) lastSeparator.style.display = 'none';
+
+    counter.textContent = searching ? `${visible} of ${total}` : `${total} songs`;
+  }
+
+  input.addEventListener('input', () => filter(input.value));
+
+  // Run on load if there's a pre-filled value
+  if (input.value) filter(input.value);
+})();
+</script>
 {% endblock %}

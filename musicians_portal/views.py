@@ -83,21 +83,7 @@ def scores(request):
     if request.user.role not in ('musician', 'admin'):
         raise PermissionDenied
 
-    query      = request.GET.get('q', '').strip()
-    genre      = request.GET.get('genre', '')
-    difficulty = request.GET.get('difficulty', '')
-    has_audio  = request.GET.get('has_audio', '')
-
-    songs = Song.objects.filter(is_active=True)
-
-    if query:
-        songs = songs.filter(Q(title__icontains=query) | Q(folder_name__icontains=query))
-    if genre:
-        songs = songs.filter(genre=genre)
-    if difficulty:
-        songs = songs.filter(difficulty=difficulty)
-    if has_audio == '1':
-        songs = songs.filter(has_audio=True)
+    songs = Song.objects.filter(is_active=True).order_by('title')
 
     available_letters = sorted(set(
         s.title[0].upper() for s in songs if s.title
@@ -106,13 +92,8 @@ def scores(request):
     context = {
         'page_title': 'Scores Library',
         'songs':      songs,
-        'total':      Song.objects.filter(is_active=True).count(),
-        'query':      query,
-        'genre':      genre,
-        'difficulty': difficulty,
-        'has_audio':  has_audio,
-        'genres':     Song.GENRE_CHOICES,
-        'difficulties': Song.DIFFICULTY_CHOICES,
+        'total':      songs.count(),
+        'query':      '',
         'available_letters': available_letters,
     }
     return render(request, 'musicians_portal/scores.html', context)

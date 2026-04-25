@@ -99,6 +99,10 @@ def scores(request):
     if has_audio == '1':
         songs = songs.filter(has_audio=True)
 
+    available_letters = sorted(set(
+        s.title[0].upper() for s in songs if s.title
+    ))
+
     context = {
         'page_title': 'Scores Library',
         'songs':      songs,
@@ -109,6 +113,7 @@ def scores(request):
         'has_audio':  has_audio,
         'genres':     Song.GENRE_CHOICES,
         'difficulties': Song.DIFFICULTY_CHOICES,
+        'available_letters': available_letters,
     }
     return render(request, 'musicians_portal/scores.html', context)
 

@@ -69,6 +69,20 @@
     </div>
   </form>
 
+  <!-- A–Z Quick Nav -->
+  {% if not query and not genre and not difficulty and not has_audio %}
+  <div class="d-flex flex-wrap gap-1 mb-3" id="az-nav">
+    <span class="text-muted small me-1 align-self-center">Jump to:</span>
+    {% for letter in available_letters %}
+      <a href="#letter-{{ letter }}"
+         class="btn btn-sm btn-outline-secondary py-0 px-2"
+         style="min-width:2rem; font-size:.8rem; font-weight:600;">
+        {{ letter }}
+      </a>
+    {% endfor %}
+  </div>
+  {% endif %}
+
   <!-- Results Table -->
   {% if songs %}
   <div class="table-responsive">
@@ -86,14 +100,16 @@
       </thead>
       <tbody>
         {% for song in songs %}
+        {% ifchanged song.title.0 %}
+        <tr id="letter-{{ song.title.0|upper }}" style="pointer-events:none;">
+          <td colspan="7" class="py-1 px-2 bg-dark border-secondary">
+            <span class="text-danger fw-bold" style="font-size:.7rem; letter-spacing:.1em;">{{ song.title.0|upper }}</span>
+          </td>
+        </tr>
+        {% endifchanged %}
         <tr style="cursor:pointer;" onclick="window.location='{% url 'portal_song_detail' song.id %}'">
           <td class="text-muted small">{{ forloop.counter }}</td>
-          <td>
-            <a href="{% url 'portal_song_detail' song.id %}"
-               class="text-white fw-semibold text-decoration-none stretched-link">
-              {{ song.title }}
-            </a>
-          </td>
+          <td class="fw-semibold">{{ song.title }}</td>
           <td>
             {% if song.genre != 'other' %}
               <span class="badge bg-secondary">{{ song.get_genre_display }}</span>

@@ -157,16 +157,18 @@
 </style>
 <script>
 function applyVideoLayout(isPortrait) {
-    const frame = document.getElementById('video-frame');
-    const row   = document.getElementById('video-row');
+    const frame       = document.getElementById('video-frame');
+    const videoCol    = document.getElementById('video-col');
+    const playlistCol = document.getElementById('playlist-col');
     if (isPortrait) {
+        // Video shrinks to exact content width; playlist fills the rest naturally
         frame.style.maxWidth = '360px';
-        row.style.maxWidth   = '700px';
-        row.style.margin     = '0 auto';
+        videoCol.className   = 'col-auto';
+        playlistCol.className= 'col';
     } else {
         frame.style.maxWidth = '100%';
-        row.style.maxWidth   = '';
-        row.style.margin     = '';
+        videoCol.className   = 'col-lg-8';
+        playlistCol.className= 'col-lg-4';
     }
 }
 function adjustVideoFrame(v) {

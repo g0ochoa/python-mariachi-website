@@ -19,15 +19,6 @@
     </a>
   </div>
 
-  {% if messages %}
-    {% for msg in messages %}
-      <div class="alert alert-{{ msg.tags|default:'info' }} alert-dismissible fade show" role="alert">
-        {{ msg }}
-        <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
-      </div>
-    {% endfor %}
-  {% endif %}
-
   <div class="alert alert-light border mb-4 d-flex align-items-center gap-2">
     <i class="bi bi-folder2-open text-danger fs-5"></i>
     {% if library %}
@@ -239,14 +230,34 @@ function openLibraryModal(btn) {
   document.querySelectorAll('.library-item').forEach(el => {
     el.style.display = el.dataset.type === _currentSlotType ? '' : 'none';
   });
-  document.querySelectorAll('.library-thumb').forEach(t => t.classList.remove('border', 'border-danger', 'border-2'));
+  document.querySelectorAll('.library-thumb').forEach(t => {
+    t.classList.remove('border-danger', 'border-2', 'shadow-lg');
+    t.classList.add('border-0');
+    const tick = t.querySelector('.selected-tick');
+    if (tick) tick.remove();
+  });
   _selectedRelPath = null;
   document.getElementById('assign-btn').disabled = true;
 }
 
 function selectLibraryItem(thumb) {
-  document.querySelectorAll('.library-thumb').forEach(t => t.classList.remove('border', 'border-danger', 'border-2'));
-  thumb.classList.add('border', 'border-danger', 'border-2');
+  document.querySelectorAll('.library-thumb').forEach(t => {
+    t.classList.remove('border-danger', 'border-2', 'shadow-lg');
+    t.classList.add('border-0');
+    const tick = t.querySelector('.selected-tick');
+    if (tick) tick.remove();
+  });
+  thumb.classList.remove('border-0');
+  thumb.classList.add('border-danger', 'border-2', 'shadow-lg');
+  // Add a checkmark overlay
+  if (!thumb.querySelector('.selected-tick')) {
+    const tick = document.createElement('div');
+    tick.className = 'selected-tick position-absolute top-0 end-0 m-1 bg-danger text-white rounded-circle d-flex align-items-center justify-content-center';
+    tick.style.cssText = 'width:22px;height:22px;font-size:13px;z-index:10;';
+    tick.innerHTML = '<i class="bi bi-check-lg"></i>';
+    thumb.style.position = 'relative';
+    thumb.appendChild(tick);
+  }
   _selectedRelPath = thumb.closest('.library-item').dataset.rel;
   document.getElementById('assign-btn').disabled = false;
 }

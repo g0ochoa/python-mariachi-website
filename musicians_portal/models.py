@@ -53,7 +53,8 @@ class Event(models.Model):
     end_time   = models.TimeField(null=True, blank=True)
     venue      = models.CharField(max_length=200, blank=True)
     client     = models.CharField(max_length=200, blank=True)
-    notes      = models.TextField(blank=True)
+    notes           = models.TextField(blank=True)
+    google_event_id = models.CharField(max_length=300, blank=True, db_index=True)
     created_by = models.ForeignKey(
         settings.AUTH_USER_MODEL,
         on_delete=models.SET_NULL,

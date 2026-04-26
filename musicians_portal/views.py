@@ -1,7 +1,10 @@
 import os
 import calendar
-from datetime import date, timedelta
+from datetime import date, datetime, timedelta
 from urllib.parse import quote
+
+import requests as http_requests
+from icalendar import Calendar as iCalendar
 
 from django.shortcuts import render, get_object_or_404, redirect
 from django.contrib.auth.decorators import login_required
@@ -10,6 +13,19 @@ from django.db.models import Q
 from django.http import JsonResponse
 from django.views.decorators.http import require_POST
 from .models import Song, Event, EventAttendance
+
+GOOGLE_ICAL_URL = (
+    'https://calendar.google.com/calendar/ical/'
+    'mariachiesencia.com_hpvqeek5buglo5fdcls0o8atbk%40group.calendar.google.com'
+    '/public/basic.ics'
+)
+
+
+def _detect_event_type(summary):
+    lower = summary.lower()
+    if any(w in lower for w in ['ensayo', 'rehearsal', 'practice', 'practica']):
+        return 'rehearsal'
+    return 'gig'
 
 SCORES_BASE_PATH = '/var/www/mariachiesencia/scores/'
 
@@ -283,3 +299,77 @@ def event_delete(request, event_id):
     year, month = event.date.year, event.date.month
     event.delete()
     return redirect(f'/portal/calendar/?year={year}&month={month}')
+
+
+@login_required
+@require_POST
+def sync_google_calendar(request):
+    """Fetch the band's Google Calendar iCal feed and sync events into the DB."""
+    _require_portal(request)
+    if request.user.role != 'admin':
+        raise PermissionDenied
+
+    try:
+        resp = http_requests.get(GOOGLE_ICAL_URL, timeout=15)
+        resp.raise_for_status()
+        gcal = iCalendar.from_ical(resp.content)
+    except Exception as e:
+        return JsonResponse({'error': f'Could not fetch calendar: {e}'}, status=502)
+
+    created = updated = deleted = 0
+    seen_uids = set()
+
+    for component in gcal.walk():
+        if component.name != 'VEVENT':
+            continue
+
+        uid     = str(component.get('UID', ''))
+        summary = str(component.get('SUMMARY', 'Untitled') or 'Untitled').strip()
+        dtstart = component.get('DTSTART')
+        dtend   = component.get('DTEND') or component.get('DTSTART')
+
+        if dtstart is None:
+            continue
+
+        dtstart_val = dtstart.dt
+        dtend_val   = dtend.dt
+
+        if isinstance(dtstart_val, datetime):
+            event_date = dtstart_val.date()
+            start_time = dtstart_val.time()
+        else:
+            event_date = dtstart_val
+            start_time = None
+
+        end_time = dtend_val.time() if isinstance(dtend_val, datetime) else None
+
+        location    = str(component.get('LOCATION',    '') or '').strip()
+        description = str(component.get('DESCRIPTION', '') or '').strip()
+
+        seen_uids.add(uid)
+
+        defaults = {
+            'title':      summary[:200],
+            'event_type': _detect_event_type(summary),
+            'date':       event_date,
+            'start_time': start_time,
+            'end_time':   end_time,
+            'venue':      location[:200],
+            'notes':      description[:2000],
+        }
+
+        obj, was_created = Event.objects.update_or_create(
+            google_event_id=uid,
+            defaults=defaults,
+        )
+        if was_created:
+            created += 1
+        else:
+            updated += 1
+
+    # Remove portal events sourced from Google that no longer exist in the feed
+    stale_qs = Event.objects.exclude(google_event_id='').exclude(google_event_id__in=seen_uids)
+    deleted  = stale_qs.count()
+    stale_qs.delete()
+
+    return JsonResponse({'created': created, 'updated': updated, 'deleted': deleted})

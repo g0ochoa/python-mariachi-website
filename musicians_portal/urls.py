@@ -13,4 +13,5 @@ urlpatterns = [
     path('portal/calendar/events/<int:event_id>/edit/', views.event_edit, name='portal_event_edit'),
     path('portal/calendar/events/<int:event_id>/delete/', views.event_delete, name='portal_event_delete'),
     path('portal/calendar/events/<int:event_id>/rsvp/', views.event_rsvp, name='portal_event_rsvp'),
+    path('portal/calendar/sync/', views.sync_google_calendar, name='portal_calendar_sync'),
 ]

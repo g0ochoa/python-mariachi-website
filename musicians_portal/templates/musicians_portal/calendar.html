@@ -8,15 +8,16 @@
   <div class="d-flex justify-content-between align-items-center mb-4">
     <div>
       <h1 class="h3 mb-0">
-        <i class="bi bi-calendar-event text-danger me-2"></i>{{ month_name }}
+        <i class="bi bi-calendar-event text-danger me-2"></i>Event Calendar
       </h1>
-      <small class="text-muted">Event Calendar</small>
+      <small class="text-muted">Mariachi Esencia — Band Schedule</small>
     </div>
     <div class="d-flex gap-2">
       {% if user.role == 'admin' %}
-        <a href="{% url 'portal_event_create' %}" class="btn btn-danger btn-sm">
-          <i class="bi bi-plus-lg me-1"></i>Add Event
-        </a>
+        <button id="sync-btn" class="btn btn-outline-success btn-sm"
+                onclick="syncCalendar(this)">
+          <i class="bi bi-arrow-repeat me-1"></i>Sync from Google
+        </button>
       {% endif %}
       <a href="{% url 'portal_dashboard' %}" class="btn btn-outline-secondary btn-sm">
         <i class="bi bi-arrow-left me-1"></i>Portal
@@ -24,70 +25,25 @@
     </div>
   </div>
 
-  <!-- Month Navigation -->
-  <div class="d-flex align-items-center justify-content-between mb-3">
-    <a href="{% url 'portal_calendar' %}?year={{ prev_year }}&month={{ prev_month }}"
-       class="btn btn-outline-secondary btn-sm px-3">
-      <i class="bi bi-chevron-left"></i>
-    </a>
-    <h4 class="mb-0 fw-bold">{{ month_name }}</h4>
-    <a href="{% url 'portal_calendar' %}?year={{ next_year }}&month={{ next_month }}"
-       class="btn btn-outline-secondary btn-sm px-3">
-      <i class="bi bi-chevron-right"></i>
-    </a>
-  </div>
+  {% if user.role == 'admin' %}
+  <div id="sync-alert" class="alert d-none mb-3" role="alert"></div>
+  {% endif %}
 
-  <!-- Calendar Grid -->
+  <!-- Google Calendar Embed -->
   <div class="card border-0 shadow-sm mb-4">
-    <div class="card-body p-2">
-      <table class="table table-bordered mb-0 text-center" id="cal-table">
-        <thead>
-          <tr class="table-dark">
-            {% for day in "Mon,Tue,Wed,Thu,Fri,Sat,Sun"|split:"," %}
-              <th class="py-2" style="font-size:.8rem;">{{ day }}</th>
-            {% endfor %}
-          </tr>
-        </thead>
-        <tbody>
-          {% for week in cal %}
-          <tr>
-            {% for day in week %}
-            <td class="p-1 align-top {% if day == today.day and month == today.month and year == today.year %}table-warning{% endif %}"
-                style="min-height:70px; height:70px; width:14.28%;">
-              {% if day != 0 %}
-                <div class="fw-semibold mb-1" style="font-size:.85rem;">{{ day }}</div>
-                {% if events_by_day|get_item:day %}
-                  {% for ev in events_by_day|get_item:day %}
-                    <a href="{% url 'portal_event_detail' ev.id %}"
-                       class="d-block text-decoration-none mb-1 px-1 rounded text-truncate
-                              {% if ev.event_type == 'gig' %}bg-danger text-white
-                              {% elif ev.event_type == 'rehearsal' %}bg-primary text-white
-                              {% else %}bg-secondary text-white{% endif %}"
-                       style="font-size:.7rem; line-height:1.6;">
-                      {{ ev.title }}
-                    </a>
-                  {% endfor %}
-                {% endif %}
-              {% endif %}
-            </td>
-            {% endfor %}
-          </tr>
-          {% endfor %}
-        </tbody>
-      </table>
+    <div class="card-body p-0" style="position:relative; padding-top:60%; overflow:hidden;">
+      <iframe
+        src="https://calendar.google.com/calendar/embed?src=mariachiesencia.com_hpvqeek5buglo5fdcls0o8atbk%40group.calendar.google.com&ctz=America%2FChicago&showTitle=0&showNav=1&showDate=1&showPrint=0&showTabs=0&showCalendars=0&showTz=1"
+        style="position:absolute; top:0; left:0; width:100%; height:100%; border:0;"
+        frameborder="0"
+        scrolling="no">
+      </iframe>
     </div>
   </div>
 
-  <!-- Legend -->
-  <div class="d-flex gap-3 mb-4 flex-wrap">
-    <span class="badge bg-danger px-3 py-2"><i class="bi bi-music-note me-1"></i>Gig</span>
-    <span class="badge bg-primary px-3 py-2"><i class="bi bi-mic me-1"></i>Rehearsal</span>
-    <span class="badge bg-secondary px-3 py-2"><i class="bi bi-calendar me-1"></i>Other</span>
-    <span class="badge bg-warning text-dark px-3 py-2">Today</span>
-  </div>
-
-  <!-- Upcoming Events List -->
-  <h5 class="fw-bold mb-3"><i class="bi bi-list-ul me-2"></i>Upcoming (next 60 days)</h5>
+  <!-- Upcoming Events List (for RSVP) -->
+  <h5 class="fw-bold mb-1"><i class="bi bi-check2-square me-2"></i>RSVP — Upcoming Events</h5>
+  <p class="text-muted small mb-3">Click an event to confirm or decline your attendance.</p>
   {% if upcoming %}
     <div class="list-group shadow-sm">
       {% for ev in upcoming %}
@@ -120,8 +76,58 @@
     <div class="text-center text-muted py-5">
       <i class="bi bi-calendar-x display-4 mb-3 d-block"></i>
       No upcoming events in the next 60 days.
+      {% if user.role == 'admin' %}
+        <p class="mt-2 small">Use the <strong>Sync from Google</strong> button above to import events.</p>
+      {% endif %}
     </div>
   {% endif %}
 
 </div>
+
+{% if user.role == 'admin' %}
+<script>
+function syncCalendar(btn) {
+  btn.disabled = true;
+  btn.innerHTML = '<span class="spinner-border spinner-border-sm me-1"></span>Syncing…';
+
+  const csrfToken = document.cookie.match(/csrftoken=([^;]+)/)?.[1] || '';
+
+  fetch("{% url 'portal_calendar_sync' %}", {
+    method: 'POST',
+    headers: {
+      'X-CSRFToken': csrfToken,
+      'Content-Type': 'application/json',
+    },
+  })
+  .then(r => r.json())
+  .then(data => {
+    const alertEl = document.getElementById('sync-alert');
+    if (data.error) {
+      alertEl.className = 'alert alert-danger mb-3';
+      alertEl.textContent = 'Sync failed: ' + data.error;
+    } else {
+      alertEl.className = 'alert alert-success mb-3';
+      alertEl.innerHTML =
+        `<i class="bi bi-check-circle me-1"></i>` +
+        `Sync complete — <strong>${data.created}</strong> added, ` +
+        `<strong>${data.updated}</strong> updated, ` +
+        `<strong>${data.deleted}</strong> removed. ` +
+        `<a href="" class="alert-link">Refresh page to see changes.</a>`;
+    }
+    alertEl.classList.remove('d-none');
+  })
+  .catch(() => {
+    const alertEl = document.getElementById('sync-alert');
+    alertEl.className = 'alert alert-danger mb-3';
+    alertEl.textContent = 'Network error — could not reach the server.';
+    alertEl.classList.remove('d-none');
+  })
+  .finally(() => {
+    btn.disabled = false;
+    btn.innerHTML = '<i class="bi bi-arrow-repeat me-1"></i>Sync from Google';
+  });
+}
+</script>
+{% endif %}
+
 {% endblock %}

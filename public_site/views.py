@@ -3,6 +3,8 @@ from django.contrib import messages
 from django.contrib.auth.decorators import login_required
 from django.http import JsonResponse
 from django.views.decorators.http import require_POST
+from django.conf import settings
+import os
 from .forms import ContactForm
 from .models import SiteMedia
 
@@ -73,10 +75,39 @@ def media_manager(request):
             'current': existing.get(slot_key),
         })
 
+    # Build library: all files already uploaded to media/site_media/
+    library = _get_library()
+
     return render(request, 'public_site/media_manager.html', {
         'slots': slots,
+        'library': library,
         'page_title': 'Media Manager',
     })
+
+
+def _get_library():
+    """Return a list of dicts for every file in media/site_media/."""
+    IMAGE_EXT = {'.jpg', '.jpeg', '.png', '.webp', '.gif'}
+    VIDEO_EXT = {'.mp4', '.webm', '.ogv', '.ogg'}
+    upload_dir = os.path.join(settings.MEDIA_ROOT, 'site_media')
+    library = []
+    if os.path.isdir(upload_dir):
+        for fname in sorted(os.listdir(upload_dir)):
+            ext = os.path.splitext(fname)[1].lower()
+            if ext in IMAGE_EXT:
+                ftype = 'image'
+            elif ext in VIDEO_EXT:
+                ftype = 'video'
+            else:
+                continue
+            rel_path = f'site_media/{fname}'
+            library.append({
+                'name':     fname,
+                'rel_path': rel_path,
+                'url':      settings.MEDIA_URL + rel_path,
+                'type':     ftype,
+            })
+    return library
 
 
 @login_required
@@ -128,4 +159,43 @@ def media_delete(request, slot):
     obj.file.delete(save=False)
     obj.delete()
     messages.success(request, f'{SLOT_META.get(slot, {}).get("label", slot)} removed. The default static file will be shown.')
+    return redirect('media_manager')
+
+
+@login_required
+@require_POST
+def media_assign(request, slot):
+    """Assign an already-uploaded file from the library to a slot."""
+    if request.user.role != 'admin':
+        return JsonResponse({'error': 'Admin access required'}, status=403)
+
+    if slot not in SLOT_META:
+        messages.error(request, 'Unknown slot.')
+        return redirect('media_manager')
+
+    rel_path = request.POST.get('rel_path', '').strip()
+    if not rel_path:
+        messages.error(request, 'No file selected.')
+        return redirect('media_manager')
+
+    # Security: ensure the path stays inside media/site_media/ (no traversal)
+    abs_path = os.path.realpath(os.path.join(settings.MEDIA_ROOT, rel_path))
+    allowed_root = os.path.realpath(os.path.join(settings.MEDIA_ROOT, 'site_media'))
+    if not abs_path.startswith(allowed_root + os.sep) and abs_path != allowed_root:
+        messages.error(request, 'Invalid file path.')
+        return redirect('media_manager')
+
+    if not os.path.isfile(abs_path):
+        messages.error(request, 'File not found on server.')
+        return redirect('media_manager')
+
+    meta = SLOT_META[slot]
+    obj, _ = SiteMedia.objects.get_or_create(slot=slot, defaults={'media_type': meta['type']})
+    obj.file.name = rel_path  # point to existing file — no copy needed
+    obj.media_type = meta['type']
+    obj.alt_text = request.POST.get('alt_text', obj.alt_text)
+    obj.caption = request.POST.get('caption', obj.caption)
+    obj.save()
+
+    messages.success(request, f'{meta["label"]} updated from library.')
     return redirect('media_manager')

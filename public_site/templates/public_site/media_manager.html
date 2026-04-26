@@ -12,7 +12,7 @@
       <h2 class="fw-bold mb-1" style="color:var(--wine);">
         <i class="bi bi-images me-2"></i>Media Manager
       </h2>
-      <p class="text-muted mb-0">Upload or replace photos and videos used across the website.</p>
+      <p class="text-muted mb-0">Upload new files or pick from your existing library for each section of the website.</p>
     </div>
     <a href="{% url 'portal_dashboard' %}" class="btn btn-outline-secondary btn-sm">
       <i class="bi bi-arrow-left me-1"></i>Back to Portal
@@ -26,6 +26,13 @@
         <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
       </div>
     {% endfor %}
+  {% endif %}
+
+  {% if library %}
+  <div class="alert alert-light border mb-4 d-flex align-items-center gap-2">
+    <i class="bi bi-folder2-open text-danger fs-5"></i>
+    <span><strong>{{ library|length }} file{{ library|length|pluralize }}</strong> already in your library — use &ldquo;Pick from library&rdquo; on any slot to reuse without re-uploading.</span>
+  </div>
   {% endif %}
 
   <!-- Slot grid -->
@@ -47,37 +54,33 @@
     </div>
 
     <div class="card-body">
-      <div class="row align-items-center g-4">
+      <div class="row align-items-start g-4">
 
         <!-- Current preview -->
-        <div class="col-md-4 text-center">
+        <div class="col-md-3 text-center">
           {% if slot.current %}
             {% if slot.type == 'image' %}
               <img src="{{ slot.current.file.url }}"
                    alt="{{ slot.current.alt_text|default:slot.label }}"
                    class="img-fluid rounded-3 shadow-sm"
-                   style="max-height:220px; object-fit:cover; width:100%;">
+                   style="max-height:180px; object-fit:cover; width:100%;">
             {% else %}
               <video src="{{ slot.current.file.url }}"
                      class="rounded-3 shadow-sm w-100"
-                     style="max-height:220px; object-fit:cover;"
+                     style="max-height:180px; object-fit:cover;"
                      controls muted preload="metadata"></video>
             {% endif %}
-            <div class="mt-2">
-              <small class="text-muted d-block text-truncate" title="{{ slot.current.file.name }}">
-                {{ slot.current.file.name|slice:"11:" }}
-              </small>
-              {% if slot.current.caption %}
-                <small class="text-muted">{{ slot.current.caption }}</small>
-              {% endif %}
-              <small class="text-muted d-block">Updated: {{ slot.current.updated_at|date:"M d, Y H:i" }}</small>
-            </div>
+            <small class="text-muted d-block mt-1 text-truncate" title="{{ slot.current.file.name }}">
+              {{ slot.current.file.name|slice:"11:" }}
+            </small>
+            {% if slot.current.caption %}<small class="text-muted d-block">{{ slot.current.caption }}</small>{% endif %}
+            <small class="text-muted d-block">{{ slot.current.updated_at|date:"M d, Y" }}</small>
           {% else %}
             <div class="rounded-3 bg-light d-flex align-items-center justify-content-center"
-                 style="height:160px; border: 2px dashed #ccc;">
+                 style="height:140px; border: 2px dashed #ccc;">
               <div class="text-muted text-center">
                 <i class="bi {% if slot.type == 'video' %}bi-camera-video{% else %}bi-image{% endif %} fs-2 d-block mb-1"></i>
-                <small>Default file in use</small>
+                <small>Default in use</small>
               </div>
             </div>
           {% endif %}
@@ -85,6 +88,7 @@
 
         <!-- Upload form -->
         <div class="col-md-5">
+          <p class="fw-semibold mb-2 text-muted" style="font-size:.8rem; text-transform:uppercase; letter-spacing:.05em;">Upload new file</p>
           <form method="post"
                 action="{% url 'media_upload' slot.key %}"
                 enctype="multipart/form-data"
@@ -135,18 +139,30 @@
           </form>
         </div>
 
-        <!-- Remove button -->
-        {% if slot.current %}
-        <div class="col-md-3 text-center">
+        <!-- Pick from library + Remove -->
+        <div class="col-md-4">
+          {% if library %}
+          <p class="fw-semibold mb-2 text-muted" style="font-size:.8rem; text-transform:uppercase; letter-spacing:.05em;">Pick from library</p>
+          <button type="button" class="btn btn-outline-danger btn-sm w-100 mb-3"
+                  data-bs-toggle="modal" data-bs-target="#libraryModal"
+                  data-slot="{{ slot.key }}"
+                  data-slot-label="{{ slot.label }}"
+                  data-slot-type="{{ slot.type }}"
+                  onclick="openLibraryModal(this)">
+            <i class="bi bi-folder2-open me-1"></i>Choose from library ({{ library|length }})
+          </button>
+          {% endif %}
+          {% if slot.current %}
+          <p class="fw-semibold mb-2 text-muted" style="font-size:.8rem; text-transform:uppercase; letter-spacing:.05em;">Remove</p>
           <form method="post" action="{% url 'media_delete' slot.key %}"
-                onsubmit="return confirm('Remove {{ slot.label }}? The default static file will be shown instead.')">
+                onsubmit="return confirm('Remove {{ slot.label }}? The site will revert to the default.')">
             {% csrf_token %}
-            <button type="submit" class="btn btn-outline-secondary btn-sm">
+            <button type="submit" class="btn btn-outline-secondary btn-sm w-100">
               <i class="bi bi-trash me-1"></i>Remove &amp; revert to default
             </button>
           </form>
+          {% endif %}
         </div>
-        {% endif %}
 
       </div>
     </div>
@@ -155,18 +171,100 @@
 
 </div>
 
+<!-- Library picker modal -->
+<div class="modal fade" id="libraryModal" tabindex="-1" aria-hidden="true">
+  <div class="modal-dialog modal-xl modal-dialog-scrollable">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h5 class="modal-title">
+          <i class="bi bi-folder2-open me-2 text-danger"></i>Library — <span id="modal-slot-label"></span>
+        </h5>
+        <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+      </div>
+      <div class="modal-body">
+        <p class="text-muted small mb-3" id="modal-slot-hint"></p>
+        <form method="post" id="assign-form" action="">
+          {% csrf_token %}
+          <input type="hidden" name="rel_path" id="assign-rel-path">
+        </form>
+        <div class="row g-3" id="library-grid">
+          {% for item in library %}
+          <div class="col-6 col-md-3 col-lg-2 library-item"
+               data-type="{{ item.type }}" data-rel="{{ item.rel_path }}" data-name="{{ item.name }}">
+            <div class="card border-0 shadow-sm h-100 library-thumb" style="cursor:pointer;" onclick="selectLibraryItem(this)">
+              {% if item.type == 'image' %}
+                <img src="{{ item.url }}" class="card-img-top" style="height:110px; object-fit:cover;" alt="{{ item.name }}">
+              {% else %}
+                <div class="d-flex align-items-center justify-content-center bg-dark rounded-top" style="height:110px;">
+                  <i class="bi bi-play-circle-fill text-white fs-2"></i>
+                </div>
+              {% endif %}
+              <div class="card-body p-1 text-center">
+                <small class="text-muted text-truncate d-block" title="{{ item.name }}" style="font-size:.7rem;">{{ item.name }}</small>
+              </div>
+            </div>
+          </div>
+          {% empty %}
+          <div class="col-12 text-center text-muted py-5">
+            <i class="bi bi-inbox fs-1 d-block mb-2"></i>No files yet. Upload something above.
+          </div>
+          {% endfor %}
+        </div>
+      </div>
+      <div class="modal-footer">
+        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+        <button type="button" class="btn btn-danger" id="assign-btn" disabled onclick="submitAssign()">
+          <i class="bi bi-check-lg me-1"></i>Use this file
+        </button>
+      </div>
+    </div>
+  </div>
+</div>
+
 <script>
+let _selectedRelPath = null;
+let _currentSlot = null;
+let _currentSlotType = null;
+
+function openLibraryModal(btn) {
+  _currentSlot = btn.dataset.slot;
+  _currentSlotType = btn.dataset.slotType;
+  document.getElementById('modal-slot-label').textContent = btn.dataset.slotLabel;
+  document.getElementById('modal-slot-hint').textContent =
+    _currentSlotType === 'image'
+      ? 'Showing images only (videos are hidden for this slot).'
+      : 'Showing videos only (images are hidden for this slot).';
+  document.querySelectorAll('.library-item').forEach(el => {
+    el.style.display = el.dataset.type === _currentSlotType ? '' : 'none';
+  });
+  document.querySelectorAll('.library-thumb').forEach(t => t.classList.remove('border', 'border-danger', 'border-2'));
+  _selectedRelPath = null;
+  document.getElementById('assign-btn').disabled = true;
+}
+
+function selectLibraryItem(thumb) {
+  document.querySelectorAll('.library-thumb').forEach(t => t.classList.remove('border', 'border-danger', 'border-2'));
+  thumb.classList.add('border', 'border-danger', 'border-2');
+  _selectedRelPath = thumb.closest('.library-item').dataset.rel;
+  document.getElementById('assign-btn').disabled = false;
+}
+
+function submitAssign() {
+  if (!_selectedRelPath || !_currentSlot) return;
+  const form = document.getElementById('assign-form');
+  form.action = '/portal/media/' + _currentSlot + '/assign/';
+  document.getElementById('assign-rel-path').value = _selectedRelPath;
+  form.submit();
+}
+
 function previewFile(input, slotKey, type) {
   const file = input.files[0];
   if (!file) return;
-  const wrapper = document.getElementById('preview-' + slotKey);
-  wrapper.style.display = 'block';
+  document.getElementById('preview-' + slotKey).style.display = 'block';
   if (type === 'image') {
-    const img = document.getElementById('preview-img-' + slotKey);
-    img.src = URL.createObjectURL(file);
+    document.getElementById('preview-img-' + slotKey).src = URL.createObjectURL(file);
   } else {
-    const vid = document.getElementById('preview-vid-' + slotKey);
-    vid.src = URL.createObjectURL(file);
+    document.getElementById('preview-vid-' + slotKey).src = URL.createObjectURL(file);
   }
 }
 </script>

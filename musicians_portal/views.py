@@ -232,6 +232,36 @@ def _require_portal(request):
 
 
 @login_required
+def calendar_month_partial(request):
+    """Returns just the calendar grid HTML fragment for AJAX month navigation."""
+    _require_portal(request)
+    today = date.today()
+    year  = int(request.GET.get('year',  today.year))
+    month = int(request.GET.get('month', today.month))
+    if month < 1:  month = 12; year -= 1
+    if month > 12: month = 1;  year += 1
+
+    cal        = calendar.monthcalendar(year, month)
+    month_name = date(year, month, 1).strftime('%B %Y')
+
+    events_this_month = Event.objects.filter(date__year=year, date__month=month)
+    events_by_day = {}
+    for ev in events_this_month:
+        events_by_day.setdefault(ev.date.day, []).append(ev)
+
+    prev_month = (date(year, month, 1) - timedelta(days=1)).replace(day=1)
+    next_month = (date(year, month, 1) + timedelta(days=32)).replace(day=1)
+
+    context = {
+        'year': year, 'month': month, 'month_name': month_name,
+        'cal': cal, 'events_by_day': events_by_day, 'today': today,
+        'prev_year': prev_month.year, 'prev_month': prev_month.month,
+        'next_year': next_month.year, 'next_month': next_month.month,
+    }
+    return render(request, 'musicians_portal/partials/calendar_month.html', context)
+
+
+@login_required
 def event_calendar(request):
     _require_portal(request)
 

@@ -238,6 +238,16 @@
 
     <!-- Viewer -->
     <div id="viewer-col">
+      <!-- Mini toolbar (mobile preview mode only) -->
+      <div id="viewer-toolbar">
+        <span id="viewer-fname" class="text-muted small text-truncate flex-grow-1" style="font-size:.75rem;"></span>
+        <button class="btn btn-sm btn-outline-secondary py-0 px-2" onclick="enterPdfFullscreen()" title="Full screen">
+          <i class="bi bi-arrows-fullscreen" style="font-size:.75rem;"></i>
+        </button>
+        <button class="btn btn-sm btn-outline-danger py-0 px-2" onclick="exitPdfPreview()" title="Close preview">
+          <i class="bi bi-x-lg" style="font-size:.75rem;"></i>
+        </button>
+      </div>
       <div id="viewer-area">
         <!-- Placeholder shown until a file is selected -->
         <div id="viewer-placeholder"
@@ -257,11 +267,25 @@
 pdfjsLib.GlobalWorkerOptions.workerSrc =
   'https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.worker.min.js';
 
+function enterPdfPreview() {
+  document.body.classList.remove('pdf-fullscreen');
+  document.body.classList.add('pdf-preview');
+}
+function exitPdfPreview() {
+  document.body.classList.remove('pdf-preview');
+  document.getElementById('viewer-col').style.display = '';
+  document.querySelectorAll('.file-btn').forEach(b => b.classList.remove('active'));
+}
 function enterPdfFullscreen() {
+  document.body.classList.remove('pdf-preview');
   document.body.classList.add('pdf-fullscreen');
 }
 function exitPdfFullscreen() {
   document.body.classList.remove('pdf-fullscreen');
+  // Return to split preview on mobile
+  if (window.matchMedia('(max-width: 767px)').matches) {
+    document.body.classList.add('pdf-preview');
+  }
 }
 
 async function renderPDF(url, area) {
@@ -303,20 +327,18 @@ function openFile(btn, url, kind) {
   const area = document.getElementById('viewer-area');
   const name = btn.querySelector('.fname').textContent.trim();
 
+  // Update toolbar filename label
+  const fnameEl = document.getElementById('viewer-fname');
+  if (fnameEl) fnameEl.textContent = btn.querySelector('.fname').textContent.trim();
+
+  const isMobile = window.matchMedia('(max-width: 767px)').matches;
+
   if (kind === 'pdf') {
-    // On mobile: show viewer full-screen so the score fills the entire screen
-    if (window.matchMedia('(max-width: 767px)').matches) {
-      document.getElementById('viewer-col').style.display = 'flex';
-      enterPdfFullscreen();
-    }
+    if (isMobile) enterPdfPreview(); // split view — tap expand button for fullscreen
     renderPDF(url, area);
 
   } else if (kind === 'image') {
-    // Images also go full-screen on mobile
-    if (window.matchMedia('(max-width: 767px)').matches) {
-      document.getElementById('viewer-col').style.display = 'flex';
-      enterPdfFullscreen();
-    }
+    if (isMobile) enterPdfPreview();
     area.innerHTML = `
       <div class="d-flex flex-column align-items-center justify-content-start h-100 gap-2 p-2 overflow-auto" style="background:#525659;">
         <img src="${url}" style="width:100%; height:auto; display:block;" alt="${name}">
@@ -333,16 +355,6 @@ function openFile(btn, url, kind) {
         <audio controls src="${url}" class="w-100" style="max-width:420px;">
           Your browser does not support audio playback.
         </audio>
-        <a href="${url}" class="btn btn-outline-secondary btn-sm" download>
-          <i class="bi bi-download me-1"></i>Download
-        </a>
-      </div>`;
-
-  } else if (kind === 'image') {
-    area.innerHTML = `
-      <div class="d-flex flex-column align-items-center justify-content-center h-100 gap-3 p-4 overflow-auto">
-        <img src="${url}" class="img-fluid shadow-sm"
-             style="max-height:80vh; object-fit:contain;" alt="${name}">
         <a href="${url}" class="btn btn-outline-secondary btn-sm" download>
           <i class="bi bi-download me-1"></i>Download
         </a>

@@ -8,6 +8,7 @@ urlpatterns = [
 
     # Calendar
     path('portal/calendar/', views.event_calendar, name='portal_calendar'),
+    path('portal/calendar/partial/', views.calendar_month_partial, name='portal_calendar_partial'),
     path('portal/calendar/events/new/', views.event_create, name='portal_event_create'),
     path('portal/calendar/events/<int:event_id>/', views.event_detail, name='portal_event_detail'),
     path('portal/calendar/events/<int:event_id>/edit/', views.event_edit, name='portal_event_edit'),

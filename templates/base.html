@@ -33,6 +33,16 @@
             <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav">
                 <span class="navbar-toggler-icon"></span>
             </button>
+            {% if user.is_authenticated %}
+              {% if user.role == 'musician' or user.role == 'admin' %}
+              <a href="{% url 'portal_dashboard' %}"
+                 class="btn btn-sm btn-outline-danger d-lg-none me-2"
+                 style="border-radius:8px; font-size:.8rem; padding:.3rem .65rem;"
+                 title="Musicians Portal">
+                <i class="bi bi-music-note-list"></i>
+              </a>
+              {% endif %}
+            {% endif %}
             <div class="collapse navbar-collapse" id="navbarNav">
                 <ul class="navbar-nav ms-auto">
                     <li class="nav-item">

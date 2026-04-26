@@ -12,66 +12,185 @@
       </h1>
       <small class="text-muted">Mariachi Esencia — Band Schedule</small>
     </div>
-    <div class="d-flex gap-2">
-      <a href="{% url 'portal_dashboard' %}" class="btn btn-outline-secondary btn-sm">
-        <i class="bi bi-arrow-left me-1"></i>Portal
-      </a>
-    </div>
+    <a href="{% url 'portal_dashboard' %}" class="btn btn-outline-secondary btn-sm">
+      <i class="bi bi-arrow-left me-1"></i>Portal
+    </a>
   </div>
 
-  <!-- Google Calendar Embed -->
-  <div class="card border-0 shadow-sm mb-4">
-    <div class="card-body p-0" style="position:relative; padding-top:60%; overflow:hidden;">
-      <iframe
-        src="https://calendar.google.com/calendar/embed?src=mariachiesencia.com_hpvqeek5buglo5fdcls0o8atbk%40group.calendar.google.com&ctz=America%2FChicago&showTitle=0&showNav=1&showDate=1&showPrint=0&showTabs=0&showCalendars=0&showTz=1"
-        style="position:absolute; top:0; left:0; width:100%; height:100%; border:0;"
-        frameborder="0"
-        scrolling="no">
-      </iframe>
-    </div>
-  </div>
-
-  <!-- Upcoming Events List (for RSVP) -->
-  <h5 class="fw-bold mb-1"><i class="bi bi-check2-square me-2"></i>RSVP — Upcoming Events</h5>
-  <p class="text-muted small mb-3">Click an event to confirm or decline your attendance.</p>
-  {% if upcoming %}
-    <div class="list-group shadow-sm">
-      {% for ev in upcoming %}
-        <a href="{% url 'portal_event_detail' ev.id %}"
-           class="list-group-item list-group-item-action d-flex justify-content-between align-items-center py-3">
-          <div class="d-flex align-items-center gap-3">
-            <div class="text-center" style="min-width:50px;">
-              <div class="fw-bold text-danger" style="font-size:1.1rem;">{{ ev.date|date:"d" }}</div>
-              <div class="text-muted" style="font-size:.75rem;">{{ ev.date|date:"M" }}</div>
+  <!-- ── Next Up Cards ─────────────────────────────────────────────────── -->
+  {% if next_up %}
+  <h5 class="fw-bold mb-3"><i class="bi bi-lightning-charge-fill text-warning me-2"></i>Next Up</h5>
+  <div class="row g-3 mb-5">
+    {% for ev in next_up %}
+    {% with rsvp=user_rsvp|get_item:ev.id %}
+    <div class="col-12 col-md-6 col-lg-4">
+      <a href="{% url 'portal_event_detail' ev.id %}" class="text-decoration-none">
+        <div class="card border-0 shadow h-100 overflow-hidden next-up-card">
+          <!-- Colored top bar -->
+          <div class="px-4 py-3 d-flex justify-content-between align-items-center
+            {% if ev.event_type == 'gig' %}bg-danger{% elif ev.event_type == 'rehearsal' %}bg-primary{% else %}bg-secondary{% endif %}">
+            <span class="text-white fw-semibold text-uppercase" style="font-size:.75rem;letter-spacing:.08em;">
+              {{ ev.get_event_type_display }}
+            </span>
+            <!-- RSVP pill -->
+            {% if rsvp == 'confirmed' %}
+              <span class="badge bg-success"><i class="bi bi-check-lg me-1"></i>Going</span>
+            {% elif rsvp == 'unavailable' %}
+              <span class="badge bg-light text-dark"><i class="bi bi-x-lg me-1"></i>Can't make it</span>
+            {% else %}
+              <span class="badge bg-warning text-dark"><i class="bi bi-question-lg me-1"></i>RSVP needed</span>
+            {% endif %}
+          </div>
+          <div class="card-body d-flex gap-3 align-items-start">
+            <!-- Big date block -->
+            <div class="text-center flex-shrink-0" style="min-width:52px;">
+              <div class="fw-bold text-danger lh-1" style="font-size:2rem;">{{ ev.date|date:"d" }}</div>
+              <div class="text-uppercase text-muted fw-semibold" style="font-size:.7rem;letter-spacing:.06em;">{{ ev.date|date:"M Y" }}</div>
+              <div class="text-muted" style="font-size:.7rem;">{{ ev.date|date:"D" }}</div>
             </div>
-            <div>
-              <div class="fw-semibold">{{ ev.title }}</div>
-              <div class="text-muted small">
-                {% if ev.venue %}<i class="bi bi-geo-alt me-1"></i>{{ ev.venue }}{% endif %}
-                {% if ev.client %} · {{ ev.client }}{% endif %}
-                {% if ev.start_time %} · {{ ev.start_time|time:"g:i A" }}{% endif %}
+            <div class="flex-grow-1 min-w-0">
+              <div class="fw-bold text-dark mb-1" style="font-size:1rem;">{{ ev.title }}</div>
+              {% if ev.start_time %}
+              <div class="text-muted small mb-1">
+                <i class="bi bi-clock me-1"></i>{{ ev.start_time|time:"g:i A" }}{% if ev.end_time %} – {{ ev.end_time|time:"g:i A" }}{% endif %}
               </div>
+              {% endif %}
+              {% if ev.venue %}
+              <div class="text-muted small text-truncate">
+                <i class="bi bi-geo-alt me-1"></i>{{ ev.venue }}
+              </div>
+              {% endif %}
+              {% if ev.client %}
+              <div class="text-muted small text-truncate">
+                <i class="bi bi-person me-1"></i>{{ ev.client }}
+              </div>
+              {% endif %}
             </div>
           </div>
-          <span class="badge
-            {% if ev.event_type == 'gig' %}bg-danger
-            {% elif ev.event_type == 'rehearsal' %}bg-primary
-            {% else %}bg-secondary{% endif %}">
-            {{ ev.get_event_type_display }}
-          </span>
+        </div>
+      </a>
+    </div>
+    {% endwith %}
+    {% endfor %}
+  </div>
+  {% endif %}
+
+  <!-- ── Monthly Grid ──────────────────────────────────────────────────── -->
+  <div class="d-flex align-items-center justify-content-between mb-3">
+    <a href="{% url 'portal_calendar' %}?year={{ prev_year }}&month={{ prev_month }}"
+       class="btn btn-outline-secondary btn-sm px-3">
+      <i class="bi bi-chevron-left"></i>
+    </a>
+    <h5 class="mb-0 fw-bold">{{ month_name }}</h5>
+    <a href="{% url 'portal_calendar' %}?year={{ next_year }}&month={{ next_month }}"
+       class="btn btn-outline-secondary btn-sm px-3">
+      <i class="bi bi-chevron-right"></i>
+    </a>
+  </div>
+
+  <div class="card border-0 shadow-sm mb-2">
+    <div class="card-body p-2">
+      <table class="table table-bordered mb-0 text-center" style="table-layout:fixed;">
+        <thead>
+          <tr class="table-dark">
+            {% for day in "Mon,Tue,Wed,Thu,Fri,Sat,Sun"|split:"," %}
+              <th class="py-2" style="font-size:.78rem;">{{ day }}</th>
+            {% endfor %}
+          </tr>
+        </thead>
+        <tbody>
+          {% for week in cal %}
+          <tr>
+            {% for day in week %}
+            <td class="p-1 align-top
+                {% if day == today.day and month == today.month and year == today.year %}bg-warning bg-opacity-25{% endif %}"
+                style="height:80px; width:14.28%; overflow:hidden;">
+              {% if day != 0 %}
+                <div class="{% if day == today.day and month == today.month and year == today.year %}fw-bold text-danger{% else %}text-muted{% endif %} mb-1"
+                     style="font-size:.8rem;">{{ day }}</div>
+                {% if events_by_day|get_item:day %}
+                  {% for ev in events_by_day|get_item:day %}
+                    <a href="{% url 'portal_event_detail' ev.id %}"
+                       class="d-block text-decoration-none mb-1 px-1 rounded text-truncate
+                         {% if ev.event_type == 'gig' %}bg-danger text-white
+                         {% elif ev.event_type == 'rehearsal' %}bg-primary text-white
+                         {% else %}bg-secondary text-white{% endif %}"
+                       style="font-size:.65rem; line-height:1.7;">
+                      {% if ev.start_time %}{{ ev.start_time|time:"g:i A" }} · {% endif %}{{ ev.title }}
+                    </a>
+                  {% endfor %}
+                {% endif %}
+              {% endif %}
+            </td>
+            {% endfor %}
+          </tr>
+          {% endfor %}
+        </tbody>
+      </table>
+    </div>
+  </div>
+
+  <!-- Legend -->
+  <div class="d-flex gap-3 mb-5 flex-wrap">
+    <span class="badge bg-danger px-3 py-2"><i class="bi bi-music-note me-1"></i>Gig</span>
+    <span class="badge bg-primary px-3 py-2"><i class="bi bi-mic me-1"></i>Rehearsal</span>
+    <span class="badge bg-secondary px-3 py-2"><i class="bi bi-calendar me-1"></i>Other</span>
+    <span class="badge bg-warning text-dark px-3 py-2">Today</span>
+  </div>
+
+  <!-- ── Full Upcoming List ────────────────────────────────────────────── -->
+  <h5 class="fw-bold mb-3"><i class="bi bi-list-ul me-2"></i>All Upcoming — Next 60 Days</h5>
+  {% if upcoming %}
+    <div class="list-group shadow-sm mb-4">
+      {% for ev in upcoming %}
+      {% with rsvp=user_rsvp|get_item:ev.id %}
+        <a href="{% url 'portal_event_detail' ev.id %}"
+           class="list-group-item list-group-item-action d-flex justify-content-between align-items-center py-3 gap-3">
+          <!-- Date block -->
+          <div class="text-center flex-shrink-0" style="min-width:44px;">
+            <div class="fw-bold text-danger lh-1" style="font-size:1.2rem;">{{ ev.date|date:"d" }}</div>
+            <div class="text-muted" style="font-size:.7rem;">{{ ev.date|date:"M" }}</div>
+          </div>
+          <!-- Event info -->
+          <div class="flex-grow-1 min-w-0">
+            <div class="fw-semibold text-truncate">{{ ev.title }}</div>
+            <div class="text-muted small">
+              {% if ev.start_time %}<i class="bi bi-clock me-1"></i>{{ ev.start_time|time:"g:i A" }}{% endif %}
+              {% if ev.venue %} &nbsp;<i class="bi bi-geo-alt me-1"></i>{{ ev.venue }}{% endif %}
+            </div>
+          </div>
+          <!-- Right side: type badge + RSVP -->
+          <div class="d-flex flex-column align-items-end gap-1 flex-shrink-0">
+            <span class="badge
+              {% if ev.event_type == 'gig' %}bg-danger
+              {% elif ev.event_type == 'rehearsal' %}bg-primary
+              {% else %}bg-secondary{% endif %}">
+              {{ ev.get_event_type_display }}
+            </span>
+            {% if rsvp == 'confirmed' %}
+              <span class="badge bg-success" style="font-size:.65rem;"><i class="bi bi-check-lg"></i> Going</span>
+            {% elif rsvp == 'unavailable' %}
+              <span class="badge bg-light text-dark border" style="font-size:.65rem;"><i class="bi bi-x-lg"></i> Out</span>
+            {% else %}
+              <span class="badge bg-warning text-dark" style="font-size:.65rem;"><i class="bi bi-question-lg"></i> RSVP</span>
+            {% endif %}
+          </div>
         </a>
+      {% endwith %}
       {% endfor %}
     </div>
   {% else %}
     <div class="text-center text-muted py-5">
       <i class="bi bi-calendar-x display-4 mb-3 d-block"></i>
       No upcoming events in the next 60 days.
-      {% if user.role == 'admin' %}
-        <p class="mt-2 small">Use the <strong>Sync from Google</strong> button above to import events.</p>
-      {% endif %}
     </div>
   {% endif %}
 
 </div>
+
+<style>
+.next-up-card { transition: transform .15s, box-shadow .15s; }
+.next-up-card:hover { transform: translateY(-3px); box-shadow: 0 .5rem 1.5rem rgba(0,0,0,.12) !important; }
+</style>
 
 {% endblock %}

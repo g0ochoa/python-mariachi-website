@@ -257,7 +257,17 @@ def event_calendar(request):
         events_by_day.setdefault(ev.date.day, []).append(ev)
 
     # Upcoming events (next 60 days) for list below grid
-    upcoming = Event.objects.filter(date__gte=today, date__lte=today + timedelta(days=60)).order_by('date', 'start_time')
+    upcoming = list(Event.objects.filter(
+        date__gte=today, date__lte=today + timedelta(days=60)
+    ).order_by('date', 'start_time'))
+
+    # Build a dict of {event_id: rsvp_status} for the current user
+    user_rsvp = {
+        a.event_id: a.status
+        for a in EventAttendance.objects.filter(
+            event__in=upcoming, user=request.user
+        )
+    }
 
     # Previous / next month links
     prev_month = date(year, month, 1) - timedelta(days=1)
@@ -266,18 +276,20 @@ def event_calendar(request):
     next_month = next_month.replace(day=1)
 
     context = {
-        'page_title':   'Event Calendar',
-        'year':         year,
-        'month':        month,
-        'month_name':   month_name,
-        'cal':          cal,
+        'page_title':    'Event Calendar',
+        'year':          year,
+        'month':         month,
+        'month_name':    month_name,
+        'cal':           cal,
         'events_by_day': events_by_day,
-        'today':        today,
-        'upcoming':     upcoming,
-        'prev_year':    prev_month.year,
-        'prev_month':   prev_month.month,
-        'next_year':    next_month.year,
-        'next_month':   next_month.month,
+        'today':         today,
+        'upcoming':      upcoming,
+        'next_up':       upcoming[:3],
+        'user_rsvp':     user_rsvp,
+        'prev_year':     prev_month.year,
+        'prev_month':    prev_month.month,
+        'next_year':     next_month.year,
+        'next_month':    next_month.month,
     }
     return render(request, 'musicians_portal/calendar.html', context)
 

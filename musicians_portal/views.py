@@ -14,11 +14,7 @@ from django.http import JsonResponse
 from django.views.decorators.http import require_POST
 from .models import Song, Event, EventAttendance
 
-GOOGLE_ICAL_URL = (
-    'https://calendar.google.com/calendar/ical/'
-    'mariachiesencia.com_hpvqeek5buglo5fdcls0o8atbk%40group.calendar.google.com'
-    '/public/basic.ics'
-)
+GOOGLE_ICAL_URL = os.environ.get('GOOGLE_ICAL_URL', '')
 
 
 def _detect_event_type(summary):

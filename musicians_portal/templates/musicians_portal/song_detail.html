@@ -116,11 +116,14 @@
     #file-list-col { flex: 1 1 0; min-height: 0; width: 100%; }
     #viewer-col    { display: none; }
 
-    /* Split preview (single tap): file list top 40%, viewer bottom 60% */
+    /* Split preview (single tap): file list top 25%, viewer bottom 75% */
     body.pdf-preview #song-panels   { flex-direction: column; }
-    body.pdf-preview #file-list-col { flex: 0 0 38%; width: 100%; border-right: none; border-bottom: 1px solid #dee2e6; }
+    body.pdf-preview #file-list-col { flex: 0 0 25%; width: 100%; border-right: none; border-bottom: 1px solid #dee2e6; }
     body.pdf-preview #viewer-col    { display: flex !important; flex: 1 1 0; }
     body.pdf-preview footer         { display: none !important; }
+
+    /* Hide expand button when already fullscreen — it does nothing there */
+    body.pdf-fullscreen #viewer-toolbar { display: none !important; }
 
     /* Full-screen mode (double tap or expand button) */
     body.pdf-fullscreen .navbar          { display: none !important; }

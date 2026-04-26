@@ -252,11 +252,14 @@ def calendar_month_partial(request):
     prev_month = (date(year, month, 1) - timedelta(days=1)).replace(day=1)
     next_month = (date(year, month, 1) + timedelta(days=32)).replace(day=1)
 
+    gig_count = events_this_month.filter(event_type='gig').count()
+
     context = {
         'year': year, 'month': month, 'month_name': month_name,
         'cal': cal, 'events_by_day': events_by_day, 'today': today,
         'prev_year': prev_month.year, 'prev_month': prev_month.month,
         'next_year': next_month.year, 'next_month': next_month.month,
+        'gig_count': gig_count,
     }
     return render(request, 'musicians_portal/partials/calendar_month.html', context)
 
@@ -306,6 +309,8 @@ def event_calendar(request):
     prev_month = prev_month.replace(day=1)
     next_month = next_month.replace(day=1)
 
+    gig_count = events_this_month.filter(event_type='gig').count()
+
     context = {
         'page_title':    'Event Calendar',
         'year':          year,
@@ -321,6 +326,7 @@ def event_calendar(request):
         'prev_month':    prev_month.month,
         'next_year':     next_month.year,
         'next_month':    next_month.month,
+        'gig_count':     gig_count,
     }
     return render(request, 'musicians_portal/calendar.html', context)
 

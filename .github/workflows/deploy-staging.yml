@@ -66,8 +66,6 @@ jobs:
 
             echo "--- Ensuring media directory exists ---"
             mkdir -p media/site_media
-            sudo chown -R www-data:www-data media/
-            sudo chmod -R 755 media/
 
             echo "--- Restarting Gunicorn ---"
             sudo systemctl restart mariachi-django

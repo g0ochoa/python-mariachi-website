@@ -154,21 +154,29 @@
     border-color: #c09a6b;
     color: #c09a6b;
 }
+#playlist-grid.stretch-btns {
+    height: 100%;
+}
+#playlist-grid.stretch-btns .video-thumb-btn {
+    flex: 1;
+}
 </style>
 <script>
 function applyVideoLayout(isPortrait) {
     const frame       = document.getElementById('video-frame');
     const videoCol    = document.getElementById('video-col');
     const playlistCol = document.getElementById('playlist-col');
+    const grid        = document.getElementById('playlist-grid');
     if (isPortrait) {
-        // Video shrinks to exact content width; playlist fills the rest naturally
-        frame.style.maxWidth = '360px';
-        videoCol.className   = 'col-auto';
-        playlistCol.className= 'col';
+        frame.style.maxWidth  = '360px';
+        videoCol.className    = 'col-auto';
+        playlistCol.className = 'col d-flex flex-column';
+        grid.classList.add('stretch-btns');
     } else {
-        frame.style.maxWidth = '100%';
-        videoCol.className   = 'col-lg-8';
-        playlistCol.className= 'col-lg-4';
+        frame.style.maxWidth  = '100%';
+        videoCol.className    = 'col-lg-8';
+        playlistCol.className = 'col-lg-4';
+        grid.classList.remove('stretch-btns');
     }
 }
 function adjustVideoFrame(v) {

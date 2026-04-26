@@ -48,12 +48,15 @@
         <div class="row g-4 align-items-start">
             <!-- Main video player -->
             <div class="col-lg-8">
-                <div class="rounded-3 overflow-hidden shadow-lg">
+                <div id="video-frame" class="mx-auto" style="max-width:100%; transition: max-width .3s ease;">
+                  <div class="rounded-3 overflow-hidden shadow-lg">
                     <video id="main-video" controls preload="metadata"
                            class="w-100 d-block"
-                           style="background:#000; max-height:480px; object-fit:contain;">
+                           style="background:#000; max-height:72vh; object-fit:contain;"
+                           onloadedmetadata="adjustVideoFrame(this)">
                         <source src="{% if site_media.video_1 %}{{ site_media.video_1.file.url }}{% else %}{% static 'videos/amor-eterno.mp4' %}{% endif %}" type="video/mp4">
                     </video>
+                  </div>
                 </div>
                 <p id="video-title" class="text-center mt-2 fw-semibold" style="color:#c09a6b; font-size:.9rem;">
                     ♪ {% if site_media.video_1 and site_media.video_1.caption %}{{ site_media.video_1.caption }}{% else %}Amor Eterno{% endif %}
@@ -153,6 +156,16 @@
 }
 </style>
 <script>
+function adjustVideoFrame(v) {
+    const frame = document.getElementById('video-frame');
+    if (v.videoHeight > v.videoWidth) {
+        // Portrait — cap width so it looks like a phone screen, not a tiny strip
+        frame.style.maxWidth = Math.min(360, v.videoWidth) + 'px';
+    } else {
+        // Landscape — fill the full column
+        frame.style.maxWidth = '100%';
+    }
+}
 function switchVideo(btn) {
     document.querySelectorAll('.video-thumb-btn').forEach(b => b.classList.remove('active'));
     btn.classList.add('active');

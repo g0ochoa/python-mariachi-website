@@ -2,9 +2,12 @@ import os
 import calendar
 from datetime import date, datetime, timedelta
 from urllib.parse import quote
+from zoneinfo import ZoneInfo
 
 import requests as http_requests
 from icalendar import Calendar as iCalendar
+
+BAND_TZ = ZoneInfo('America/Chicago')
 
 from django.shortcuts import render, get_object_or_404, redirect
 from django.contrib.auth.decorators import login_required
@@ -59,13 +62,21 @@ def _do_ical_sync():
         dtend_val   = dtend.dt
 
         if isinstance(dtstart_val, datetime):
+            # Convert timezone-aware datetimes to CDT before extracting date/time
+            if dtstart_val.tzinfo is not None:
+                dtstart_val = dtstart_val.astimezone(BAND_TZ)
             event_date = dtstart_val.date()
             start_time = dtstart_val.time()
         else:
             event_date = dtstart_val
             start_time = None
 
-        end_time = dtend_val.time() if isinstance(dtend_val, datetime) else None
+        if isinstance(dtend_val, datetime):
+            if dtend_val.tzinfo is not None:
+                dtend_val = dtend_val.astimezone(BAND_TZ)
+            end_time = dtend_val.time()
+        else:
+            end_time = None
 
         location    = str(component.get('LOCATION',    '') or '').strip()
         description = str(component.get('DESCRIPTION', '') or '').strip()

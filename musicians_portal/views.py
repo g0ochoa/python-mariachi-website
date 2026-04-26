@@ -8,11 +8,15 @@ from icalendar import Calendar as iCalendar
 
 from django.shortcuts import render, get_object_or_404, redirect
 from django.contrib.auth.decorators import login_required
+from django.core.cache import cache
 from django.core.exceptions import PermissionDenied
 from django.db.models import Q
 from django.http import JsonResponse
 from django.views.decorators.http import require_POST
 from .models import Song, Event, EventAttendance
+
+GCAL_SYNC_CACHE_KEY    = 'gcal_last_sync'
+GCAL_SYNC_INTERVAL     = 30 * 60   # seconds — re-sync at most every 30 minutes
 
 GOOGLE_ICAL_URL = os.environ.get('GOOGLE_ICAL_URL', '')
 
@@ -22,6 +26,77 @@ def _detect_event_type(summary):
     if any(w in lower for w in ['ensayo', 'rehearsal', 'practice', 'practica']):
         return 'rehearsal'
     return 'gig'
+
+
+def _do_ical_sync():
+    """Fetch Google Calendar iCal feed and sync events into the DB.
+    Returns (created, updated, deleted) counts, or None if URL not configured."""
+    if not GOOGLE_ICAL_URL:
+        return None
+    try:
+        resp = http_requests.get(GOOGLE_ICAL_URL, timeout=15)
+        resp.raise_for_status()
+        gcal = iCalendar.from_ical(resp.content)
+    except Exception:
+        return None
+
+    created = updated = deleted = 0
+    seen_uids = set()
+
+    for component in gcal.walk():
+        if component.name != 'VEVENT':
+            continue
+
+        uid     = str(component.get('UID', ''))
+        summary = str(component.get('SUMMARY', 'Untitled') or 'Untitled').strip()
+        dtstart = component.get('DTSTART')
+        dtend   = component.get('DTEND') or component.get('DTSTART')
+
+        if dtstart is None:
+            continue
+
+        dtstart_val = dtstart.dt
+        dtend_val   = dtend.dt
+
+        if isinstance(dtstart_val, datetime):
+            event_date = dtstart_val.date()
+            start_time = dtstart_val.time()
+        else:
+            event_date = dtstart_val
+            start_time = None
+
+        end_time = dtend_val.time() if isinstance(dtend_val, datetime) else None
+
+        location    = str(component.get('LOCATION',    '') or '').strip()
+        description = str(component.get('DESCRIPTION', '') or '').strip()
+
+        seen_uids.add(uid)
+
+        defaults = {
+            'title':      summary[:200],
+            'event_type': _detect_event_type(summary),
+            'date':       event_date,
+            'start_time': start_time,
+            'end_time':   end_time,
+            'venue':      location[:200],
+            'notes':      description[:2000],
+        }
+
+        obj, was_created = Event.objects.update_or_create(
+            google_event_id=uid,
+            defaults=defaults,
+        )
+        if was_created:
+            created += 1
+        else:
+            updated += 1
+
+    stale_qs = Event.objects.exclude(google_event_id='').exclude(google_event_id__in=seen_uids)
+    deleted  = stale_qs.count()
+    stale_qs.delete()
+
+    cache.set(GCAL_SYNC_CACHE_KEY, True, GCAL_SYNC_INTERVAL)
+    return created, updated, deleted
 
 SCORES_BASE_PATH = '/var/www/mariachiesencia/scores/'
 
@@ -159,6 +234,10 @@ def event_calendar(request):
     # Build calendar grid (6 rows × 7 cols, None for padding)
     cal        = calendar.monthcalendar(year, month)
     month_name = date(year, month, 1).strftime('%B %Y')
+
+    # Auto-sync Google Calendar if the cache has expired
+    if not cache.get(GCAL_SYNC_CACHE_KEY):
+        _do_ical_sync()
 
     # All events this month
     events_this_month = Event.objects.filter(date__year=year, date__month=month)
@@ -300,72 +379,14 @@ def event_delete(request, event_id):
 @login_required
 @require_POST
 def sync_google_calendar(request):
-    """Fetch the band's Google Calendar iCal feed and sync events into the DB."""
+    """Force a manual sync (admin only), bypassing the cache cooldown."""
     _require_portal(request)
     if request.user.role != 'admin':
         raise PermissionDenied
 
-    try:
-        resp = http_requests.get(GOOGLE_ICAL_URL, timeout=15)
-        resp.raise_for_status()
-        gcal = iCalendar.from_ical(resp.content)
-    except Exception as e:
-        return JsonResponse({'error': f'Could not fetch calendar: {e}'}, status=502)
-
-    created = updated = deleted = 0
-    seen_uids = set()
-
-    for component in gcal.walk():
-        if component.name != 'VEVENT':
-            continue
-
-        uid     = str(component.get('UID', ''))
-        summary = str(component.get('SUMMARY', 'Untitled') or 'Untitled').strip()
-        dtstart = component.get('DTSTART')
-        dtend   = component.get('DTEND') or component.get('DTSTART')
-
-        if dtstart is None:
-            continue
-
-        dtstart_val = dtstart.dt
-        dtend_val   = dtend.dt
-
-        if isinstance(dtstart_val, datetime):
-            event_date = dtstart_val.date()
-            start_time = dtstart_val.time()
-        else:
-            event_date = dtstart_val
-            start_time = None
-
-        end_time = dtend_val.time() if isinstance(dtend_val, datetime) else None
-
-        location    = str(component.get('LOCATION',    '') or '').strip()
-        description = str(component.get('DESCRIPTION', '') or '').strip()
-
-        seen_uids.add(uid)
-
-        defaults = {
-            'title':      summary[:200],
-            'event_type': _detect_event_type(summary),
-            'date':       event_date,
-            'start_time': start_time,
-            'end_time':   end_time,
-            'venue':      location[:200],
-            'notes':      description[:2000],
-        }
-
-        obj, was_created = Event.objects.update_or_create(
-            google_event_id=uid,
-            defaults=defaults,
-        )
-        if was_created:
-            created += 1
-        else:
-            updated += 1
-
-    # Remove portal events sourced from Google that no longer exist in the feed
-    stale_qs = Event.objects.exclude(google_event_id='').exclude(google_event_id__in=seen_uids)
-    deleted  = stale_qs.count()
-    stale_qs.delete()
-
+    cache.delete(GCAL_SYNC_CACHE_KEY)
+    result = _do_ical_sync()
+    if result is None:
+        return JsonResponse({'error': 'GOOGLE_ICAL_URL not configured'}, status=502)
+    created, updated, deleted = result
     return JsonResponse({'created': created, 'updated': updated, 'deleted': deleted})

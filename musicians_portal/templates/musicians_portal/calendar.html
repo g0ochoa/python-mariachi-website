@@ -13,21 +13,11 @@
       <small class="text-muted">Mariachi Esencia — Band Schedule</small>
     </div>
     <div class="d-flex gap-2">
-      {% if user.role == 'admin' %}
-        <button id="sync-btn" class="btn btn-outline-success btn-sm"
-                onclick="syncCalendar(this)">
-          <i class="bi bi-arrow-repeat me-1"></i>Sync from Google
-        </button>
-      {% endif %}
       <a href="{% url 'portal_dashboard' %}" class="btn btn-outline-secondary btn-sm">
         <i class="bi bi-arrow-left me-1"></i>Portal
       </a>
     </div>
   </div>
-
-  {% if user.role == 'admin' %}
-  <div id="sync-alert" class="alert d-none mb-3" role="alert"></div>
-  {% endif %}
 
   <!-- Google Calendar Embed -->
   <div class="card border-0 shadow-sm mb-4">
@@ -83,51 +73,5 @@
   {% endif %}
 
 </div>
-
-{% if user.role == 'admin' %}
-<script>
-function syncCalendar(btn) {
-  btn.disabled = true;
-  btn.innerHTML = '<span class="spinner-border spinner-border-sm me-1"></span>Syncing…';
-
-  const csrfToken = document.cookie.match(/csrftoken=([^;]+)/)?.[1] || '';
-
-  fetch("{% url 'portal_calendar_sync' %}", {
-    method: 'POST',
-    headers: {
-      'X-CSRFToken': csrfToken,
-      'Content-Type': 'application/json',
-    },
-  })
-  .then(r => r.json())
-  .then(data => {
-    const alertEl = document.getElementById('sync-alert');
-    if (data.error) {
-      alertEl.className = 'alert alert-danger mb-3';
-      alertEl.textContent = 'Sync failed: ' + data.error;
-    } else {
-      alertEl.className = 'alert alert-success mb-3';
-      alertEl.innerHTML =
-        `<i class="bi bi-check-circle me-1"></i>` +
-        `Sync complete — <strong>${data.created}</strong> added, ` +
-        `<strong>${data.updated}</strong> updated, ` +
-        `<strong>${data.deleted}</strong> removed. ` +
-        `<a href="" class="alert-link">Refresh page to see changes.</a>`;
-    }
-    alertEl.classList.remove('d-none');
-  })
-  .catch(() => {
-    const alertEl = document.getElementById('sync-alert');
-    alertEl.className = 'alert alert-danger mb-3';
-    alertEl.textContent = 'Network error — could not reach the server.';
-    alertEl.classList.remove('d-none');
-  })
-  .finally(() => {
-    btn.disabled = false;
-    btn.innerHTML = '<i class="bi bi-arrow-repeat me-1"></i>Sync from Google';
-  });
-}
-</script>
-{% endif %}
 
 {% endblock %}

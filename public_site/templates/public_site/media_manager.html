@@ -28,12 +28,14 @@
     {% endfor %}
   {% endif %}
 
-  {% if library %}
   <div class="alert alert-light border mb-4 d-flex align-items-center gap-2">
     <i class="bi bi-folder2-open text-danger fs-5"></i>
-    <span><strong>{{ library|length }} file{{ library|length|pluralize }}</strong> already in your library — use &ldquo;Pick from library&rdquo; on any slot to reuse without re-uploading.</span>
+    {% if library %}
+    <span><strong>{{ library|length }} file{{ library|length|pluralize }}</strong> in your library — use "Choose from library" on any slot to reuse without re-uploading.</span>
+    {% else %}
+    <span class="text-muted">Your library is empty. Upload a file to any slot and it will appear here for reuse across other slots.</span>
+    {% endif %}
   </div>
-  {% endif %}
 
   <!-- Slot grid -->
   {% for slot in slots %}
@@ -141,17 +143,17 @@
 
         <!-- Pick from library + Remove -->
         <div class="col-md-4">
-          {% if library %}
           <p class="fw-semibold mb-2 text-muted" style="font-size:.8rem; text-transform:uppercase; letter-spacing:.05em;">Pick from library</p>
           <button type="button" class="btn btn-outline-danger btn-sm w-100 mb-3"
                   data-bs-toggle="modal" data-bs-target="#libraryModal"
                   data-slot="{{ slot.key }}"
                   data-slot-label="{{ slot.label }}"
                   data-slot-type="{{ slot.type }}"
-                  onclick="openLibraryModal(this)">
-            <i class="bi bi-folder2-open me-1"></i>Choose from library ({{ library|length }})
+                  onclick="openLibraryModal(this)"
+                  {% if not library %}title="Upload a file first to build your library"{% endif %}>
+            <i class="bi bi-folder2-open me-1"></i>Choose from library
+            {% if library %}<span class="badge bg-danger ms-1">{{ library|length }}</span>{% else %}<span class="badge bg-secondary ms-1">0</span>{% endif %}
           </button>
-          {% endif %}
           {% if slot.current %}
           <p class="fw-semibold mb-2 text-muted" style="font-size:.8rem; text-transform:uppercase; letter-spacing:.05em;">Remove</p>
           <form method="post" action="{% url 'media_delete' slot.key %}"

@@ -117,6 +117,7 @@
   @media (max-width: 767px) {
     /* Default mobile: file list visible, viewer hidden */
     #song-panels   { flex-direction: column; }
+    #file-list-col { flex: 1 1 0; min-height: 0; width: 100%; }
     #viewer-col    { display: none; }
 
     /* Full-screen mode: triggered by JS when a file is tapped */
@@ -364,11 +365,7 @@ function openFile(btn, url, kind) {
   }
 }
 
-// Auto-open the first PDF if there is one
-document.addEventListener('DOMContentLoaded', () => {
-  const firstPdf = document.querySelector('.file-btn[onclick*=\'pdf\']');
-  if (firstPdf) firstPdf.click();
-});
+// No auto-open — user selects which PDF to view
 
 // Keyboard left/right arrow navigation between songs
 document.addEventListener('keydown', (e) => {

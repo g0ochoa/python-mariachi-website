@@ -19,7 +19,7 @@
   <!-- Live Search -->
   <div class="mb-3 d-flex gap-2 align-items-center">
     <div class="flex-grow-1 position-relative">
-      <i class="bi bi-search position-absolute text-muted" style="top:50%;left:.75rem;transform:translateY(-50%);"></i>
+      <i id="search-icon" class="bi bi-search position-absolute text-muted" style="top:50%;left:.75rem;transform:translateY(-50%);"></i>
       <input id="score-search" type="search" autocomplete="off"
              class="form-control ps-4" placeholder="Search songs…"
              value="{{ query }}">
@@ -166,7 +166,11 @@
     counter.textContent = searching ? `${visible} of ${total}` : `${total} songs`;
   }
 
-  input.addEventListener('input', () => filter(input.value));
+  const searchIcon = document.getElementById('search-icon');
+  input.addEventListener('input', () => {
+    if (searchIcon) searchIcon.style.display = input.value ? 'none' : '';
+    filter(input.value);
+  });
 
   // Run on load if there's a pre-filled value
   if (input.value) filter(input.value);

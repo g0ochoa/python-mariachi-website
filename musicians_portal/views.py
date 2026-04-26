@@ -1,5 +1,6 @@
 import os
 import calendar
+import threading
 from datetime import date, datetime, timedelta
 from urllib.parse import quote
 from zoneinfo import ZoneInfo
@@ -246,9 +247,9 @@ def event_calendar(request):
     cal        = calendar.monthcalendar(year, month)
     month_name = date(year, month, 1).strftime('%B %Y')
 
-    # Auto-sync Google Calendar if the cache has expired
+    # Auto-sync Google Calendar if the cache has expired (non-blocking)
     if not cache.get(GCAL_SYNC_CACHE_KEY):
-        _do_ical_sync()
+        threading.Thread(target=_do_ical_sync, daemon=True).start()
 
     # All events this month
     events_this_month = Event.objects.filter(date__year=year, date__month=month)

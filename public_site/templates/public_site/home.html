@@ -154,12 +154,6 @@
     border-color: #c09a6b;
     color: #c09a6b;
 }
-#playlist-grid.stretch-btns {
-    height: 100%;
-}
-#playlist-grid.stretch-btns .video-thumb-btn {
-    flex: 1;
-}
 </style>
 <script>
 function applyVideoLayout(isPortrait) {
@@ -169,14 +163,13 @@ function applyVideoLayout(isPortrait) {
     const grid        = document.getElementById('playlist-grid');
     if (isPortrait) {
         frame.style.maxWidth  = '360px';
-        videoCol.className    = 'col-auto';
-        playlistCol.className = 'col d-flex flex-column';
-        grid.classList.add('stretch-btns');
+        videoCol.className    = 'col-lg-4';
+        playlistCol.className = 'col-lg-5';
+        grid.classList.remove('stretch-btns');
     } else {
         frame.style.maxWidth  = '100%';
         videoCol.className    = 'col-lg-8';
         playlistCol.className = 'col-lg-4';
-        grid.classList.remove('stretch-btns');
     }
 }
 function adjustVideoFrame(v) {

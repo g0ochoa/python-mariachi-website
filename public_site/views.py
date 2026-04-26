@@ -136,9 +136,7 @@ def media_upload(request, slot):
         return redirect('media_manager')
 
     obj, _ = SiteMedia.objects.get_or_create(slot=slot, defaults={'media_type': media_type})
-    # Delete old file from disk before replacing
-    if obj.file:
-        obj.file.delete(save=False)
+    # Do NOT delete old file — keep it in media/site_media/ so it stays in the library
     obj.file = uploaded
     obj.media_type = media_type
     obj.alt_text = request.POST.get('alt_text', obj.alt_text)

@@ -34,9 +34,61 @@
 </section>
 
 <!-- STATS -->
-<section class="stats-section">
+<!-- VIDEO SHOWCASE -->
+<section class="py-section" style="background: #1a1a1a;">
     <div class="container">
-        <div class="row g-4 text-center">
+        <p class="eyebrow-label text-center" style="color:#c09a6b;">See Us Live</p>
+        <h2 class="section-title text-center text-white mb-4">Watch Us Perform</h2>
+        <div class="row g-4 align-items-start">
+            <!-- Main video player -->
+            <div class="col-lg-8">
+                <div class="rounded-3 overflow-hidden shadow-lg">
+                    <video id="main-video" controls preload="metadata"
+                           class="w-100 d-block"
+                           style="background:#000; aspect-ratio:16/9; object-fit:cover; max-height:420px;">
+                        <source src="{% static 'videos/amor-eterno.mp4' %}" type="video/mp4">
+                    </video>
+                </div>
+                <p id="video-title" class="text-center mt-2 fw-semibold" style="color:#c09a6b; font-size:.9rem;">
+                    ♪ Amor Eterno
+                </p>
+            </div>
+            <!-- Video playlist -->
+            <div class="col-lg-4">
+                <div class="d-flex flex-column gap-2">
+                    <button class="video-thumb-btn active" onclick="switchVideo(this, '{% static "videos/amor-eterno.mp4" %}', '♪ Amor Eterno')">
+                        <i class="bi bi-play-circle-fill me-2" style="font-size:1.2rem;"></i>
+                        <div class="text-start">
+                            <div class="fw-semibold" style="font-size:.85rem;">Amor Eterno</div>
+                            <div style="font-size:.72rem; opacity:.7;">Ballad</div>
+                        </div>
+                    </button>
+                    <button class="video-thumb-btn" onclick="switchVideo(this, '{% static "videos/la-venia-bendita.mp4" %}', '♪ La Venia Bendita')">
+                        <i class="bi bi-play-circle-fill me-2" style="font-size:1.2rem;"></i>
+                        <div class="text-start">
+                            <div class="fw-semibold" style="font-size:.85rem;">La Venia Bendita</div>
+                            <div style="font-size:.72rem; opacity:.7;">Quinceañera</div>
+                        </div>
+                    </button>
+                    <button class="video-thumb-btn" onclick="switchVideo(this, '{% static "videos/regalo-de-dios.mp4" %}', '♪ Regalo de Dios')">
+                        <i class="bi bi-play-circle-fill me-2" style="font-size:1.2rem;"></i>
+                        <div class="text-start">
+                            <div class="fw-semibold" style="font-size:.85rem;">Regalo de Dios</div>
+                            <div style="font-size:.72rem; opacity:.7;">Ranchera</div>
+                        </div>
+                    </button>
+                    <button class="video-thumb-btn" onclick="switchVideo(this, '{% static "videos/toro-relajo.mp4" %}', '♪ Toro y el Relajo')">
+                        <i class="bi bi-play-circle-fill me-2" style="font-size:1.2rem;"></i>
+                        <div class="text-start">
+                            <div class="fw-semibold" style="font-size:.85rem;">Toro y el Relajo</div>
+                            <div style="font-size:.72rem; opacity:.7;">Lively / Fiesta</div>
+                        </div>
+                    </button>
+                </div>
+            </div>
+        </div>
+        <!-- Stats moved here -->
+        <div class="row g-4 text-center mt-5">
             <div class="col-md-4">
                 <div class="stat-card stat-card--blush">
                     <div class="stat-number">15<span>+</span></div>
@@ -58,6 +110,40 @@
         </div>
     </div>
 </section>
+
+<style>
+.video-thumb-btn {
+    display: flex;
+    align-items: center;
+    background: rgba(255,255,255,.07);
+    border: 1px solid rgba(255,255,255,.12);
+    border-radius: 10px;
+    color: #fff;
+    padding: .65rem .9rem;
+    cursor: pointer;
+    transition: background .15s, border-color .15s;
+    width: 100%;
+}
+.video-thumb-btn:hover {
+    background: rgba(255,255,255,.14);
+    border-color: rgba(192,154,107,.5);
+}
+.video-thumb-btn.active {
+    background: rgba(192,154,107,.18);
+    border-color: #c09a6b;
+    color: #c09a6b;
+}
+</style>
+<script>
+function switchVideo(btn, src, title) {
+    document.querySelectorAll('.video-thumb-btn').forEach(b => b.classList.remove('active'));
+    btn.classList.add('active');
+    const v = document.getElementById('main-video');
+    v.src = src;
+    v.play();
+    document.getElementById('video-title').textContent = title;
+}
+</script>
 
 <!-- ABOUT -->
 <section id="about" class="py-section">
@@ -154,23 +240,23 @@
         <p class="eyebrow-label text-center">Moments We've Created</p>
         <h2 class="section-title text-center">Photo Gallery</h2>
         <div class="gallery-grid">
-            <div class="gallery-item" style="background:#F2C4C9;">
-                <div class="gallery-overlay"><span>Wedding Ceremony</span></div>
+            <div class="gallery-item" style="background-image:url('{% static "images/mariachi-photo-2.jpeg" %}');background-size:cover;background-position:center;">
+                <div class="gallery-overlay"><span>Mariachi Todo Terreno</span></div>
             </div>
-            <div class="gallery-item" style="background:#B8DEC9;">
+            <div class="gallery-item" style="background-image:url('{% static "images/quinceanera-1.jpeg" %}');background-size:cover;background-position:center;">
+                <div class="gallery-overlay"><span>Quinceañera</span></div>
+            </div>
+            <div class="gallery-item" style="background-image:url('{% static "images/mariachi-photo-3.jpeg" %}');background-size:cover;background-position:center;">
+                <div class="gallery-overlay"><span>Live Performance</span></div>
+            </div>
+            <div class="gallery-item" style="background-image:url('{% static "images/mariachi-photo-4.jpeg" %}');background-size:cover;background-position:center;">
+                <div class="gallery-overlay"><span>The Band</span></div>
+            </div>
+            <div class="gallery-item" style="background-image:url('{% static "images/quinceanera-2.jpeg" %}');background-size:cover;background-position:center;">
                 <div class="gallery-overlay"><span>Quinceañera Night</span></div>
             </div>
-            <div class="gallery-item" style="background:#F7C4A0;">
-                <div class="gallery-overlay"><span>Birthday Serenade</span></div>
-            </div>
-            <div class="gallery-item" style="background:#D4C4E8;">
-                <div class="gallery-overlay"><span>Corporate Gala</span></div>
-            </div>
-            <div class="gallery-item" style="background:#F5E6A3;">
-                <div class="gallery-overlay"><span>Outdoor Concert</span></div>
-            </div>
-            <div class="gallery-item" style="background:#EDBED4;">
-                <div class="gallery-overlay"><span>Anniversary Party</span></div>
+            <div class="gallery-item" style="background-image:url('{% static "images/mariachi-photo-1.jpeg" %}');background-size:cover;background-position:center;">
+                <div class="gallery-overlay"><span>Portrait</span></div>
             </div>
         </div>
     </div>

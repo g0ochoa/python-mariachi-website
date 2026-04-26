@@ -108,22 +108,28 @@
     background: #fff;
   }
 
-  /* ── Mobile full-screen PDF mode ──────────────────────────── */
-  /* Floating back button — hidden by default, shown in full-screen mode */
-  #mobile-back-btn {
-    display: none;
-  }
-  body.pdf-fullscreen footer { display: none !important; }
+  /* ── Mobile layout & PDF modes ──────────────────────────────── */
+  @media (max-width: 767px) {
+    #mobile-back-btn { display: none; }
+
+    /* Default mobile: full-width file list, viewer hidden */
     #file-list-col { flex: 1 1 0; min-height: 0; width: 100%; }
     #viewer-col    { display: none; }
 
-    /* Full-screen mode: triggered by JS when a file is tapped */
+    /* Split preview (single tap): file list top 40%, viewer bottom 60% */
+    body.pdf-preview #song-panels   { flex-direction: column; }
+    body.pdf-preview #file-list-col { flex: 0 0 38%; width: 100%; border-right: none; border-bottom: 1px solid #dee2e6; }
+    body.pdf-preview #viewer-col    { display: flex !important; flex: 1 1 0; }
+    body.pdf-preview footer         { display: none !important; }
+
+    /* Full-screen mode (double tap or expand button) */
     body.pdf-fullscreen .navbar          { display: none !important; }
     body.pdf-fullscreen #song-header     { display: none !important; }
     body.pdf-fullscreen #file-list-col   { display: none !important; }
     body.pdf-fullscreen #viewer-col      { display: flex !important; }
     body.pdf-fullscreen #song-app        { height: 100dvh; }
     body.pdf-fullscreen #song-panels     { flex: 1 1 0; }
+    body.pdf-fullscreen footer           { display: none !important; }
 
     /* Floating pill to go back to file list */
     body.pdf-fullscreen #mobile-back-btn {
@@ -319,6 +325,9 @@ async function renderPDF(url, area) {
   }
 }
 
+let _lastTapUrl = null;
+let _lastTapTime = 0;
+
 function openFile(btn, url, kind) {
   // Highlight selected button
   document.querySelectorAll('.file-btn').forEach(b => b.classList.remove('active'));
@@ -329,12 +338,24 @@ function openFile(btn, url, kind) {
 
   // Update toolbar filename label
   const fnameEl = document.getElementById('viewer-fname');
-  if (fnameEl) fnameEl.textContent = btn.querySelector('.fname').textContent.trim();
+  if (fnameEl) fnameEl.textContent = name;
 
   const isMobile = window.matchMedia('(max-width: 767px)').matches;
 
+  // Double-tap on same file → fullscreen (PDF already rendered)
+  if (isMobile) {
+    const now = Date.now();
+    const isDoubleTap = (now - _lastTapTime < 400) && (_lastTapUrl === url);
+    _lastTapTime = now;
+    _lastTapUrl = url;
+    if (isDoubleTap) {
+      enterPdfFullscreen();
+      return;
+    }
+  }
+
   if (kind === 'pdf') {
-    if (isMobile) enterPdfPreview(); // split view — tap expand button for fullscreen
+    if (isMobile) enterPdfPreview(); // single tap = split preview; double tap = fullscreen
     renderPDF(url, area);
 
   } else if (kind === 'image') {

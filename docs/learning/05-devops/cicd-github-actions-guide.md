@@ -44,16 +44,19 @@ This is called **manual deployment**. It works, but it has real problems:
 
 ## Part 2 — Key Vocabulary
 
-### VPS (Virtual Private Server)
-A rented Linux computer running in a data center. "Virtual" because it's a slice of a physical machine shared with others, but you get your own isolated operating system. You never physically touch it — you connect via SSH.
+### VPS (Virtual Private Server) vs Dedicated Server
+In the industry, "VPS" is often used loosely to mean any remote Linux server you SSH into. Technically:
 
-Our VPS:
+- **VPS** — a virtualized slice of a shared physical machine (like renting a room in an apartment building)
+- **Dedicated Server** — a physical machine all to yourself (like owning the whole building)
+
+Our server at `mariachiesencia.com` is actually a **dedicated physical Ubuntu server** — even better than a VPS. More resources, no noisy neighbors, consistent performance. The CI/CD pipeline works identically for both — it just cares that there's a Linux machine it can SSH into.
+
+Our server:
 - **Host**: `mariachiesencia.com` (IP: 72.204.116.227)
 - **OS**: Ubuntu Linux
-- **Provider**: Dynu/shared hosting with SSH access
+- **Type**: Physical dedicated server
 - **User**: `nekrosys`
-
-Think of it like renting a studio apartment in a building you'll never visit. The building owner (the hosting company) manages the physical hardware. You manage everything inside your apartment (your OS, your files, your running processes).
 
 ### CI/CD
 **CI = Continuous Integration** — automatically test and validate code whenever someone pushes  

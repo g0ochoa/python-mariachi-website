@@ -36,8 +36,7 @@ PostgreSQL and database design
 
 ### **05 - DevOps & Infrastructure**
 Deployment, containers, and infrastructure
-- Manual Deployment to Linux *(In progress)*
-- Gunicorn & Nginx Setup *(In progress)*
+- ⭐ [Server Setup — Complete Guide](05-devops/server-setup-complete-guide.md) **Available** ← packages, Postgres, Gunicorn, nginx, static file permissions, sudo rules
 - ⭐ [CI/CD Pipelines with GitHub Actions](05-devops/cicd-github-actions-guide.md) **Available**
 - Docker Basics *(Coming soon)*
 - Google Cloud Platform *(Coming soon)*

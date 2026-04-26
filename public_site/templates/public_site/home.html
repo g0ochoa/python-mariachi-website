@@ -8,8 +8,9 @@
 <!-- HERO -->
 <section class="hero-home">
     <div class="container">
-        <div class="row justify-content-center">
-            <div class="col-lg-9 col-xl-8 text-center">
+        <div class="row align-items-center g-5 justify-content-center">
+            <!-- Text column -->
+            <div class="col-lg-6 col-xl-5 text-center text-lg-start">
                 <div class="hero-frame">
                     <span class="hero-pill">Est. &nbsp;&#9834;&nbsp; Professional Mariachi</span>
                     <p class="hero-script">Authentic Mexican Music</p>
@@ -28,6 +29,13 @@
                         </a>
                     </div>
                 </div>
+            </div>
+            <!-- Band photo column -->
+            <div class="col-lg-6 col-xl-5 d-none d-lg-block">
+                <img src="{% static 'images/mariachi-photo-2.jpeg' %}"
+                     alt="Mariachi Todo Terreno — full band"
+                     class="img-fluid rounded-4 shadow-lg"
+                     style="width:100%; object-fit:cover; max-height:520px; border: 3px solid var(--blush);">
             </div>
         </div>
     </div>

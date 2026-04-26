@@ -45,7 +45,7 @@
     <div class="container">
         <p class="eyebrow-label text-center" style="color:#c09a6b;">See Us Live</p>
         <h2 class="section-title text-center text-white mb-4">Watch Us Perform</h2>
-        <div id="video-row" class="row g-4 align-items-start">
+        <div id="video-row" class="row g-4 align-items-start justify-content-center">
             <!-- Main video player -->
             <div id="video-col" class="col-lg-8">
                 <div id="video-frame" class="mx-auto" style="max-width:100%; transition: max-width .3s ease;">
@@ -64,7 +64,7 @@
             </div>
             <!-- Video playlist -->
             <div id="playlist-col" class="col-lg-4">
-                <div id="playlist-grid" class="d-flex flex-column gap-2" style="transition: all .3s ease;">
+                <div id="playlist-grid" class="d-flex flex-column gap-2">
                     <button class="video-thumb-btn active"
                             data-src="{% if site_media.video_1 %}{{ site_media.video_1.file.url }}{% else %}{% static 'videos/amor-eterno.mp4' %}{% endif %}"
                             data-title="♪ {% if site_media.video_1 and site_media.video_1.caption %}{{ site_media.video_1.caption }}{% else %}Amor Eterno{% endif %}"
@@ -154,51 +154,19 @@
     border-color: #c09a6b;
     color: #c09a6b;
 }
-#playlist-grid.two-col {
-    display: grid !important;
-    grid-template-columns: 1fr 1fr;
-    gap: .75rem;
-}
-#playlist-grid.two-col .video-thumb-btn {
-    padding: 1rem;
-    justify-content: center;
-    flex-direction: column;
-    text-align: center;
-    gap: .4rem;
-}
-#playlist-grid.two-col .video-thumb-btn i {
-    font-size: 1.5rem !important;
-    margin: 0 !important;
-}
-#playlist-grid.two-col .text-start {
-    text-align: center !important;
-}
 </style>
 <script>
 function applyVideoLayout(isPortrait) {
-    const frame       = document.getElementById('video-frame');
-    const videoCol    = document.getElementById('video-col');
-    const playlistCol = document.getElementById('playlist-col');
-    const playlistGrid= document.getElementById('playlist-grid');
-    const row         = document.getElementById('video-row');
+    const frame = document.getElementById('video-frame');
+    const row   = document.getElementById('video-row');
     if (isPortrait) {
-        // Stack: video centered on top, full-width playlist 2×2 below
         frame.style.maxWidth = '360px';
-        row.classList.add('flex-column');
-        videoCol.classList.replace('col-lg-8', 'col-12');
-        videoCol.classList.replace('col-lg-4', 'col-12');
-        playlistCol.classList.replace('col-lg-4', 'col-12');
-        playlistCol.classList.replace('col-lg-8', 'col-12');
-        playlistGrid.classList.add('two-col');
+        row.style.maxWidth   = '700px';
+        row.style.margin     = '0 auto';
     } else {
-        // Side-by-side: video wide, playlist narrow
         frame.style.maxWidth = '100%';
-        row.classList.remove('flex-column');
-        ['col-12','col-lg-4'].forEach(c => videoCol.classList.remove(c));
-        videoCol.classList.add('col-lg-8');
-        ['col-12','col-lg-8'].forEach(c => playlistCol.classList.remove(c));
-        playlistCol.classList.add('col-lg-4');
-        playlistGrid.classList.remove('two-col');
+        row.style.maxWidth   = '';
+        row.style.margin     = '';
     }
 }
 function adjustVideoFrame(v) {

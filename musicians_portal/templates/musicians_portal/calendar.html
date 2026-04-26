@@ -103,7 +103,9 @@
           <tr>
             {% for day in week %}
             <td class="p-1 align-top
-                {% if day == today.day and month == today.month and year == today.year %}bg-warning bg-opacity-25{% endif %}"
+                {% if day == today.day and month == today.month and year == today.year %}bg-warning bg-opacity-25{% endif %}
+                {% if day != 0 and events_by_day|get_item:day %}cal-day-click{% endif %}"
+                {% if day != 0 and events_by_day|get_item:day %}onclick="showDayEvents({{ day }})"{% endif %}
                 style="height:80px; width:14.28%; overflow:hidden;">
               {% if day != 0 %}
                 <div class="{% if day == today.day and month == today.month and year == today.year %}fw-bold text-danger{% else %}text-muted{% endif %} mb-1"
@@ -188,9 +190,61 @@
 
 </div>
 
+<!-- Day Events Modal -->
+<div class="modal fade" id="dayEventsModal" tabindex="-1" aria-labelledby="dayEventsTitle" aria-hidden="true">
+  <div class="modal-dialog modal-dialog-centered modal-dialog-scrollable">
+    <div class="modal-content">
+      <div class="modal-header border-0 pb-1">
+        <h5 class="modal-title fw-bold" id="dayEventsTitle"></h5>
+        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+      </div>
+      <div class="modal-body pt-0 list-group list-group-flush" id="dayEventsBody"></div>
+    </div>
+  </div>
+</div>
+
 <style>
 .next-up-card { transition: transform .15s, box-shadow .15s; }
 .next-up-card:hover { transform: translateY(-3px); box-shadow: 0 .5rem 1.5rem rgba(0,0,0,.12) !important; }
+.cal-day-click { cursor: pointer; }
+.cal-day-click:hover { background-color: rgba(220,53,69,.06) !important; }
 </style>
+
+<script>
+const CAL_YEAR  = {{ year }};
+const CAL_MONTH = {{ month }};
+const MONTH_NAMES = ['January','February','March','April','May','June','July','August','September','October','November','December'];
+const DAY_NAMES   = ['Sunday','Monday','Tuesday','Wednesday','Thursday','Friday','Saturday'];
+
+const eventsByDay = {
+  {% for day, evs in events_by_day.items %}
+  "{{ day }}": [{% for ev in evs %}{"id":{{ ev.id }},"title":"{{ ev.title|escapejs }}","type":"{{ ev.event_type }}","typeLabel":"{{ ev.get_event_type_display }}","start":"{% if ev.start_time %}{{ ev.start_time|time:'g:i A' }}{% endif %}","end":"{% if ev.end_time %}{{ ev.end_time|time:'g:i A' }}{% endif %}","venue":"{{ ev.venue|escapejs }}","url":"{% url 'portal_event_detail' ev.id %}"}{% if not forloop.last %},{% endif %}{% endfor %}]{% if not forloop.last %},{% endif %}
+  {% endfor %}
+};
+
+function showDayEvents(day) {
+  const evs = eventsByDay[String(day)] || [];
+  if (!evs.length) return;
+  const d = new Date(CAL_YEAR, CAL_MONTH - 1, day);
+  document.getElementById('dayEventsTitle').textContent =
+    DAY_NAMES[d.getDay()] + ', ' + MONTH_NAMES[CAL_MONTH - 1] + ' ' + day;
+  const colors = {gig: 'bg-danger', rehearsal: 'bg-primary', other: 'bg-secondary'};
+  document.getElementById('dayEventsBody').innerHTML = evs.map(ev =>
+    `<a href="${ev.url}" class="list-group-item list-group-item-action py-3">
+      <div class="d-flex justify-content-between align-items-start gap-2">
+        <div>
+          <div class="fw-semibold">${ev.title}</div>
+          <div class="text-muted small mt-1">
+            ${ev.start ? '<i class="bi bi-clock me-1"></i>' + ev.start + (ev.end ? ' – ' + ev.end : '') + '&nbsp;&nbsp;' : ''}
+            ${ev.venue ? '<i class="bi bi-geo-alt me-1"></i>' + ev.venue : ''}
+          </div>
+        </div>
+        <span class="badge ${colors[ev.type] || 'bg-secondary'} flex-shrink-0">${ev.typeLabel}</span>
+      </div>
+    </a>`
+  ).join('');
+  new bootstrap.Modal(document.getElementById('dayEventsModal')).show();
+}
+</script>
 
 {% endblock %}

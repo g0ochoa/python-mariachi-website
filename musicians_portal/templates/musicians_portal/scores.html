@@ -19,9 +19,10 @@
   <!-- Live Search -->
   <div class="mb-3 d-flex gap-2 align-items-center">
     <div class="flex-grow-1 position-relative">
-      <i id="search-icon" class="bi bi-search position-absolute text-muted" style="top:50%;left:.75rem;transform:translateY(-50%);"></i>
+      <i id="search-icon" class="bi bi-search position-absolute text-muted" style="top:50%;left:.75rem;transform:translateY(-50%);pointer-events:none;"></i>
       <input id="score-search" type="search" autocomplete="off"
-             class="form-control ps-4" placeholder="Search songs…"
+             class="form-control" placeholder="Search songs…"
+             style="text-align:center; padding-left:2.5rem; padding-right:2.5rem;"
              value="{{ query }}">
     </div>
     <span id="match-count" class="text-muted small text-nowrap"></span>
@@ -168,7 +169,10 @@
 
   const searchIcon = document.getElementById('search-icon');
   input.addEventListener('input', () => {
-    if (searchIcon) searchIcon.style.display = input.value ? 'none' : '';
+    const hasVal = input.value.length > 0;
+    if (searchIcon) searchIcon.style.display = hasVal ? 'none' : '';
+    input.style.textAlign    = hasVal ? 'left'    : 'center';
+    input.style.paddingLeft  = hasVal ? '0.75rem' : '2.5rem';
     filter(input.value);
   });
 

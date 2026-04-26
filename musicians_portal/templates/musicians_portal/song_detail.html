@@ -113,10 +113,7 @@
   #mobile-back-btn {
     display: none;
   }
-
-  @media (max-width: 767px) {
-    /* Default mobile: file list visible, viewer hidden */
-    #song-panels   { flex-direction: column; }
+  body.pdf-fullscreen footer { display: none !important; }
     #file-list-col { flex: 1 1 0; min-height: 0; width: 100%; }
     #viewer-col    { display: none; }
 

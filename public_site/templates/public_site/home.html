@@ -51,7 +51,7 @@
                 <div class="rounded-3 overflow-hidden shadow-lg">
                     <video id="main-video" controls preload="metadata"
                            class="w-100 d-block"
-                           style="background:#000; aspect-ratio:16/9; object-fit:cover; max-height:420px;">
+                           style="background:#000; max-height:480px; object-fit:contain;">
                         <source src="{% if site_media.video_1 %}{{ site_media.video_1.file.url }}{% else %}{% static 'videos/amor-eterno.mp4' %}{% endif %}" type="video/mp4">
                     </video>
                 </div>

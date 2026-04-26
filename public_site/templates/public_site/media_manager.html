@@ -1,0 +1,173 @@
+{% extends "base.html" %}
+{% load static %}
+
+{% block title %}Media Manager — Admin{% endblock %}
+
+{% block content %}
+<div class="container py-5">
+
+  <!-- Header -->
+  <div class="d-flex align-items-center justify-content-between mb-4 flex-wrap gap-2">
+    <div>
+      <h2 class="fw-bold mb-1" style="color:var(--wine);">
+        <i class="bi bi-images me-2"></i>Media Manager
+      </h2>
+      <p class="text-muted mb-0">Upload or replace photos and videos used across the website.</p>
+    </div>
+    <a href="{% url 'portal_dashboard' %}" class="btn btn-outline-secondary btn-sm">
+      <i class="bi bi-arrow-left me-1"></i>Back to Portal
+    </a>
+  </div>
+
+  {% if messages %}
+    {% for msg in messages %}
+      <div class="alert alert-{{ msg.tags|default:'info' }} alert-dismissible fade show" role="alert">
+        {{ msg }}
+        <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+      </div>
+    {% endfor %}
+  {% endif %}
+
+  <!-- Slot grid -->
+  {% for slot in slots %}
+  <div class="card border-0 shadow-sm mb-4">
+    <div class="card-header bg-white d-flex align-items-center gap-3 py-3">
+      <span class="badge {% if slot.type == 'video' %}bg-dark{% else %}bg-danger{% endif %} text-uppercase" style="font-size:.65rem; letter-spacing:.05em;">
+        <i class="bi {% if slot.type == 'video' %}bi-camera-video-fill{% else %}bi-image-fill{% endif %} me-1"></i>{{ slot.type }}
+      </span>
+      <div>
+        <h6 class="mb-0 fw-bold">{{ slot.label }}</h6>
+        <small class="text-muted">{{ slot.hint }}</small>
+      </div>
+      {% if slot.current %}
+        <span class="badge bg-success ms-auto"><i class="bi bi-check-circle-fill me-1"></i>Active</span>
+      {% else %}
+        <span class="badge bg-secondary ms-auto">Using default</span>
+      {% endif %}
+    </div>
+
+    <div class="card-body">
+      <div class="row align-items-center g-4">
+
+        <!-- Current preview -->
+        <div class="col-md-4 text-center">
+          {% if slot.current %}
+            {% if slot.type == 'image' %}
+              <img src="{{ slot.current.file.url }}"
+                   alt="{{ slot.current.alt_text|default:slot.label }}"
+                   class="img-fluid rounded-3 shadow-sm"
+                   style="max-height:220px; object-fit:cover; width:100%;">
+            {% else %}
+              <video src="{{ slot.current.file.url }}"
+                     class="rounded-3 shadow-sm w-100"
+                     style="max-height:220px; object-fit:cover;"
+                     controls muted preload="metadata"></video>
+            {% endif %}
+            <div class="mt-2">
+              <small class="text-muted d-block text-truncate" title="{{ slot.current.file.name }}">
+                {{ slot.current.file.name|slice:"11:" }}
+              </small>
+              {% if slot.current.caption %}
+                <small class="text-muted">{{ slot.current.caption }}</small>
+              {% endif %}
+              <small class="text-muted d-block">Updated: {{ slot.current.updated_at|date:"M d, Y H:i" }}</small>
+            </div>
+          {% else %}
+            <div class="rounded-3 bg-light d-flex align-items-center justify-content-center"
+                 style="height:160px; border: 2px dashed #ccc;">
+              <div class="text-muted text-center">
+                <i class="bi {% if slot.type == 'video' %}bi-camera-video{% else %}bi-image{% endif %} fs-2 d-block mb-1"></i>
+                <small>Default file in use</small>
+              </div>
+            </div>
+          {% endif %}
+        </div>
+
+        <!-- Upload form -->
+        <div class="col-md-5">
+          <form method="post"
+                action="{% url 'media_upload' slot.key %}"
+                enctype="multipart/form-data"
+                id="form-{{ slot.key }}">
+            {% csrf_token %}
+            <div class="mb-3">
+              <label class="form-label fw-semibold">
+                {% if slot.current %}Replace file{% else %}Upload file{% endif %}
+                <span class="text-muted fw-normal">
+                  ({% if slot.type == 'image' %}JPG, PNG, WebP{% else %}MP4, WebM{% endif %})
+                </span>
+              </label>
+              <input type="file"
+                     name="file"
+                     class="form-control"
+                     accept="{% if slot.type == 'image' %}image/jpeg,image/png,image/webp,image/gif{% else %}video/mp4,video/webm,video/ogg{% endif %}"
+                     required
+                     onchange="previewFile(this, '{{ slot.key }}', '{{ slot.type }}')">
+            </div>
+
+            <!-- Live preview before upload -->
+            <div id="preview-{{ slot.key }}" class="mb-3" style="display:none;">
+              {% if slot.type == 'image' %}
+                <img id="preview-img-{{ slot.key }}" src="" alt="preview"
+                     class="img-fluid rounded-3" style="max-height:120px; object-fit:cover;">
+              {% else %}
+                <video id="preview-vid-{{ slot.key }}"
+                       class="w-100 rounded-3" style="max-height:120px;" controls muted></video>
+              {% endif %}
+              <small class="text-success mt-1 d-block"><i class="bi bi-check-circle me-1"></i>Ready to upload</small>
+            </div>
+
+            <div class="mb-3">
+              <label class="form-label">Alt text / Caption <span class="text-muted">(optional)</span></label>
+              <input type="text" name="alt_text" class="form-control form-control-sm"
+                     placeholder="e.g. Mariachi Todo Terreno performing at a wedding"
+                     value="{{ slot.current.alt_text|default:'' }}">
+              {% if slot.type == 'video' %}
+              <input type="text" name="caption" class="form-control form-control-sm mt-2"
+                     placeholder="Video title shown in the player"
+                     value="{{ slot.current.caption|default:'' }}">
+              {% endif %}
+            </div>
+
+            <button type="submit" class="btn btn-danger btn-sm">
+              <i class="bi bi-cloud-upload me-1"></i>Upload & Save
+            </button>
+          </form>
+        </div>
+
+        <!-- Remove button -->
+        {% if slot.current %}
+        <div class="col-md-3 text-center">
+          <form method="post" action="{% url 'media_delete' slot.key %}"
+                onsubmit="return confirm('Remove {{ slot.label }}? The default static file will be shown instead.')">
+            {% csrf_token %}
+            <button type="submit" class="btn btn-outline-secondary btn-sm">
+              <i class="bi bi-trash me-1"></i>Remove &amp; revert to default
+            </button>
+          </form>
+        </div>
+        {% endif %}
+
+      </div>
+    </div>
+  </div>
+  {% endfor %}
+
+</div>
+
+<script>
+function previewFile(input, slotKey, type) {
+  const file = input.files[0];
+  if (!file) return;
+  const wrapper = document.getElementById('preview-' + slotKey);
+  wrapper.style.display = 'block';
+  if (type === 'image') {
+    const img = document.getElementById('preview-img-' + slotKey);
+    img.src = URL.createObjectURL(file);
+  } else {
+    const vid = document.getElementById('preview-vid-' + slotKey);
+    vid.src = URL.createObjectURL(file);
+  }
+}
+</script>
+{% endblock %}

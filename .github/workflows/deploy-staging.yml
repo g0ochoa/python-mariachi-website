@@ -38,6 +38,7 @@ jobs:
             --exclude='venv/' \
             --exclude='venv-mac/' \
             --exclude='staticfiles/' \
+            --exclude='media/' \
             --exclude='db.sqlite3' \
             --exclude='db.sqlite3.backup' \
             --exclude='__pycache__/' \
@@ -62,6 +63,11 @@ jobs:
             venv/bin/python manage.py collectstatic --noinput --clear
             sudo cp -r staticfiles/* /var/www/mariachi-django-static/
             sudo chown -R www-data:www-data /var/www/mariachi-django-static/
+
+            echo "--- Ensuring media directory exists ---"
+            mkdir -p media/site_media
+            sudo chown -R www-data:www-data media/
+            sudo chmod -R 755 media/
 
             echo "--- Restarting Gunicorn ---"
             sudo systemctl restart mariachi-django

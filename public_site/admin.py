@@ -1,5 +1,12 @@
 from django.contrib import admin
-from .models import BookingRequest
+from .models import BookingRequest, SiteMedia
+
+
+@admin.register(SiteMedia)
+class SiteMediaAdmin(admin.ModelAdmin):
+    list_display = ('slot', 'media_type', 'file', 'caption', 'updated_at')
+    list_filter = ('media_type',)
+    readonly_fields = ('updated_at',)
 
 
 @admin.register(BookingRequest)

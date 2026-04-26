@@ -75,6 +75,7 @@ TEMPLATES = [
                 'django.contrib.messages.context_processors.messages',
                 'social_django.context_processors.backends',
                 'social_django.context_processors.login_redirect',
+                'public_site.context_processors.site_media',
             ],
         },
     },
@@ -146,6 +147,10 @@ STATICFILES_DIRS = [
     BASE_DIR / 'static',  # Project-level static files
 ]
 STATIC_ROOT = BASE_DIR / 'staticfiles'  # For production (collectstatic)
+
+# User-uploaded media (site images/videos managed via Media Manager)
+MEDIA_URL = '/site-media/'
+MEDIA_ROOT = BASE_DIR / 'media'
 
 # Default primary key field type
 # https://docs.djangoproject.com/en/5.2/ref/settings/#default-auto-field

@@ -164,6 +164,9 @@ AUTH_USER_MODEL = 'accounts.User'
 LOGIN_URL = 'login'
 LOGIN_REDIRECT_URL = 'portal_dashboard'
 
+# Trust the X-Forwarded-Proto header from Nginx so Django knows requests are HTTPS
+SECURE_PROXY_SSL_HEADER = ('HTTP_X_FORWARDED_PROTO', 'https')
+
 # ── Google OAuth (social-auth-app-django) ─────────────────────────────────────
 AUTHENTICATION_BACKENDS = [
     'social_core.backends.google.GoogleOAuth2',
@@ -190,6 +193,9 @@ SOCIAL_AUTH_PIPELINE = (
 SOCIAL_AUTH_LOGIN_ERROR_URL      = '/login/?social_error=1'
 SOCIAL_AUTH_GOOGLE_OAUTH2_SCOPE  = ['email', 'profile']
 SOCIAL_AUTH_GOOGLE_OAUTH2_AUTH_EXTRA_ARGUMENTS = {'prompt': 'select_account'}
+
+# Force HTTPS in the redirect_uri sent to Google (required when behind Nginx/SSL proxy)
+SOCIAL_AUTH_REDIRECT_IS_HTTPS = True
 LOGOUT_REDIRECT_URL = 'home'
 
 # Email — console backend for development (prints to terminal instead of sending)

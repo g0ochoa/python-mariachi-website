@@ -237,9 +237,14 @@
           input.value = leadShare;
         });
       } else if (leadInputs.length > 0) {
-        // No total charged — just leave blank so user fills manually
+        // No total charged — fall back to rate × hours if rate is set
         leadInputs.forEach(function (input) {
-          if (!input.value) input.placeholder = 'Enter manually';
+          var rate = parseFloat(input.dataset.rate) || 0;
+          if (rate > 0) {
+            input.value = (rate * hours).toFixed(2);
+          } else {
+            if (!input.value) input.placeholder = 'Enter manually';
+          }
         });
       }
     });

@@ -14,6 +14,8 @@
                 Welcome back, <strong>{{ user.get_full_name|default:user.username }}</strong>!
                 {% if user.role == 'admin' %}
                     <span class="badge bg-danger ms-2">Administrator</span>
+                {% elif user.role == 'lead' %}
+                    <span class="badge bg-warning text-dark ms-2">Lead</span>
                 {% else %}
                     <span class="badge bg-secondary ms-2">Musician</span>
                     {% if user.instrument %}
@@ -76,8 +78,8 @@
 
     </div>
 
-    <!-- Admin-only panel -->
-    {% if user.role == 'admin' %}
+    <!-- Admin/Lead panel -->
+    {% if user.role == 'admin' or user.role == 'lead' %}
     <div class="row mb-4">
         <div class="col-12">
             <div class="card border-danger">
@@ -86,9 +88,11 @@
                 </div>
                 <div class="card-body">
                     <p class="mb-2">Manage the site from the Django admin panel:</p>
+                    {% if user.role == 'admin' %}
                     <a href="/django-admin/" class="btn btn-danger btn-sm me-2" target="_blank">
                         <i class="bi bi-gear-fill"></i> Open Admin Panel
                     </a>
+                    {% endif %}
                     <a href="{% url 'media_manager' %}" class="btn btn-outline-danger btn-sm">
                         <i class="bi bi-images"></i> Media Manager
                     </a>

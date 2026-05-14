@@ -59,7 +59,7 @@ SLOT_META = {
 
 @login_required
 def media_manager(request):
-    if request.user.role != 'admin':
+    if request.user.role not in ('admin', 'lead'):
         messages.error(request, 'Admin access required.')
         return redirect('portal_dashboard')
 

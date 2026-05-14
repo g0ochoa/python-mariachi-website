@@ -28,7 +28,7 @@ class CustomUserAdmin(UserAdmin):
             'description': 'Fields for customer accounts'
         }),
         ('Musician Information', {
-            'fields': ('instrument', 'google_id', 'default_hourly_rate'),
+            'fields': ('instrument', 'google_id'),
             'description': 'Fields for musician accounts (band members)'
         }),
     )

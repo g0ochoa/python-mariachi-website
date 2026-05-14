@@ -57,6 +57,7 @@ class Event(models.Model):
     google_event_id = models.CharField(max_length=300, blank=True, db_index=True)
     rate_per_hour   = models.DecimalField(max_digits=8, decimal_places=2, null=True, blank=True, help_text='Rate charged per hour (admin/lead only)')
     total_charged   = models.DecimalField(max_digits=10, decimal_places=2, null=True, blank=True, help_text='Total amount charged to client (admin/lead only)')
+    billed_hours    = models.DecimalField(max_digits=5, decimal_places=2, null=True, blank=True, help_text='Actual hours billed (overrides start/end time calculation)')
     created_by = models.ForeignKey(
         settings.AUTH_USER_MODEL,
         on_delete=models.SET_NULL,

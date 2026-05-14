@@ -1,7 +1,7 @@
 {% extends "base.html" %}
 
 {% block content %}
-<div class="container py-4" style="max-width:800px;">
+<div class="container py-4" style="max-width:1100px;">
 
   <a href="{% url 'portal_dashboard' %}" class="btn btn-outline-secondary btn-sm mb-4">
     <i class="bi bi-arrow-left me-1"></i>Back to Portal
@@ -42,6 +42,8 @@
           <thead class="table-light">
             <tr>
               <th class="ps-3">Date</th>
+              <th>Time</th>
+              <th>Hrs</th>
               <th>Event</th>
               <th>Rate/hr</th>
               <th>Total Charged</th>
@@ -53,6 +55,12 @@
             {% for pay in row.pays %}
             <tr>
               <td class="ps-3 text-muted small">{{ pay.event.date|date:"M j, Y" }}</td>
+              <td class="text-muted small">
+                {% if pay.event.start_time %}{{ pay.event.start_time|time:"g:i A" }}{% if pay.event.end_time %} – {{ pay.event.end_time|time:"g:i A" }}{% endif %}{% else %}—{% endif %}
+              </td>
+              <td class="text-muted small">
+                {% if pay.event.billed_hours %}{{ pay.event.billed_hours }}{% else %}—{% endif %}
+              </td>
               <td>
                 <a href="{% url 'portal_event_detail' pay.event.id %}" class="text-decoration-none">
                   {{ pay.event.title }}
@@ -67,7 +75,7 @@
           </tbody>
           <tfoot class="table-light">
             <tr>
-              <td colspan="4" class="ps-3 fw-semibold text-end">Total {{ selected_year }}:</td>
+              <td colspan="6" class="ps-3 fw-semibold text-end">Total {{ selected_year }}:</td>
               <td colspan="2" class="fw-bold text-success">${{ row.total }}</td>
             </tr>
           </tfoot>

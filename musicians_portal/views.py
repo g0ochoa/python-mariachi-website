@@ -372,7 +372,9 @@ def event_detail(request, event_id):
             pm = pay_map.get(m.id)
             m.pay_amount = pm['amount'] if pm else ''
             m.pay_notes  = pm['notes']  if pm else ''
-        if event.start_time and event.end_time:
+        if event.billed_hours:
+            event_hours = float(event.billed_hours)
+        elif event.start_time and event.end_time:
             from datetime import datetime, date as _date, timedelta as _td
             _start = datetime.combine(_date.today(), event.start_time)
             _end   = datetime.combine(_date.today(), event.end_time)
@@ -431,6 +433,7 @@ def event_create(request):
             notes         = p.get('notes', ''),
             rate_per_hour = p.get('rate_per_hour') or None,
             total_charged = p.get('total_charged') or None,
+            billed_hours  = p.get('billed_hours')  or None,
             created_by    = request.user,
         )
         return redirect('portal_event_detail', event_id=event.id)
@@ -459,6 +462,7 @@ def event_edit(request, event_id):
         event.notes         = p.get('notes', '')
         event.rate_per_hour = p.get('rate_per_hour') or None
         event.total_charged = p.get('total_charged') or None
+        event.billed_hours  = p.get('billed_hours')  or None
         event.save()
         return redirect('portal_event_detail', event_id=event.id)
 

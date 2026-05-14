@@ -103,6 +103,10 @@
     </div>
     <div class="card-body">
       <dl class="row mb-0">
+        {% if event.billed_hours %}
+          <dt class="col-sm-4 text-muted">Billed Hours</dt>
+          <dd class="col-sm-8 fw-semibold">{{ event.billed_hours }} hrs</dd>
+        {% endif %}
         {% if event.rate_per_hour %}
           <dt class="col-sm-4 text-muted">Rate / Hour</dt>
           <dd class="col-sm-8 fw-semibold">${{ event.rate_per_hour }}</dd>
@@ -111,7 +115,7 @@
           <dt class="col-sm-4 text-muted">Total Charged</dt>
           <dd class="col-sm-8 fw-semibold text-success">${{ event.total_charged }}</dd>
         {% endif %}
-        {% if not event.rate_per_hour and not event.total_charged %}
+        {% if not event.rate_per_hour and not event.total_charged and not event.billed_hours %}
           <dd class="col-12 text-muted fst-italic">No financial data recorded yet. <a href="{% url 'portal_event_edit' event.id %}">Edit event</a> to add it.</dd>
         {% endif %}
       </dl>

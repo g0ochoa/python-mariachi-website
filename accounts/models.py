@@ -49,7 +49,14 @@ class User(AbstractUser):
         unique=True,
         help_text='Google Workspace ID for SSO authentication'
     )
-    
+    default_hourly_rate = models.DecimalField(
+        max_digits=6,
+        decimal_places=2,
+        null=True,
+        blank=True,
+        help_text='Default hourly pay rate for this musician (used in auto-calculate)',
+    )
+
     def __str__(self):
         return f"{self.username} ({self.get_role_display()})"
     

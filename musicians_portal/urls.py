@@ -21,5 +21,6 @@ urlpatterns = [
 
     # Musician pay
     path('portal/calendar/events/<int:event_id>/pay/', views.musician_pay_set, name='portal_musician_pay_set'),
+    path('portal/calendar/events/<int:event_id>/pay/bulk/', views.musician_pay_bulk, name='portal_musician_pay_bulk'),
     path('portal/pay/summary/', views.pay_summary, name='portal_pay_summary'),
 ]

@@ -43,7 +43,9 @@
             <tr>
               <th class="ps-3">Date</th>
               <th>Event</th>
-              <th>Amount</th>
+              <th>Rate/hr</th>
+              <th>Total Charged</th>
+              <th>Amount Paid</th>
               <th>Note</th>
             </tr>
           </thead>
@@ -56,6 +58,8 @@
                   {{ pay.event.title }}
                 </a>
               </td>
+              <td class="text-muted small">{% if pay.event.rate_per_hour %}${{ pay.event.rate_per_hour }}{% else %}—{% endif %}</td>
+              <td class="text-muted small">{% if pay.event.total_charged %}<span class="text-dark fw-semibold">${{ pay.event.total_charged }}</span>{% else %}—{% endif %}</td>
               <td class="fw-semibold text-success">${{ pay.amount }}</td>
               <td class="text-muted small">{{ pay.notes|default:"—" }}</td>
             </tr>
@@ -63,7 +67,7 @@
           </tbody>
           <tfoot class="table-light">
             <tr>
-              <td colspan="2" class="ps-3 fw-semibold text-end">Total {{ selected_year }}:</td>
+              <td colspan="4" class="ps-3 fw-semibold text-end">Total {{ selected_year }}:</td>
               <td colspan="2" class="fw-bold text-success">${{ row.total }}</td>
             </tr>
           </tfoot>

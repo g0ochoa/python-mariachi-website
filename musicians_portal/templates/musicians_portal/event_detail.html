@@ -120,58 +120,125 @@
 
   <!-- Member Pay (admin/lead only) -->
   <div class="card border-0 shadow-sm mb-4">
-    <div class="card-header bg-white fw-bold border-bottom">
-      <i class="bi bi-wallet2 me-2 text-success"></i>Member Pay
+    <div class="card-header bg-white border-bottom py-3">
+      <div class="d-flex justify-content-between align-items-center flex-wrap gap-2">
+        <span class="fw-bold"><i class="bi bi-wallet2 me-2 text-success"></i>Member Pay</span>
+        <div class="d-flex align-items-center gap-2 flex-wrap">
+          <label class="text-muted small mb-0">Hours:</label>
+          <input type="number" id="event-hours" class="form-control form-control-sm"
+                 style="width:80px;" step="0.25" min="0"
+                 value="{{ event_hours|default:'' }}" placeholder="hrs">
+          <button type="button" id="btn-auto-calc" class="btn btn-sm btn-outline-primary">
+            <i class="bi bi-calculator me-1"></i>Auto-Calculate
+          </button>
+        </div>
+      </div>
     </div>
     <div class="card-body p-0">
-      {% if pay_records %}
-        <ul class="list-group list-group-flush">
-          {% for pay in pay_records %}
-            <li class="list-group-item d-flex justify-content-between align-items-center py-3">
-              <div>
-                <span class="fw-semibold">{{ pay.musician.get_full_name|default:pay.musician.username }}</span>
-                {% if pay.notes %}<small class="text-muted ms-2">— {{ pay.notes }}</small>{% endif %}
-              </div>
-              <span class="badge bg-success fs-6">${{ pay.amount }}</span>
-            </li>
-          {% endfor %}
-        </ul>
-      {% endif %}
-
-      <!-- Add pay for remaining band members -->
-      {% if band_members %}
-        <div class="p-3 border-top">
-          <p class="fw-semibold small text-muted mb-2">Add pay for a member:</p>
-          <form method="post" action="{% url 'portal_musician_pay_set' event.id %}" class="row g-2 align-items-end">
-            {% csrf_token %}
-            <div class="col-sm-4">
-              <select name="musician_id" class="form-select form-select-sm">
-                {% for m in band_members %}
-                  <option value="{{ m.id }}">{{ m.get_full_name|default:m.username }}</option>
-                {% endfor %}
-              </select>
-            </div>
-            <div class="col-sm-3">
-              <div class="input-group input-group-sm">
-                <span class="input-group-text">$</span>
-                <input type="number" name="amount" class="form-control" step="0.01" min="0" placeholder="Amount" required>
-              </div>
-            </div>
-            <div class="col-sm-3">
-              <input type="text" name="notes" class="form-control form-control-sm" placeholder="Note (optional)">
-            </div>
-            <div class="col-sm-2">
-              <button type="submit" class="btn btn-success btn-sm w-100">Add</button>
-            </div>
-          </form>
+      <form method="post" action="{% url 'portal_musician_pay_bulk' event.id %}">
+        {% csrf_token %}
+        <table class="table table-sm align-middle mb-0">
+          <thead class="table-light">
+            <tr>
+              <th class="ps-3">Musician</th>
+              <th>Default Rate</th>
+              <th>Amount</th>
+              <th>Note</th>
+            </tr>
+          </thead>
+          <tbody>
+            {% for m in all_musicians %}
+            <tr>
+              <td class="ps-3">
+                <span class="fw-semibold">{{ m.get_full_name|default:m.username }}</span>
+                {% if m.instrument %}<small class="text-muted ms-1">({{ m.instrument }})</small>{% endif %}
+                {% if m.role == 'admin' or m.role == 'lead' %}
+                  <span class="badge bg-warning text-dark ms-1" style="font-size:0.65rem;">lead</span>
+                {% endif %}
+              </td>
+              <td class="text-muted small">
+                {% if m.default_hourly_rate %}${{ m.default_hourly_rate }}/hr{% else %}<span class="text-muted">—</span>{% endif %}
+              </td>
+              <td>
+                <div class="input-group input-group-sm" style="max-width:130px;">
+                  <span class="input-group-text">$</span>
+                  <input type="number"
+                         name="amount_{{ m.id }}"
+                         class="form-control pay-amount-input"
+                         step="0.01" min="0"
+                         value="{{ m.pay_amount }}"
+                         data-rate="{{ m.default_hourly_rate|default:'' }}"
+                         data-is-lead="{% if m.role == 'admin' or m.role == 'lead' %}true{% else %}false{% endif %}"
+                         placeholder="0.00">
+                </div>
+              </td>
+              <td>
+                <input type="text"
+                       name="notes_{{ m.id }}"
+                       class="form-control form-control-sm"
+                       style="max-width:160px;"
+                       value="{{ m.pay_notes }}"
+                       placeholder="optional">
+              </td>
+            </tr>
+            {% empty %}
+            <tr><td colspan="4" class="text-center text-muted py-3">No band members found.</td></tr>
+            {% endfor %}
+          </tbody>
+        </table>
+        {% if all_musicians %}
+        <div class="p-3 border-top d-flex justify-content-end">
+          <button type="submit" class="btn btn-success btn-sm">
+            <i class="bi bi-check-lg me-1"></i>Save All Pay
+          </button>
         </div>
-      {% endif %}
-
-      {% if not pay_records and not band_members %}
-        <p class="text-muted text-center py-3 mb-0">All members have been paid.</p>
-      {% endif %}
+        {% endif %}
+      </form>
     </div>
   </div>
+
+  <script>
+  (function () {
+    var totalCharged = parseFloat("{{ event.total_charged|default:'0' }}") || 0;
+
+    document.getElementById('btn-auto-calc').addEventListener('click', function () {
+      var hours = parseFloat(document.getElementById('event-hours').value) || 0;
+      if (hours <= 0) {
+        alert('Enter event hours first.');
+        return;
+      }
+
+      var fixedTotal = 0;
+      var leadInputs = [];
+
+      document.querySelectorAll('.pay-amount-input').forEach(function (input) {
+        var rate   = parseFloat(input.dataset.rate) || 0;
+        var isLead = input.dataset.isLead === 'true';
+
+        if (!isLead && rate > 0) {
+          var amount = parseFloat((rate * hours).toFixed(2));
+          input.value = amount.toFixed(2);
+          fixedTotal += amount;
+        } else if (isLead) {
+          leadInputs.push(input);
+        }
+      });
+
+      if (leadInputs.length > 0 && totalCharged > 0) {
+        var remainder  = totalCharged - fixedTotal;
+        var leadShare  = (remainder / leadInputs.length).toFixed(2);
+        leadInputs.forEach(function (input) {
+          input.value = leadShare;
+        });
+      } else if (leadInputs.length > 0) {
+        // No total charged — just leave blank so user fills manually
+        leadInputs.forEach(function (input) {
+          if (!input.value) input.placeholder = 'Enter manually';
+        });
+      }
+    });
+  })();
+  </script>
   {% endif %}
 
   <!-- Band Availability -->

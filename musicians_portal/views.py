@@ -356,14 +356,29 @@ def event_detail(request, event_id):
     # Finance data (only queried when user has access)
     from django.contrib.auth import get_user_model
     User = get_user_model()
-    pay_records   = []
-    band_members  = []
+    pay_records    = []
+    all_musicians  = []
+    pay_map        = {}   # musician_id -> {'amount': ..., 'notes': ...}
+    event_hours    = None
     if _is_finance_user(request.user):
-        pay_records  = MusicianPay.objects.filter(event=event).select_related('musician')
-        paid_ids     = {p.musician_id for p in pay_records}
-        band_members = User.objects.filter(
-            role__in=['musician', 'lead', 'admin']
-        ).exclude(id__in=paid_ids).order_by('first_name', 'username')
+        pay_records   = MusicianPay.objects.filter(event=event).select_related('musician')
+        pay_map       = {p.musician_id: {'amount': p.amount, 'notes': p.notes} for p in pay_records}
+        all_musicians = list(
+            User.objects.filter(role__in=['musician', 'lead', 'admin'])
+            .order_by('first_name', 'username')
+        )
+        # Attach existing pay data directly to each musician for easy template access
+        for m in all_musicians:
+            pm = pay_map.get(m.id)
+            m.pay_amount = pm['amount'] if pm else ''
+            m.pay_notes  = pm['notes']  if pm else ''
+        if event.start_time and event.end_time:
+            from datetime import datetime, date as _date, timedelta as _td
+            _start = datetime.combine(_date.today(), event.start_time)
+            _end   = datetime.combine(_date.today(), event.end_time)
+            if _end < _start:
+                _end += _td(days=1)
+            event_hours = round((_end - _start).total_seconds() / 3600, 2)
 
     context = {
         'page_title':     event.title,
@@ -371,7 +386,9 @@ def event_detail(request, event_id):
         'attendance':     attendance,
         'all_attendance': all_attendance,
         'pay_records':    pay_records,
-        'band_members':   band_members,
+        'all_musicians':  all_musicians,
+        'pay_map':        pay_map,
+        'event_hours':    event_hours,
         'is_finance_user': _is_finance_user(request.user),
     }
     return render(request, 'musicians_portal/event_detail.html', context)
@@ -627,6 +644,46 @@ def musician_pay_set(request, event_id):
         pay.amount = amount
         pay.notes  = notes
         pay.save()
+
+    return redirect('portal_event_detail', event_id=event_id)
+
+
+@login_required
+@require_POST
+def musician_pay_bulk(request, event_id):
+    """Bulk create/update MusicianPay records for all musicians on an event."""
+    _require_portal(request)
+    if not _is_finance_user(request.user):
+        raise PermissionDenied
+
+    event = get_object_or_404(Event, id=event_id)
+
+    from django.contrib.auth import get_user_model
+    User = get_user_model()
+    musicians = User.objects.filter(role__in=['musician', 'lead', 'admin'])
+
+    for musician in musicians:
+        amount_str = request.POST.get(f'amount_{musician.id}', '').strip()
+        notes_str  = request.POST.get(f'notes_{musician.id}', '').strip()
+
+        if not amount_str:
+            continue
+        try:
+            amount = float(amount_str)
+        except ValueError:
+            continue
+        if amount <= 0:
+            continue
+
+        pay, created = MusicianPay.objects.get_or_create(
+            event=event,
+            musician=musician,
+            defaults={'amount': amount, 'notes': notes_str, 'created_by': request.user},
+        )
+        if not created:
+            pay.amount = amount
+            pay.notes  = notes_str
+            pay.save()
 
     return redirect('portal_event_detail', event_id=event_id)
 

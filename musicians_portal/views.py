@@ -17,7 +17,7 @@ from django.core.exceptions import PermissionDenied
 from django.db.models import Q
 from django.http import JsonResponse
 from django.views.decorators.http import require_POST
-from .models import Song, Event, EventAttendance, Gig
+from .models import Song, Event, EventAttendance, Gig, MusicianPay
 
 GCAL_SYNC_CACHE_KEY    = 'gcal_last_sync'
 GCAL_SYNC_INTERVAL     = 30 * 60   # seconds — re-sync at most every 30 minutes
@@ -174,7 +174,7 @@ def dashboard(request):
       (set to 'login' in settings).
     - Role check: Only musicians and admins can enter. Customers get a 403.
     """
-    if request.user.role not in ('musician', 'admin'):
+    if request.user.role not in ('musician', 'lead', 'admin'):
         raise PermissionDenied
 
     context = {
@@ -185,7 +185,7 @@ def dashboard(request):
 
 @login_required
 def scores(request):
-    if request.user.role not in ('musician', 'admin'):
+    if request.user.role not in ('musician', 'lead', 'admin'):
         raise PermissionDenied
 
     songs = Song.objects.filter(is_active=True).order_by('title')
@@ -206,7 +206,7 @@ def scores(request):
 
 @login_required
 def song_detail(request, song_id):
-    if request.user.role not in ('musician', 'admin'):
+    if request.user.role not in ('musician', 'lead', 'admin'):
         raise PermissionDenied
 
     song  = get_object_or_404(Song, id=song_id, is_active=True)
@@ -228,9 +228,14 @@ def song_detail(request, song_id):
 # ─── Calendar ────────────────────────────────────────────────────────────────
 
 def _require_portal(request):
-    """Raise PermissionDenied if user is not musician or admin."""
-    if request.user.role not in ('musician', 'admin'):
+    """Raise PermissionDenied if user is not musician, lead, or admin."""
+    if request.user.role not in ('musician', 'lead', 'admin'):
         raise PermissionDenied
+
+
+def _is_finance_user(user):
+    """Returns True for users who can see/edit financial data."""
+    return user.role in ('admin', 'lead')
 
 
 @login_required
@@ -378,21 +383,23 @@ def event_rsvp(request, event_id):
 @login_required
 def event_create(request):
     _require_portal(request)
-    if request.user.role != 'admin':
+    if not _is_finance_user(request.user):
         raise PermissionDenied
 
     if request.method == 'POST':
         p = request.POST
         event = Event.objects.create(
-            title      = p['title'],
-            event_type = p.get('event_type', 'gig'),
-            date       = p['date'],
-            start_time = p.get('start_time') or None,
-            end_time   = p.get('end_time')   or None,
-            venue      = p.get('venue', ''),
-            client     = p.get('client', ''),
-            notes      = p.get('notes', ''),
-            created_by = request.user,
+            title         = p['title'],
+            event_type    = p.get('event_type', 'gig'),
+            date          = p['date'],
+            start_time    = p.get('start_time') or None,
+            end_time      = p.get('end_time')   or None,
+            venue         = p.get('venue', ''),
+            client        = p.get('client', ''),
+            notes         = p.get('notes', ''),
+            rate_per_hour = p.get('rate_per_hour') or None,
+            total_charged = p.get('total_charged') or None,
+            created_by    = request.user,
         )
         return redirect('portal_event_detail', event_id=event.id)
 
@@ -403,21 +410,23 @@ def event_create(request):
 @login_required
 def event_edit(request, event_id):
     _require_portal(request)
-    if request.user.role != 'admin':
+    if not _is_finance_user(request.user):
         raise PermissionDenied
 
     event = get_object_or_404(Event, id=event_id)
 
     if request.method == 'POST':
         p = request.POST
-        event.title      = p['title']
-        event.event_type = p.get('event_type', 'gig')
-        event.date       = p['date']
-        event.start_time = p.get('start_time') or None
-        event.end_time   = p.get('end_time')   or None
-        event.venue      = p.get('venue', '')
-        event.client     = p.get('client', '')
-        event.notes      = p.get('notes', '')
+        event.title         = p['title']
+        event.event_type    = p.get('event_type', 'gig')
+        event.date          = p['date']
+        event.start_time    = p.get('start_time') or None
+        event.end_time      = p.get('end_time')   or None
+        event.venue         = p.get('venue', '')
+        event.client        = p.get('client', '')
+        event.notes         = p.get('notes', '')
+        event.rate_per_hour = p.get('rate_per_hour') or None
+        event.total_charged = p.get('total_charged') or None
         event.save()
         return redirect('portal_event_detail', event_id=event.id)
 
@@ -429,7 +438,7 @@ def event_edit(request, event_id):
 @require_POST
 def event_delete(request, event_id):
     _require_portal(request)
-    if request.user.role != 'admin':
+    if not _is_finance_user(request.user):
         raise PermissionDenied
 
     event = get_object_or_404(Event, id=event_id)
@@ -443,7 +452,7 @@ def event_delete(request, event_id):
 def sync_google_calendar(request):
     """Force a manual sync (admin only), bypassing the cache cooldown."""
     _require_portal(request)
-    if request.user.role != 'admin':
+    if not _is_finance_user(request.user):
         raise PermissionDenied
 
     cache.delete(GCAL_SYNC_CACHE_KEY)
@@ -504,10 +513,10 @@ def _push_to_gcal(gig, title):
 
 @login_required
 def gig_log(request):
-    """Admin-only form to log a new gig: creates Gig record, Event for the
+    """Admin/lead form to log a new gig: creates Gig record, Event for the
     calendar, and pushes the event to Google Calendar."""
     _require_portal(request)
-    if request.user.role != 'admin':
+    if not _is_finance_user(request.user):
         raise PermissionDenied
 
     if request.method == 'POST':
@@ -568,3 +577,93 @@ def gig_log(request):
         'gcal_ready':   bool(GCAL_SERVICE_ACCOUNT_JSON and GCAL_CALENDAR_ID),
     }
     return render(request, 'musicians_portal/gig_log_form.html', context)
+
+
+# ---------------------------------------------------------------------------
+# Musician Pay
+# ---------------------------------------------------------------------------
+
+@login_required
+@require_POST
+def musician_pay_set(request, event_id):
+    """Create or update a MusicianPay record for a musician on an event."""
+    _require_portal(request)
+    if not _is_finance_user(request.user):
+        raise PermissionDenied
+
+    event      = get_object_or_404(Event, id=event_id)
+    musician_id = request.POST.get('musician_id')
+    amount      = request.POST.get('amount', '').strip()
+    notes       = request.POST.get('notes', '').strip()
+
+    if not musician_id or not amount:
+        return redirect('portal_event_detail', event_id=event_id)
+
+    from django.contrib.auth import get_user_model
+    User = get_user_model()
+    musician = get_object_or_404(User, id=musician_id)
+
+    pay, created = MusicianPay.objects.get_or_create(
+        event=event,
+        musician=musician,
+        defaults={'amount': amount, 'notes': notes, 'created_by': request.user},
+    )
+    if not created:
+        pay.amount = amount
+        pay.notes  = notes
+        pay.save()
+
+    return redirect('portal_event_detail', event_id=event_id)
+
+
+@login_required
+def pay_summary(request):
+    """Yearly pay summary per musician — visible to admin/lead only."""
+    _require_portal(request)
+    if not _is_finance_user(request.user):
+        raise PermissionDenied
+
+    from django.db.models import Sum
+    from django.contrib.auth import get_user_model
+    User = get_user_model()
+
+    selected_year = int(request.GET.get('year', date.today().year))
+
+    # All years that have pay records (for the year filter dropdown)
+    available_years = (
+        MusicianPay.objects
+        .filter(event__date__isnull=False)
+        .dates('event__date', 'year')
+    )
+    year_list = sorted({d.year for d in available_years}, reverse=True)
+    if selected_year not in year_list:
+        year_list = [selected_year] + year_list
+
+    # Pay records for the selected year
+    pays = (
+        MusicianPay.objects
+        .filter(event__date__year=selected_year)
+        .select_related('musician', 'event')
+        .order_by('musician__first_name', 'event__date')
+    )
+
+    # Group by musician
+    from collections import defaultdict
+    by_musician = defaultdict(list)
+    totals      = defaultdict(lambda: 0)
+    for p in pays:
+        by_musician[p.musician].append(p)
+        totals[p.musician] += p.amount
+
+    summary = [
+        {'musician': m, 'pays': by_musician[m], 'total': totals[m]}
+        for m in sorted(by_musician.keys(), key=lambda u: u.first_name or u.username)
+    ]
+
+    context = {
+        'page_title':     f'Pay Summary {selected_year}',
+        'summary':        summary,
+        'selected_year':  selected_year,
+        'year_list':      year_list,
+    }
+    return render(request, 'musicians_portal/pay_summary.html', context)

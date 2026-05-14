@@ -15,4 +15,11 @@ urlpatterns = [
     path('portal/calendar/events/<int:event_id>/delete/', views.event_delete, name='portal_event_delete'),
     path('portal/calendar/events/<int:event_id>/rsvp/', views.event_rsvp, name='portal_event_rsvp'),
     path('portal/calendar/sync/', views.sync_google_calendar, name='portal_calendar_sync'),
+
+    # Gig logging
+    path('portal/gigs/new/', views.gig_log, name='portal_gig_log'),
+
+    # Musician pay
+    path('portal/calendar/events/<int:event_id>/pay/', views.musician_pay_set, name='portal_musician_pay_set'),
+    path('portal/pay/summary/', views.pay_summary, name='portal_pay_summary'),
 ]

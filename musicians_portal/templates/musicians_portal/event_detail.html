@@ -156,7 +156,9 @@
               <td class="ps-3">
                 <span class="fw-semibold">{{ m.get_full_name|default:m.username }}</span>
                 {% if m.instrument %}<small class="text-muted ms-1">({{ m.instrument }})</small>{% endif %}
-                {% if m.role == 'admin' or m.role == 'lead' %}
+                {% if m.role == 'admin' %}
+                  <span class="badge bg-danger ms-1" style="font-size:0.65rem;">admin</span>
+                {% elif m.role == 'lead' %}
                   <span class="badge bg-warning text-dark ms-1" style="font-size:0.65rem;">lead</span>
                 {% endif %}
               </td>

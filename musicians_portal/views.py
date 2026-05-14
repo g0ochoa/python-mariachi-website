@@ -364,8 +364,16 @@ def event_detail(request, event_id):
         pay_records   = MusicianPay.objects.filter(event=event).select_related('musician')
         pay_map       = {p.musician_id: {'amount': p.amount, 'notes': p.notes} for p in pay_records}
         all_musicians = list(
-            User.objects.filter(role__in=['musician', 'lead', 'admin'])
-            .order_by('first_name', 'username')
+            User.objects.filter(
+                role__in=['musician', 'lead', 'admin'],
+                is_test_account=False,
+            ).filter(
+                # active_from: not set, or on/before the event date
+                Q(active_from__isnull=True) | Q(active_from__lte=event.date)
+            ).filter(
+                # active_until: not set, or on/after the event date
+                Q(active_until__isnull=True) | Q(active_until__gte=event.date)
+            ).order_by('first_name', 'username')
         )
         # Attach existing pay data directly to each musician for easy template access
         for m in all_musicians:

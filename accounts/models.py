@@ -56,6 +56,20 @@ class User(AbstractUser):
         blank=True,
         help_text='Default hourly pay rate for this musician (used in auto-calculate)',
     )
+    is_test_account = models.BooleanField(
+        default=False,
+        help_text='Test/demo accounts are hidden from pay entry and pay summary',
+    )
+    active_from = models.DateField(
+        null=True,
+        blank=True,
+        help_text='Date this musician joined the band (leave blank = always active from start)',
+    )
+    active_until = models.DateField(
+        null=True,
+        blank=True,
+        help_text='Last date this musician was active (leave blank = still active)',
+    )
 
     def __str__(self):
         return f"{self.username} ({self.get_role_display()})"

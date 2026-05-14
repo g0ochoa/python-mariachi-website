@@ -41,12 +41,12 @@
         <div class="row g-3 mb-3">
           <div class="col-sm-6">
             <label class="form-label fw-semibold">Start Time</label>
-            <input type="time" name="start_time" class="form-control"
+            <input type="time" name="start_time" id="id_start_time" class="form-control"
                    value="{% if event and event.start_time %}{{ event.start_time|time:'H:i' }}{% endif %}">
           </div>
           <div class="col-sm-6">
             <label class="form-label fw-semibold">End Time</label>
-            <input type="time" name="end_time" class="form-control"
+            <input type="time" name="end_time" id="id_end_time" class="form-control"
                    value="{% if event and event.end_time %}{{ event.end_time|time:'H:i' }}{% endif %}">
           </div>
         </div>
@@ -76,14 +76,14 @@
           <p class="fw-semibold text-muted small mb-3"><i class="bi bi-cash-stack me-1"></i>Financials <span class="badge bg-warning text-dark ms-1">Admin / Lead only</span></p>
           <div class="row g-3">
             <div class="col-sm-4">
-              <label class="form-label fw-semibold">Billed Hours <span class="text-muted fw-normal">(optional)</span></label>
+              <label class="form-label fw-semibold mb-0" style="white-space:nowrap;">Billed Hours <small class="text-muted fw-normal">(optional)</small></label>
               <input type="number" name="billed_hours" id="id_billed_hours" class="form-control" step="0.25" min="0"
                      placeholder="e.g. 7"
                      value="{% if event and event.billed_hours %}{{ event.billed_hours }}{% endif %}">
-              <div class="form-text">Overrides start/end time for pay calc</div>
+              <div class="form-text" id="billed-hours-hint">Auto-filled from event time</div>
             </div>
             <div class="col-sm-4">
-              <label class="form-label fw-semibold">Rate / Hour <span class="text-muted fw-normal">(optional)</span></label>
+              <label class="form-label fw-semibold mb-0" style="white-space:nowrap;">Rate / Hour <small class="text-muted fw-normal">(optional)</small></label>
               <div class="input-group">
                 <span class="input-group-text">$</span>
                 <input type="number" name="rate_per_hour" id="id_rate_per_hour" class="form-control" step="0.01" min="0"
@@ -92,7 +92,7 @@
               </div>
             </div>
             <div class="col-sm-4">
-              <label class="form-label fw-semibold">Total Charged <span class="text-muted fw-normal">(optional)</span></label>
+              <label class="form-label fw-semibold mb-0" style="white-space:nowrap;">Total Charged <small class="text-muted fw-normal">(optional)</small></label>
               <div class="input-group">
                 <span class="input-group-text">$</span>
                 <input type="number" name="total_charged" id="id_total_charged" class="form-control" step="0.01" min="0"
@@ -106,43 +106,73 @@
 
         <script>
         (function () {
-          var hoursInput   = document.getElementById('id_billed_hours');
-          var rateInput    = document.getElementById('id_rate_per_hour');
-          var totalInput   = document.getElementById('id_total_charged');
-          var hint         = document.getElementById('total-charged-hint');
-          var userEdited   = false;
+          var startInput  = document.getElementById('id_start_time');
+          var endInput    = document.getElementById('id_end_time');
+          var hoursInput  = document.getElementById('id_billed_hours');
+          var hoursHint   = document.getElementById('billed-hours-hint');
+          var rateInput   = document.getElementById('id_rate_per_hour');
+          var totalInput  = document.getElementById('id_total_charged');
+          var totalHint   = document.getElementById('total-charged-hint');
+          var hoursEdited = false;
+          var totalEdited = false;
 
-          function recalc() {
-            if (userEdited) return;
+          function recalcTotal() {
+            if (totalEdited) return;
             var hours = parseFloat(hoursInput.value) || 0;
             var rate  = parseFloat(rateInput.value)  || 0;
             if (hours > 0 && rate > 0) {
               totalInput.value = (hours * rate).toFixed(2);
-              hint.textContent = 'Auto-calculated (' + hours + ' hrs × $' + rate + ')';
+              totalHint.textContent = 'Auto-calculated (' + hours + ' hrs × $' + rate + ')';
             } else {
-              hint.textContent = '';
+              totalHint.textContent = '';
             }
           }
 
-          totalInput.addEventListener('input', function () {
-            userEdited = true;
-            hint.textContent = 'Manually set';
-          });
-
-          // If both fields clear, re-enable auto-calc
-          totalInput.addEventListener('change', function () {
-            if (!totalInput.value) {
-              userEdited = false;
-              hint.textContent = '';
+          function calcHours() {
+            if (hoursEdited) return;
+            var start = startInput.value;
+            var end   = endInput.value;
+            if (!start || !end) return;
+            var sp = start.split(':').map(Number);
+            var ep = end.split(':').map(Number);
+            var startMins = sp[0] * 60 + sp[1];
+            var endMins   = ep[0] * 60 + ep[1];
+            if (endMins <= startMins) endMins += 24 * 60; // overnight
+            var diff = (endMins - startMins) / 60;
+            if (diff > 0) {
+              hoursInput.value = diff.toFixed(2);
+              hoursHint.textContent = 'Auto from event time (' + start + '–' + end + ')';
+              recalcTotal();
             }
+          }
+
+          hoursInput.addEventListener('input', function () {
+            hoursEdited = true;
+            hoursHint.textContent = 'Manually set';
+            recalcTotal();
+          });
+          hoursInput.addEventListener('change', function () {
+            if (!hoursInput.value) { hoursEdited = false; hoursHint.textContent = ''; calcHours(); }
           });
 
-          hoursInput.addEventListener('input', recalc);
-          rateInput.addEventListener('input', recalc);
+          totalInput.addEventListener('input', function () {
+            totalEdited = true;
+            totalHint.textContent = 'Manually set';
+          });
+          totalInput.addEventListener('change', function () {
+            if (!totalInput.value) { totalEdited = false; totalHint.textContent = ''; recalcTotal(); }
+          });
 
-          // Run once on page load in case values are pre-filled (new event only)
-          {% if not event or not event.total_charged %}
-          recalc();
+          startInput.addEventListener('change', calcHours);
+          endInput.addEventListener('change', calcHours);
+          hoursInput.addEventListener('input', recalcTotal);
+          rateInput.addEventListener('input', recalcTotal);
+
+          // Run on page load for new events
+          {% if not event or not event.billed_hours %}
+          calcHours();
+          {% elif not event.total_charged %}
+          recalcTotal();
           {% endif %}
         })();
         </script>

@@ -77,7 +77,7 @@
           <div class="row g-3">
             <div class="col-sm-4">
               <label class="form-label fw-semibold">Billed Hours <span class="text-muted fw-normal">(optional)</span></label>
-              <input type="number" name="billed_hours" class="form-control" step="0.25" min="0"
+              <input type="number" name="billed_hours" id="id_billed_hours" class="form-control" step="0.25" min="0"
                      placeholder="e.g. 7"
                      value="{% if event and event.billed_hours %}{{ event.billed_hours }}{% endif %}">
               <div class="form-text">Overrides start/end time for pay calc</div>
@@ -86,7 +86,7 @@
               <label class="form-label fw-semibold">Rate / Hour <span class="text-muted fw-normal">(optional)</span></label>
               <div class="input-group">
                 <span class="input-group-text">$</span>
-                <input type="number" name="rate_per_hour" class="form-control" step="0.01" min="0"
+                <input type="number" name="rate_per_hour" id="id_rate_per_hour" class="form-control" step="0.01" min="0"
                        placeholder="—"
                        value="{% if event and event.rate_per_hour %}{{ event.rate_per_hour }}{% endif %}">
               </div>
@@ -95,13 +95,57 @@
               <label class="form-label fw-semibold">Total Charged <span class="text-muted fw-normal">(optional)</span></label>
               <div class="input-group">
                 <span class="input-group-text">$</span>
-                <input type="number" name="total_charged" class="form-control" step="0.01" min="0"
+                <input type="number" name="total_charged" id="id_total_charged" class="form-control" step="0.01" min="0"
                        placeholder="—"
                        value="{% if event and event.total_charged %}{{ event.total_charged }}{% endif %}">
               </div>
+              <div class="form-text" id="total-charged-hint"></div>
             </div>
           </div>
         </div>
+
+        <script>
+        (function () {
+          var hoursInput   = document.getElementById('id_billed_hours');
+          var rateInput    = document.getElementById('id_rate_per_hour');
+          var totalInput   = document.getElementById('id_total_charged');
+          var hint         = document.getElementById('total-charged-hint');
+          var userEdited   = false;
+
+          function recalc() {
+            if (userEdited) return;
+            var hours = parseFloat(hoursInput.value) || 0;
+            var rate  = parseFloat(rateInput.value)  || 0;
+            if (hours > 0 && rate > 0) {
+              totalInput.value = (hours * rate).toFixed(2);
+              hint.textContent = 'Auto-calculated (' + hours + ' hrs × $' + rate + ')';
+            } else {
+              hint.textContent = '';
+            }
+          }
+
+          totalInput.addEventListener('input', function () {
+            userEdited = true;
+            hint.textContent = 'Manually set';
+          });
+
+          // If both fields clear, re-enable auto-calc
+          totalInput.addEventListener('change', function () {
+            if (!totalInput.value) {
+              userEdited = false;
+              hint.textContent = '';
+            }
+          });
+
+          hoursInput.addEventListener('input', recalc);
+          rateInput.addEventListener('input', recalc);
+
+          // Run once on page load in case values are pre-filled (new event only)
+          {% if not event or not event.total_charged %}
+          recalc();
+          {% endif %}
+        })();
+        </script>
 
         <div class="d-flex gap-2">
           <button type="submit" class="btn btn-danger px-4">

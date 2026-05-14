@@ -17,12 +17,14 @@ from django.core.exceptions import PermissionDenied
 from django.db.models import Q
 from django.http import JsonResponse
 from django.views.decorators.http import require_POST
-from .models import Song, Event, EventAttendance
+from .models import Song, Event, EventAttendance, Gig
 
 GCAL_SYNC_CACHE_KEY    = 'gcal_last_sync'
 GCAL_SYNC_INTERVAL     = 30 * 60   # seconds — re-sync at most every 30 minutes
 
-GOOGLE_ICAL_URL = os.environ.get('GOOGLE_ICAL_URL', '')
+GOOGLE_ICAL_URL              = os.environ.get('GOOGLE_ICAL_URL', '')
+GCAL_CALENDAR_ID             = os.environ.get('GCAL_CALENDAR_ID', '')
+GCAL_SERVICE_ACCOUNT_JSON    = os.environ.get('GCAL_SERVICE_ACCOUNT_JSON', '')
 
 
 def _detect_event_type(summary):
@@ -450,3 +452,119 @@ def sync_google_calendar(request):
         return JsonResponse({'error': 'GOOGLE_ICAL_URL not configured'}, status=502)
     created, updated, deleted = result
     return JsonResponse({'created': created, 'updated': updated, 'deleted': deleted})
+
+
+# ---------------------------------------------------------------------------
+# Google Calendar write-back
+# ---------------------------------------------------------------------------
+
+def _push_to_gcal(gig, title):
+    """Create an event in Google Calendar. Returns the GCal event ID or None."""
+    import logging
+    logger = logging.getLogger(__name__)
+
+    if not GCAL_SERVICE_ACCOUNT_JSON or not GCAL_CALENDAR_ID:
+        logger.warning('GCal write skipped: GCAL_SERVICE_ACCOUNT_JSON or GCAL_CALENDAR_ID not set')
+        return None
+
+    try:
+        from google.oauth2 import service_account
+        from googleapiclient.discovery import build
+
+        credentials = service_account.Credentials.from_service_account_file(
+            GCAL_SERVICE_ACCOUNT_JSON,
+            scopes=['https://www.googleapis.com/auth/calendar.events'],
+        )
+        service = build('calendar', 'v3', credentials=credentials)
+
+        tz       = 'America/Chicago'
+        location = ', '.join(filter(None, [gig.venue, gig.city]))
+        gig_date = gig.date if isinstance(gig.date, date) else date.fromisoformat(str(gig.date))
+        start_dt = datetime.combine(gig_date, gig.start_time).isoformat()
+        end_dt   = datetime.combine(gig_date, gig.end_time).isoformat()
+
+        body = {
+            'summary':     title,
+            'location':    location,
+            'description': gig.notes,
+            'start':       {'dateTime': start_dt, 'timeZone': tz},
+            'end':         {'dateTime': end_dt,   'timeZone': tz},
+        }
+
+        result = service.events().insert(calendarId=GCAL_CALENDAR_ID, body=body).execute()
+        return result.get('id')
+    except Exception as exc:
+        logging.getLogger(__name__).error('GCal push failed: %s', exc)
+        return None
+
+
+# ---------------------------------------------------------------------------
+# Log New Gig (admin only) — creates Gig + Event + GCal event
+# ---------------------------------------------------------------------------
+
+@login_required
+def gig_log(request):
+    """Admin-only form to log a new gig: creates Gig record, Event for the
+    calendar, and pushes the event to Google Calendar."""
+    _require_portal(request)
+    if request.user.role != 'admin':
+        raise PermissionDenied
+
+    if request.method == 'POST':
+        p = request.POST
+
+        client_name     = p.get('client_name', '').strip()
+        event_type      = p.get('event_type', 'private')
+        date_val        = p.get('date', '')
+        start_time_val  = p.get('start_time') or None
+        end_time_val    = p.get('end_time')   or None
+        venue           = p.get('venue', '').strip()
+        city            = p.get('city', '').strip()
+        musicians_count = int(p.get('musicians_count') or 1)
+        rate_per_hour   = p.get('rate_per_hour')  or None
+        total_charged   = p.get('total_charged')  or None
+        notes           = p.get('notes', '').strip()
+
+        gig = Gig.objects.create(
+            client_name     = client_name,
+            event_type      = event_type,
+            date            = date_val,
+            start_time      = start_time_val,
+            end_time        = end_time_val,
+            venue           = venue,
+            city            = city,
+            musicians_count = musicians_count,
+            rate_per_hour   = rate_per_hour,
+            total_charged   = total_charged,
+            notes           = notes,
+        )
+
+        # Calendar event title uses client name so it matches existing Google Cal style
+        event_title = client_name
+        event = Event.objects.create(
+            title         = event_title,
+            event_type    = 'gig',
+            date          = date_val,
+            start_time    = start_time_val,
+            end_time      = end_time_val,
+            venue         = venue,
+            notes         = notes,
+            rate_per_hour = rate_per_hour,
+            total_charged = total_charged,
+            created_by    = request.user,
+        )
+
+        # Push to Google Calendar and store the GCal event ID
+        gcal_id = _push_to_gcal(gig, event_title)
+        if gcal_id:
+            event.google_event_id = gcal_id
+            event.save()
+
+        return redirect('portal_event_detail', event_id=event.id)
+
+    context = {
+        'page_title':   'Log New Gig',
+        'event_types':  Gig.EVENT_TYPE_CHOICES,
+        'gcal_ready':   bool(GCAL_SERVICE_ACCOUNT_JSON and GCAL_CALENDAR_ID),
+    }
+    return render(request, 'musicians_portal/gig_log_form.html', context)

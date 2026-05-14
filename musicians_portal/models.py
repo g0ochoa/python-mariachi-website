@@ -55,6 +55,8 @@ class Event(models.Model):
     client     = models.CharField(max_length=200, blank=True)
     notes           = models.TextField(blank=True)
     google_event_id = models.CharField(max_length=300, blank=True, db_index=True)
+    rate_per_hour   = models.DecimalField(max_digits=8, decimal_places=2, null=True, blank=True, help_text='Rate charged per hour (admin/lead only)')
+    total_charged   = models.DecimalField(max_digits=10, decimal_places=2, null=True, blank=True, help_text='Total amount charged to client (admin/lead only)')
     created_by = models.ForeignKey(
         settings.AUTH_USER_MODEL,
         on_delete=models.SET_NULL,
@@ -91,3 +93,54 @@ class EventAttendance(models.Model):
 
     def __str__(self):
         return f"{self.user} / {self.event} — {self.status}"
+
+
+class Gig(models.Model):
+    EVENT_TYPE_CHOICES = [
+        ('wedding',      'Wedding'),
+        ('quinceanera',  'Quinceañera'),
+        ('birthday',     'Birthday'),
+        ('corporate',    'Corporate'),
+        ('church',       'Church'),
+        ('festival',     'Festival'),
+        ('private',      'Private Party'),
+        ('other',        'Other'),
+    ]
+
+    client_name     = models.CharField(max_length=200)
+    event_type      = models.CharField(max_length=20, choices=EVENT_TYPE_CHOICES, default='other')
+    date            = models.DateField()
+    start_time      = models.TimeField()
+    end_time        = models.TimeField()
+    venue           = models.CharField(max_length=200, blank=True)
+    city            = models.CharField(max_length=100, blank=True)
+    musicians_count = models.PositiveSmallIntegerField(default=1, help_text='Number of musicians at this gig')
+    rate_per_hour   = models.DecimalField(max_digits=8, decimal_places=2, null=True, blank=True, help_text='Rate charged per hour (total, not per musician)')
+    total_charged   = models.DecimalField(max_digits=10, decimal_places=2, null=True, blank=True, help_text='Total amount charged to client')
+    notes           = models.TextField(blank=True)
+    created_at      = models.DateTimeField(auto_now_add=True)
+
+    class Meta:
+        ordering = ['-date', '-start_time']
+        verbose_name = 'Gig'
+        verbose_name_plural = 'Gigs'
+
+    def __str__(self):
+        return f"{self.date} — {self.client_name} ({self.get_event_type_display()})"
+
+    @property
+    def gig_number(self):
+        """Human-readable reference: GIG-2026-001"""
+        return f"GIG-{self.date.year}-{self.id:03d}"
+
+    @property
+    def hours_played(self):
+        """Calculate hours played from start/end time."""
+        from datetime import datetime, date
+        start = datetime.combine(date.today(), self.start_time)
+        end   = datetime.combine(date.today(), self.end_time)
+        if end < start:          # past midnight
+            from datetime import timedelta
+            end += timedelta(days=1)
+        delta = end - start
+        return round(delta.total_seconds() / 3600, 2)

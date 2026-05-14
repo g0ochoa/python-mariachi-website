@@ -353,11 +353,26 @@ def event_detail(request, event_id):
     # All attendance records for display
     all_attendance = EventAttendance.objects.filter(event=event).select_related('user').order_by('user__first_name')
 
+    # Finance data (only queried when user has access)
+    from django.contrib.auth import get_user_model
+    User = get_user_model()
+    pay_records   = []
+    band_members  = []
+    if _is_finance_user(request.user):
+        pay_records  = MusicianPay.objects.filter(event=event).select_related('musician')
+        paid_ids     = {p.musician_id for p in pay_records}
+        band_members = User.objects.filter(
+            role__in=['musician', 'lead', 'admin']
+        ).exclude(id__in=paid_ids).order_by('first_name', 'username')
+
     context = {
-        'page_title':    event.title,
-        'event':         event,
-        'attendance':    attendance,
+        'page_title':     event.title,
+        'event':          event,
+        'attendance':     attendance,
         'all_attendance': all_attendance,
+        'pay_records':    pay_records,
+        'band_members':   band_members,
+        'is_finance_user': _is_finance_user(request.user),
     }
     return render(request, 'musicians_portal/event_detail.html', context)
 

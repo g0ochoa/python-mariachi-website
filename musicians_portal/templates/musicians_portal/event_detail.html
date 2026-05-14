@@ -22,7 +22,7 @@
           {% else %}text-secondary{% endif %}">
           {{ event.get_event_type_display }}
         </span>
-        {% if user.role == 'admin' %}
+        {% if is_finance_user %}
           <div class="d-flex gap-2">
             <a href="{% url 'portal_event_edit' event.id %}" class="btn btn-sm btn-light">
               <i class="bi bi-pencil"></i> Edit
@@ -94,6 +94,85 @@
       </form>
     </div>
   </div>
+
+  <!-- Financials (admin/lead only) -->
+  {% if is_finance_user %}
+  <div class="card border-0 shadow-sm mb-4">
+    <div class="card-header bg-white fw-bold border-bottom d-flex justify-content-between align-items-center">
+      <span><i class="bi bi-cash-stack me-2 text-success"></i>Event Financials</span>
+    </div>
+    <div class="card-body">
+      <dl class="row mb-0">
+        {% if event.rate_per_hour %}
+          <dt class="col-sm-4 text-muted">Rate / Hour</dt>
+          <dd class="col-sm-8 fw-semibold">${{ event.rate_per_hour }}</dd>
+        {% endif %}
+        {% if event.total_charged %}
+          <dt class="col-sm-4 text-muted">Total Charged</dt>
+          <dd class="col-sm-8 fw-semibold text-success">${{ event.total_charged }}</dd>
+        {% endif %}
+        {% if not event.rate_per_hour and not event.total_charged %}
+          <dd class="col-12 text-muted fst-italic">No financial data recorded yet. <a href="{% url 'portal_event_edit' event.id %}">Edit event</a> to add it.</dd>
+        {% endif %}
+      </dl>
+    </div>
+  </div>
+
+  <!-- Member Pay (admin/lead only) -->
+  <div class="card border-0 shadow-sm mb-4">
+    <div class="card-header bg-white fw-bold border-bottom">
+      <i class="bi bi-wallet2 me-2 text-success"></i>Member Pay
+    </div>
+    <div class="card-body p-0">
+      {% if pay_records %}
+        <ul class="list-group list-group-flush">
+          {% for pay in pay_records %}
+            <li class="list-group-item d-flex justify-content-between align-items-center py-3">
+              <div>
+                <span class="fw-semibold">{{ pay.musician.get_full_name|default:pay.musician.username }}</span>
+                {% if pay.notes %}<small class="text-muted ms-2">— {{ pay.notes }}</small>{% endif %}
+              </div>
+              <span class="badge bg-success fs-6">${{ pay.amount }}</span>
+            </li>
+          {% endfor %}
+        </ul>
+      {% endif %}
+
+      <!-- Add pay for remaining band members -->
+      {% if band_members %}
+        <div class="p-3 border-top">
+          <p class="fw-semibold small text-muted mb-2">Add pay for a member:</p>
+          <form method="post" action="{% url 'portal_musician_pay_set' event.id %}" class="row g-2 align-items-end">
+            {% csrf_token %}
+            <div class="col-sm-4">
+              <select name="musician_id" class="form-select form-select-sm">
+                {% for m in band_members %}
+                  <option value="{{ m.id }}">{{ m.get_full_name|default:m.username }}</option>
+                {% endfor %}
+              </select>
+            </div>
+            <div class="col-sm-3">
+              <div class="input-group input-group-sm">
+                <span class="input-group-text">$</span>
+                <input type="number" name="amount" class="form-control" step="0.01" min="0" placeholder="Amount" required>
+              </div>
+            </div>
+            <div class="col-sm-3">
+              <input type="text" name="notes" class="form-control form-control-sm" placeholder="Note (optional)">
+            </div>
+            <div class="col-sm-2">
+              <button type="submit" class="btn btn-success btn-sm w-100">Add</button>
+            </div>
+          </form>
+        </div>
+      {% endif %}
+
+      {% if not pay_records and not band_members %}
+        <p class="text-muted text-center py-3 mb-0">All members have been paid.</p>
+      {% endif %}
+    </div>
+  </div>
+  {% endif %}
 
   <!-- Band Availability -->
   <div class="card border-0 shadow-sm">

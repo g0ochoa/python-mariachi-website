@@ -144,3 +144,34 @@ class Gig(models.Model):
             end += timedelta(days=1)
         delta = end - start
         return round(delta.total_seconds() / 3600, 2)
+
+
+class MusicianPay(models.Model):
+    """Tracks how much each musician is paid for a specific event."""
+    event    = models.ForeignKey(
+        Event,
+        on_delete=models.CASCADE,
+        related_name='musician_pays',
+    )
+    musician = models.ForeignKey(
+        settings.AUTH_USER_MODEL,
+        on_delete=models.CASCADE,
+        related_name='pay_records',
+        limit_choices_to={'role__in': ['musician', 'lead', 'admin']},
+    )
+    amount     = models.DecimalField(max_digits=8, decimal_places=2, help_text='Amount paid to this musician for this event')
+    notes      = models.CharField(max_length=200, blank=True, help_text='Optional note (e.g. cash, Venmo, etc.)')
+    created_by = models.ForeignKey(
+        settings.AUTH_USER_MODEL,
+        on_delete=models.SET_NULL,
+        null=True,
+        related_name='pay_records_created',
+    )
+    created_at = models.DateTimeField(auto_now_add=True)
+
+    class Meta:
+        unique_together = ('event', 'musician')
+        ordering = ['event__date', 'musician__first_name']
+
+    def __str__(self):
+        return f"{self.musician} — {self.event} — ${self.amount}"

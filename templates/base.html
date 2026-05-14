@@ -31,7 +31,7 @@
                 <span class="ms-2">Mariachi Todo Terreno</span>
             </a>
             {% if user.is_authenticated %}
-              {% if user.role == 'musician' or user.role == 'admin' %}
+              {% if user.role == 'musician' or user.role == 'admin' or user.role == 'lead' %}
               <a href="{% url 'portal_dashboard' %}"
                  class="btn btn-sm btn-outline-danger d-lg-none me-2"
                  style="border-radius:8px; font-size:.8rem; padding:.3rem .65rem;"
@@ -61,7 +61,7 @@
                         <a class="nav-link" href="#contact">Contact</a>
                     </li>
                     {% if user.is_authenticated %}
-                        {% if user.role == 'musician' or user.role == 'admin' %}
+                        {% if user.role == 'musician' or user.role == 'admin' or user.role == 'lead' %}
                         <li class="nav-item">
                             <a class="nav-link" href="{% url 'portal_dashboard' %}"><i class="bi bi-music-note-list"></i> Portal</a>
                         </li>

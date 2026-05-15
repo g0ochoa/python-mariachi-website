@@ -1,5 +1,6 @@
 import os
 import calendar
+import logging
 import threading
 from datetime import date, datetime, timedelta
 from django.utils import timezone
@@ -610,6 +611,7 @@ def event_edit(request, event_id):
         event.total_charged = p.get('total_charged') or None
         event.billed_hours  = p.get('billed_hours')  or None
         event.save()
+        _update_gcal(event)
         return redirect('portal_event_detail', event_id=event.id)
 
     context = {'page_title': 'Edit Event', 'event': event}
@@ -625,7 +627,9 @@ def event_delete(request, event_id):
 
     event = get_object_or_404(Event, id=event_id)
     year, month = event.date.year, event.date.month
+    gcal_id = event.google_event_id
     event.delete()
+    _delete_gcal(gcal_id)
     return redirect(f'/portal/calendar/?year={year}&month={month}')
 
 
@@ -649,25 +653,33 @@ def sync_google_calendar(request):
 # Google Calendar write-back
 # ---------------------------------------------------------------------------
 
-def _push_to_gcal(gig, title):
-    """Create an event in Google Calendar. Returns the GCal event ID or None."""
-    import logging
-    logger = logging.getLogger(__name__)
-
+def _gcal_service():
+    """Build and return an authenticated Google Calendar service, or None."""
     if not GCAL_SERVICE_ACCOUNT_JSON or not GCAL_CALENDAR_ID:
-        logger.warning('GCal write skipped: GCAL_SERVICE_ACCOUNT_JSON or GCAL_CALENDAR_ID not set')
         return None
-
     try:
         from google.oauth2 import service_account
         from googleapiclient.discovery import build
-
         credentials = service_account.Credentials.from_service_account_file(
             GCAL_SERVICE_ACCOUNT_JSON,
             scopes=['https://www.googleapis.com/auth/calendar.events'],
         )
-        service = build('calendar', 'v3', credentials=credentials)
+        return build('calendar', 'v3', credentials=credentials)
+    except Exception as exc:
+        logging.getLogger(__name__).error('GCal auth failed: %s', exc)
+        return None
 
+
+def _push_to_gcal(gig, title):
+    """Create an event in Google Calendar. Returns the GCal event ID or None."""
+    logger = logging.getLogger(__name__)
+
+    service = _gcal_service()
+    if not service:
+        logger.warning('GCal write skipped: credentials not configured')
+        return None
+
+    try:
         tz       = 'America/Chicago'
         location = ', '.join(filter(None, [gig.venue, gig.city]))
         gig_date = gig.date if isinstance(gig.date, date) else date.fromisoformat(str(gig.date))
@@ -687,6 +699,54 @@ def _push_to_gcal(gig, title):
     except Exception as exc:
         logging.getLogger(__name__).error('GCal push failed: %s', exc)
         return None
+
+
+def _update_gcal(event):
+    """Update an existing GCal event to match the Django Event. No-op if no google_event_id."""
+    logger = logging.getLogger(__name__)
+
+    if not event.google_event_id:
+        return
+    service = _gcal_service()
+    if not service:
+        return
+    try:
+        tz       = 'America/Chicago'
+        location = ', '.join(filter(None, [event.venue or '', event.city if hasattr(event, 'city') else '']))
+        ev_date  = event.date if isinstance(event.date, date) else date.fromisoformat(str(event.date))
+
+        body = {'summary': event.title, 'location': location, 'description': event.notes or ''}
+        if event.start_time and event.end_time:
+            body['start'] = {'dateTime': datetime.combine(ev_date, event.start_time).isoformat(), 'timeZone': tz}
+            body['end']   = {'dateTime': datetime.combine(ev_date, event.end_time).isoformat(),   'timeZone': tz}
+        else:
+            body['start'] = {'date': ev_date.isoformat()}
+            body['end']   = {'date': ev_date.isoformat()}
+
+        service.events().update(
+            calendarId=GCAL_CALENDAR_ID,
+            eventId=event.google_event_id,
+            body=body,
+        ).execute()
+        logger.info('GCal event updated: %s', event.google_event_id)
+    except Exception as exc:
+        logger.error('GCal update failed: %s', exc)
+
+
+def _delete_gcal(google_event_id):
+    """Delete a GCal event by its event ID. No-op if id is blank."""
+    logger = logging.getLogger(__name__)
+
+    if not google_event_id:
+        return
+    service = _gcal_service()
+    if not service:
+        return
+    try:
+        service.events().delete(calendarId=GCAL_CALENDAR_ID, eventId=google_event_id).execute()
+        logger.info('GCal event deleted: %s', google_event_id)
+    except Exception as exc:
+        logger.error('GCal delete failed: %s', exc)
 
 
 # ---------------------------------------------------------------------------

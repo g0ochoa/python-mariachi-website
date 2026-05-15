@@ -211,3 +211,6 @@ COMMAND_LOG.md
 session-continuity-status.md
 PERSONAL_NOTES.md
 docs/sessions/
+docs/gcal-service-account.json
+*service-account*.json
+

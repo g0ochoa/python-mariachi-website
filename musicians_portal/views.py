@@ -325,6 +325,7 @@ def _month_financial_stats(user, year, month, today):
     result = {
         'is_finance':   is_finance,
         'my_earned':    my_earned,
+        'my_pending':   my_potential - my_earned,
         'my_potential': my_potential,
         'my_ytd':       my_ytd,
     }
@@ -347,6 +348,8 @@ def _month_financial_stats(user, year, month, today):
             date__lte=today,
             total_charged__isnull=False,
         ).aggregate(t=Sum('total_charged'))['t'] or 0
+
+        result['biz_pending'] = result['biz_potential'] - result['biz_earned']
 
     return result
 

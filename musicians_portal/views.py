@@ -78,8 +78,12 @@ def _do_ical_sync():
             if dtend_val.tzinfo is not None:
                 dtend_val = dtend_val.astimezone(BAND_TZ)
             end_time = dtend_val.time()
+            event_end_date = None  # single-day timed event
         else:
             end_time = None
+            # iCal all-day DTEND is exclusive — subtract 1 day for the actual last day
+            last_day = dtend_val - timedelta(days=1)
+            event_end_date = last_day if last_day > event_date else None
 
         location    = str(component.get('LOCATION',    '') or '').strip()
         description = str(component.get('DESCRIPTION', '') or '').strip()
@@ -90,6 +94,7 @@ def _do_ical_sync():
             'title':      summary[:200],
             'event_type': _detect_event_type(summary),
             'date':       event_date,
+            'end_date':   event_end_date,
             'start_time': start_time,
             'end_time':   end_time,
             'venue':      location[:200],
@@ -251,10 +256,21 @@ def calendar_month_partial(request):
     cal        = calendar.monthcalendar(year, month)
     month_name = date(year, month, 1).strftime('%B %Y')
 
-    events_this_month = Event.objects.filter(date__year=year, date__month=month)
+    first_day = date(year, month, 1)
+    last_day  = date(year, month, calendar.monthrange(year, month)[1])
+
+    # Events that overlap this month (single-day or spanning)
+    from django.db.models import Q
+    events_this_month = Event.objects.filter(
+        Q(date__lte=last_day) & (Q(end_date__isnull=True, date__gte=first_day) | Q(end_date__gte=first_day))
+    )
     events_by_day = {}
     for ev in events_this_month:
-        events_by_day.setdefault(ev.date.day, []).append(ev)
+        span_end = ev.end_date if ev.end_date else ev.date
+        cur = max(ev.date, first_day)
+        while cur <= min(span_end, last_day):
+            events_by_day.setdefault(cur.day, []).append(ev)
+            cur += timedelta(days=1)
 
     prev_month = (date(year, month, 1) - timedelta(days=1)).replace(day=1)
     next_month = (date(year, month, 1) + timedelta(days=32)).replace(day=1)
@@ -291,11 +307,20 @@ def event_calendar(request):
     if not cache.get(GCAL_SYNC_CACHE_KEY):
         threading.Thread(target=_do_ical_sync, daemon=True).start()
 
-    # All events this month
-    events_this_month = Event.objects.filter(date__year=year, date__month=month)
+    first_day = date(year, month, 1)
+    last_day  = date(year, month, calendar.monthrange(year, month)[1])
+
+    # All events that overlap this month (handles multi-day spans)
+    events_this_month = Event.objects.filter(
+        Q(date__lte=last_day) & (Q(end_date__isnull=True, date__gte=first_day) | Q(end_date__gte=first_day))
+    )
     events_by_day = {}
     for ev in events_this_month:
-        events_by_day.setdefault(ev.date.day, []).append(ev)
+        span_end = ev.end_date if ev.end_date else ev.date
+        cur = max(ev.date, first_day)
+        while cur <= min(span_end, last_day):
+            events_by_day.setdefault(cur.day, []).append(ev)
+            cur += timedelta(days=1)
 
     # Upcoming events (next 60 days) for list below grid
     upcoming = list(Event.objects.filter(
@@ -712,6 +737,7 @@ def pay_summary(request):
     User = get_user_model()
 
     selected_year = int(request.GET.get('year', date.today().year))
+    selected_musician_id = request.GET.get('musician', '')
 
     # All years that have pay records (for the year filter dropdown)
     available_years = (
@@ -723,6 +749,13 @@ def pay_summary(request):
     if selected_year not in year_list:
         year_list = [selected_year] + year_list
 
+    # All musicians who have ever had pay records (for the musician dropdown)
+    musician_list = (
+        User.objects.filter(
+            id__in=MusicianPay.objects.values_list('musician_id', flat=True)
+        ).order_by('first_name', 'username')
+    )
+
     # Pay records for the selected year
     pays = (
         MusicianPay.objects
@@ -730,6 +763,10 @@ def pay_summary(request):
         .select_related('musician', 'event')
         .order_by('musician__first_name', 'event__date')
     )
+
+    # Apply musician filter if selected
+    if selected_musician_id:
+        pays = pays.filter(musician_id=selected_musician_id)
 
     # Group by musician
     from collections import defaultdict
@@ -745,9 +782,11 @@ def pay_summary(request):
     ]
 
     context = {
-        'page_title':     f'Pay Summary {selected_year}',
-        'summary':        summary,
-        'selected_year':  selected_year,
-        'year_list':      year_list,
+        'page_title':            f'Pay Summary {selected_year}',
+        'summary':               summary,
+        'selected_year':         selected_year,
+        'year_list':             year_list,
+        'musician_list':         musician_list,
+        'selected_musician_id':  selected_musician_id,
     }
     return render(request, 'musicians_portal/pay_summary.html', context)

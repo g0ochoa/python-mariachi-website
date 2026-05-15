@@ -49,6 +49,7 @@ class Event(models.Model):
     title      = models.CharField(max_length=200)
     event_type = models.CharField(max_length=20, choices=TYPE_CHOICES, default='gig')
     date       = models.DateField()
+    end_date   = models.DateField(null=True, blank=True, help_text='Last day of multi-day events (leave blank for single-day)')
     start_time = models.TimeField(null=True, blank=True)
     end_time   = models.TimeField(null=True, blank=True)
     venue      = models.CharField(max_length=200, blank=True)

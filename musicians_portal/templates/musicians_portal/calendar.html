@@ -24,6 +24,60 @@
     </div>
   </div>
 
+  <!-- ── Financial Stats ───────────────────────────────────────────────── -->
+  {% if month_stats %}
+  <div class="mb-4">
+    <!-- Personal row -->
+    <div class="text-muted mb-1" style="font-size:.72rem; font-weight:600; text-transform:uppercase; letter-spacing:.05em;">
+      <i class="bi bi-person-fill me-1"></i>My Pay
+    </div>
+    <div class="row g-2 mb-2">
+      <div class="col-4">
+        <div class="card border-0 shadow-sm text-center py-2 px-1">
+          <div class="text-muted mb-1" style="font-size:.7rem;"><i class="bi bi-check-circle-fill text-success me-1"></i>Earned this month</div>
+          <div class="fw-bold text-success" style="font-size:1rem;">${{ month_stats.my_earned|floatformat:2 }}</div>
+        </div>
+      </div>
+      <div class="col-4">
+        <div class="card border-0 shadow-sm text-center py-2 px-1">
+          <div class="text-muted mb-1" style="font-size:.7rem;"><i class="bi bi-calendar-check-fill text-primary me-1"></i>Potential this month</div>
+          <div class="fw-bold text-primary" style="font-size:1rem;">${{ month_stats.my_potential|floatformat:2 }}</div>
+        </div>
+      </div>
+      <div class="col-4">
+        <div class="card border-0 shadow-sm text-center py-2 px-1">
+          <div class="text-muted mb-1" style="font-size:.7rem;"><i class="bi bi-graph-up-arrow text-warning me-1"></i>YTD since Jan 1</div>
+          <div class="fw-bold" style="font-size:1rem; color:#e6a817;">${{ month_stats.my_ytd|floatformat:2 }}</div>
+        </div>
+      </div>
+    </div>
+    <!-- Business row -->
+    <div class="text-muted mb-1" style="font-size:.72rem; font-weight:600; text-transform:uppercase; letter-spacing:.05em;">
+      <i class="bi bi-building me-1"></i>Band Revenue
+    </div>
+    <div class="row g-2">
+      <div class="col-4">
+        <div class="card border-0 shadow-sm text-center py-2 px-1" style="border-left:3px solid #198754 !important;">
+          <div class="text-muted mb-1" style="font-size:.7rem;"><i class="bi bi-check-circle-fill text-success me-1"></i>Earned this month</div>
+          <div class="fw-bold text-success" style="font-size:1rem;">${{ month_stats.biz_earned|floatformat:2 }}</div>
+        </div>
+      </div>
+      <div class="col-4">
+        <div class="card border-0 shadow-sm text-center py-2 px-1" style="border-left:3px solid #0d6efd !important;">
+          <div class="text-muted mb-1" style="font-size:.7rem;"><i class="bi bi-calendar-check-fill text-primary me-1"></i>Potential this month</div>
+          <div class="fw-bold text-primary" style="font-size:1rem;">${{ month_stats.biz_potential|floatformat:2 }}</div>
+        </div>
+      </div>
+      <div class="col-4">
+        <div class="card border-0 shadow-sm text-center py-2 px-1" style="border-left:3px solid #e6a817 !important;">
+          <div class="text-muted mb-1" style="font-size:.7rem;"><i class="bi bi-graph-up-arrow text-warning me-1"></i>YTD since Jan 1</div>
+          <div class="fw-bold" style="font-size:1rem; color:#e6a817;">${{ month_stats.biz_ytd|floatformat:2 }}</div>
+        </div>
+      </div>
+    </div>
+  </div>
+  {% endif %}
+
   <!-- ── Next Up Cards ─────────────────────────────────────────────────── -->
   {% if next_up %}
   <h5 class="fw-bold mb-3"><i class="bi bi-lightning-charge-fill text-warning me-2"></i>Next Up</h5>
@@ -90,29 +144,6 @@
       <i class="bi bi-chevron-right"></i>
     </button>
   </div>
-
-  {% if month_stats %}
-  <div class="row g-2 mb-3">
-    <div class="col-4">
-      <div class="card border-0 shadow-sm text-center py-2 px-1">
-        <div class="text-muted mb-1" style="font-size:.7rem;"><i class="bi bi-check-circle-fill text-success me-1"></i>Earned this month</div>
-        <div class="fw-bold text-success" style="font-size:1rem;">${{ month_stats.earned|floatformat:2 }}</div>
-      </div>
-    </div>
-    <div class="col-4">
-      <div class="card border-0 shadow-sm text-center py-2 px-1">
-        <div class="text-muted mb-1" style="font-size:.7rem;"><i class="bi bi-calendar-check-fill text-primary me-1"></i>Potential this month</div>
-        <div class="fw-bold text-primary" style="font-size:1rem;">${{ month_stats.potential|floatformat:2 }}</div>
-      </div>
-    </div>
-    <div class="col-4">
-      <div class="card border-0 shadow-sm text-center py-2 px-1">
-        <div class="text-muted mb-1" style="font-size:.7rem;"><i class="bi bi-graph-up-arrow text-warning me-1"></i>YTD since Jan 1</div>
-        <div class="fw-bold" style="font-size:1rem; color:#e6a817;">${{ month_stats.ytd|floatformat:2 }}</div>
-      </div>
-    </div>
-  </div>
-  {% endif %}
 
   <div class="card border-0 shadow-sm mb-2">
     <div class="card-body p-0">

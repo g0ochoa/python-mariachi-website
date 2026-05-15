@@ -293,25 +293,58 @@ def _is_finance_user(user):
 
 def _month_financial_stats(user, year, month, today):
     """Compute monthly and YTD financial stats for admin/lead users.
-    Returns a dict or None if user is not a finance user."""
+    Returns a dict with both personal (MusicianPay) and business (Event) totals,
+    or None if user is not a finance user."""
     if not _is_finance_user(user):
         return None
     jan_first = date(today.year, 1, 1)
-    earned = Event.objects.filter(
+
+    # --- Business stats (Event.total_charged) ---
+    biz_earned = Event.objects.filter(
         date__year=year, date__month=month,
         date__lte=today,
         total_charged__isnull=False,
     ).aggregate(t=Sum('total_charged'))['t'] or 0
-    potential = Event.objects.filter(
+
+    biz_potential = Event.objects.filter(
         date__year=year, date__month=month,
         total_charged__isnull=False,
     ).aggregate(t=Sum('total_charged'))['t'] or 0
-    ytd = Event.objects.filter(
+
+    biz_ytd = Event.objects.filter(
         date__gte=jan_first,
         date__lte=today,
         total_charged__isnull=False,
     ).aggregate(t=Sum('total_charged'))['t'] or 0
-    return {'earned': earned, 'potential': potential, 'ytd': ytd}
+
+    # --- Personal stats (MusicianPay for this user) ---
+    my_earned = MusicianPay.objects.filter(
+        musician=user,
+        event__date__year=year,
+        event__date__month=month,
+        event__date__lte=today,
+    ).aggregate(t=Sum('amount'))['t'] or 0
+
+    my_potential = MusicianPay.objects.filter(
+        musician=user,
+        event__date__year=year,
+        event__date__month=month,
+    ).aggregate(t=Sum('amount'))['t'] or 0
+
+    my_ytd = MusicianPay.objects.filter(
+        musician=user,
+        event__date__gte=jan_first,
+        event__date__lte=today,
+    ).aggregate(t=Sum('amount'))['t'] or 0
+
+    return {
+        'biz_earned':    biz_earned,
+        'biz_potential': biz_potential,
+        'biz_ytd':       biz_ytd,
+        'my_earned':     my_earned,
+        'my_potential':  my_potential,
+        'my_ytd':        my_ytd,
+    }
 
 
 @login_required

@@ -17,10 +17,10 @@
     updateTopStats({
       my_earned:    '{{ month_stats.my_earned|floatformat:2 }}',
       my_potential: '{{ month_stats.my_potential|floatformat:2 }}',
-      my_ytd:       '{{ month_stats.my_ytd|floatformat:2 }}',
+      my_ytd:       '{{ month_stats.my_ytd|floatformat:2 }}'{% if month_stats.is_finance %},
       biz_earned:   '{{ month_stats.biz_earned|floatformat:2 }}',
       biz_potential:'{{ month_stats.biz_potential|floatformat:2 }}',
-      biz_ytd:      '{{ month_stats.biz_ytd|floatformat:2 }}'
+      biz_ytd:      '{{ month_stats.biz_ytd|floatformat:2 }}'{% endif %}
     });
   }
   </script>

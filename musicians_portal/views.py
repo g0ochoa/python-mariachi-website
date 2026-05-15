@@ -292,30 +292,14 @@ def _is_finance_user(user):
 
 
 def _month_financial_stats(user, year, month, today):
-    """Compute monthly and YTD financial stats for admin/lead users.
-    Returns a dict with both personal (MusicianPay) and business (Event) totals,
-    or None if user is not a finance user."""
-    if not _is_finance_user(user):
+    """Compute monthly and YTD financial stats.
+    Admin/lead get personal + business totals.
+    Musicians get personal totals only.
+    Returns None for customers."""
+    if user.role not in ('admin', 'lead', 'musician'):
         return None
+    is_finance = user.role in ('admin', 'lead')
     jan_first = date(today.year, 1, 1)
-
-    # --- Business stats (Event.total_charged) ---
-    biz_earned = Event.objects.filter(
-        date__year=year, date__month=month,
-        date__lte=today,
-        total_charged__isnull=False,
-    ).aggregate(t=Sum('total_charged'))['t'] or 0
-
-    biz_potential = Event.objects.filter(
-        date__year=year, date__month=month,
-        total_charged__isnull=False,
-    ).aggregate(t=Sum('total_charged'))['t'] or 0
-
-    biz_ytd = Event.objects.filter(
-        date__gte=jan_first,
-        date__lte=today,
-        total_charged__isnull=False,
-    ).aggregate(t=Sum('total_charged'))['t'] or 0
 
     # --- Personal stats (MusicianPay for this user) ---
     my_earned = MusicianPay.objects.filter(
@@ -337,14 +321,33 @@ def _month_financial_stats(user, year, month, today):
         event__date__lte=today,
     ).aggregate(t=Sum('amount'))['t'] or 0
 
-    return {
-        'biz_earned':    biz_earned,
-        'biz_potential': biz_potential,
-        'biz_ytd':       biz_ytd,
-        'my_earned':     my_earned,
-        'my_potential':  my_potential,
-        'my_ytd':        my_ytd,
+    result = {
+        'is_finance':   is_finance,
+        'my_earned':    my_earned,
+        'my_potential': my_potential,
+        'my_ytd':       my_ytd,
     }
+
+    if is_finance:
+        # --- Business stats (Event.total_charged) ---
+        result['biz_earned'] = Event.objects.filter(
+            date__year=year, date__month=month,
+            date__lte=today,
+            total_charged__isnull=False,
+        ).aggregate(t=Sum('total_charged'))['t'] or 0
+
+        result['biz_potential'] = Event.objects.filter(
+            date__year=year, date__month=month,
+            total_charged__isnull=False,
+        ).aggregate(t=Sum('total_charged'))['t'] or 0
+
+        result['biz_ytd'] = Event.objects.filter(
+            date__gte=jan_first,
+            date__lte=today,
+            total_charged__isnull=False,
+        ).aggregate(t=Sum('total_charged'))['t'] or 0
+
+    return result
 
 
 @login_required

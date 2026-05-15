@@ -2,6 +2,7 @@ import os
 import calendar
 import threading
 from datetime import date, datetime, timedelta
+from django.utils import timezone
 from urllib.parse import quote
 from zoneinfo import ZoneInfo
 
@@ -294,7 +295,7 @@ def _is_finance_user(user):
 def calendar_month_partial(request):
     """Returns just the calendar grid HTML fragment for AJAX month navigation."""
     _require_portal(request)
-    today = date.today()
+    today = timezone.localdate()
     year  = int(request.GET.get('year',  today.year))
     month = int(request.GET.get('month', today.month))
     if month < 1:  month = 12; year -= 1
@@ -340,7 +341,7 @@ def calendar_month_partial(request):
 def event_calendar(request):
     _require_portal(request)
 
-    today = date.today()
+    today = timezone.localdate()
     year  = int(request.GET.get('year',  today.year))
     month = int(request.GET.get('month', today.month))
 

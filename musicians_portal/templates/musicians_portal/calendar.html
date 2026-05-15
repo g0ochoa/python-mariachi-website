@@ -12,9 +12,16 @@
       </h1>
       <small class="text-muted">Mariachi Esencia — Band Schedule</small>
     </div>
-    <a href="{% url 'portal_dashboard' %}" class="btn btn-outline-secondary btn-sm">
-      <i class="bi bi-arrow-left me-1"></i>Portal
-    </a>
+    <div class="d-flex gap-2 align-items-center">
+      {% if request.user.role == 'admin' %}
+      <a href="{% url 'portal_gig_log' %}" class="btn btn-danger btn-sm">
+        <i class="bi bi-plus-lg me-1"></i>Log Gig
+      </a>
+      {% endif %}
+      <a href="{% url 'portal_dashboard' %}" class="btn btn-outline-secondary btn-sm">
+        <i class="bi bi-arrow-left me-1"></i>Portal
+      </a>
+    </div>
   </div>
 
   <!-- ── Next Up Cards ─────────────────────────────────────────────────── -->
@@ -85,46 +92,32 @@
   </div>
 
   <div class="card border-0 shadow-sm mb-2">
-    <div class="card-body p-2">
-      <table class="table table-bordered mb-0 text-center" style="table-layout:fixed;">
-        <thead>
-          <tr class="table-dark">
-            {% for day in "Mon,Tue,Wed,Thu,Fri,Sat,Sun"|split:"," %}
-              <th class="py-2" style="font-size:.78rem;">{{ day }}</th>
-            {% endfor %}
-          </tr>
-        </thead>
-        <tbody>
-          {% for week in cal %}
-          <tr>
-            {% for day in week %}
-            <td class="p-1 align-top
-                {% if day == today.day and month == today.month and year == today.year %}bg-warning bg-opacity-25{% endif %}
-                {% if day != 0 and events_by_day|get_item:day %}cal-day-click{% endif %}"
-                {% if day != 0 and events_by_day|get_item:day %}onclick="showDayEvents({{ day }}, currentMonthData)"{% endif %}
-                style="height:80px; width:14.28%; overflow:hidden;">
-              {% if day != 0 %}
-                <div class="{% if day == today.day and month == today.month and year == today.year %}fw-bold text-danger{% else %}text-muted{% endif %} mb-1"
-                     style="font-size:.8rem;">{{ day }}</div>
-                {% if events_by_day|get_item:day %}
-                  {% for ev in events_by_day|get_item:day %}
-                    <a href="{% url 'portal_event_detail' ev.id %}"
-                       class="d-block text-decoration-none mb-1 px-1 rounded text-truncate
-                         {% if ev.event_type == 'gig' %}bg-danger text-white
-                         {% elif ev.event_type == 'rehearsal' %}bg-primary text-white
-                         {% else %}bg-secondary text-white{% endif %}"
-                       style="font-size:.65rem; line-height:1.7;">
-                      {% if ev.start_time %}{{ ev.start_time|time:"g:i A" }} · {% endif %}{{ ev.title }}
-                    </a>
-                  {% endfor %}
-                {% endif %}
-              {% endif %}
-            </td>
-            {% endfor %}
-          </tr>
-          {% endfor %}
-        </tbody>
-      </table>
+    <div class="card-body p-0">
+      <!-- Day-of-week header -->
+      <div class="cal-grid-hdr">
+        {% for d in "Mon,Tue,Wed,Thu,Fri,Sat,Sun"|split:"," %}<div>{{ d }}</div>{% endfor %}
+      </div>
+      <!-- Weeks -->
+      {% for week_data in cal_weeks %}
+      <div class="cal-week{% if forloop.last %} cal-week-last{% endif %}">
+        <!-- Day number cells → row 1 of this week's grid -->
+        {% for day in week_data.days %}
+        <div class="cal-dn{% if day == 0 %} cal-dn-empty{% endif %}{% if day != 0 and day == today.day and month == today.month and year == today.year %} cal-today{% endif %}"
+             {% if day != 0 %}onclick="showDayEvents({{ day }}, currentMonthData)"{% endif %}>
+          {% if day != 0 %}<span class="cal-dn-num">{{ day }}</span>{% endif %}
+        </div>
+        {% endfor %}
+        <!-- Event bars — CSS Grid auto-places these after the 7 day cells -->
+        {% for span in week_data.event_spans %}
+        <a href="{% url 'portal_event_detail' span.event.id %}"
+           class="cal-ev cal-ev-{{ span.event.event_type }}{% if span.continues_from %} cal-cont-from{% endif %}{% if span.continues_after %} cal-cont-after{% endif %}"
+           style="grid-column:{{ span.col_start }}/span {{ span.col_span }};"
+           title="{{ span.event.title }}">
+          {% if not span.continues_from and span.event.start_time %}{{ span.event.start_time|time:"g:i A" }} · {% endif %}{{ span.event.title }}
+        </a>
+        {% endfor %}
+      </div>
+      {% endfor %}
     </div>
   </div>
 
@@ -213,8 +206,73 @@
 </div>
 
 <style>
-.cal-day-click { cursor: pointer; }
-.cal-day-click:hover { background-color: rgba(220,53,69,.06) !important; }
+/* ── Calendar Grid ───────────────────────────────────────── */
+.cal-grid-hdr {
+  display: grid;
+  grid-template-columns: repeat(7, 1fr);
+  background: #212529;
+  border-radius: 4px 4px 0 0;
+}
+.cal-grid-hdr > div {
+  text-align: center;
+  color: #fff;
+  font-size: .78rem;
+  font-weight: 600;
+  padding: 6px 0;
+}
+.cal-week {
+  display: grid;
+  grid-template-columns: repeat(7, 1fr);
+  grid-auto-rows: auto;
+  border-bottom: 1px solid #dee2e6;
+  padding-bottom: 4px;
+}
+.cal-week-last { border-bottom: none; }
+.cal-dn {
+  padding: 4px 6px 2px;
+  text-align: right;
+  min-height: 28px;
+  cursor: pointer;
+  user-select: none;
+}
+.cal-dn:hover:not(.cal-dn-empty) { background: rgba(0,0,0,.05); }
+.cal-dn-empty { cursor: default; }
+.cal-dn-num { font-size: .75rem; color: #6c757d; }
+.cal-today .cal-dn-num {
+  background: #dc3545;
+  color: #fff;
+  border-radius: 50%;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 20px;
+  height: 20px;
+  font-size: .72rem;
+  font-weight: 700;
+}
+/* Event bars */
+.cal-ev {
+  align-self: start;
+  margin: 1px 2px;
+  padding: 2px 6px;
+  font-size: .62rem;
+  border-radius: 4px;
+  text-decoration: none !important;
+  color: #fff !important;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  line-height: 1.65;
+  display: block;
+}
+.cal-ev:hover { filter: brightness(1.2); }
+.cal-ev-gig       { background: #dc3545; }
+.cal-ev-rehearsal { background: #0d6efd; }
+.cal-ev-other     { background: #6c757d; }
+/* Multi-day continuation edges (no rounded corner where bar continues) */
+.cal-ev.cal-cont-from                      { border-radius: 0 4px 4px 0; margin-left: 0; }
+.cal-ev.cal-cont-after                     { border-radius: 4px 0 0 4px; margin-right: 0; }
+.cal-ev.cal-cont-from.cal-cont-after       { border-radius: 0; margin-left: 0; margin-right: 0; }
 </style>
 
 <script>

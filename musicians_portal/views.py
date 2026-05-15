@@ -117,6 +117,53 @@ def _do_ical_sync():
     cache.set(GCAL_SYNC_CACHE_KEY, True, GCAL_SYNC_INTERVAL)
     return created, updated, deleted
 
+
+def _build_week_events(cal, year, month, events_by_day):
+    """
+    For each week in `cal`, return a list of event-span dicts for CSS Grid rendering.
+    Each dict: {event, col_start (1-7), col_span (1+), continues_from, continues_after}
+    Multi-day events spanning a week boundary appear in both affected weeks, clamped.
+    """
+    from datetime import date as date_cls
+    week_events = []
+    for week in cal:
+        col_dates = {ci: date_cls(year, month, d) for ci, d in enumerate(week) if d != 0}
+        if not col_dates:
+            week_events.append([])
+            continue
+        week_start = min(col_dates.values())
+        week_end   = max(col_dates.values())
+        seen_ids = set()
+        spans = []
+        for col_idx in sorted(col_dates):
+            day_num = week[col_idx]
+            for ev in events_by_day.get(day_num, []):
+                if ev.id in seen_ids:
+                    continue
+                seen_ids.add(ev.id)
+                ev_end = ev.end_date if ev.end_date else ev.date
+                clamp_start = max(ev.date, week_start)
+                clamp_end   = min(ev_end, week_end)
+                # Find CSS grid column numbers (1-indexed)
+                start_col = end_col = None
+                for ci, d in col_dates.items():
+                    if d == clamp_start:
+                        start_col = ci + 1
+                    if d == clamp_end:
+                        end_col = ci + 1
+                if start_col is None or end_col is None:
+                    continue
+                spans.append({
+                    'event':           ev,
+                    'col_start':       start_col,
+                    'col_span':        end_col - start_col + 1,
+                    'continues_from':  ev.date < week_start,
+                    'continues_after': ev_end > week_end,
+                })
+        week_events.append(spans)
+    return week_events
+
+
 SCORES_BASE_PATH = '/var/www/mariachiesencia/scores/'
 
 
@@ -276,10 +323,12 @@ def calendar_month_partial(request):
     next_month = (date(year, month, 1) + timedelta(days=32)).replace(day=1)
 
     gig_count = events_this_month.filter(event_type='gig').count()
+    week_events = _build_week_events(cal, year, month, events_by_day)
+    cal_weeks = [{'days': w, 'event_spans': we} for w, we in zip(cal, week_events)]
 
     context = {
         'year': year, 'month': month, 'month_name': month_name,
-        'cal': cal, 'events_by_day': events_by_day, 'today': today,
+        'cal': cal, 'cal_weeks': cal_weeks, 'events_by_day': events_by_day, 'today': today,
         'prev_year': prev_month.year, 'prev_month': prev_month.month,
         'next_year': next_month.year, 'next_month': next_month.month,
         'gig_count': gig_count,
@@ -342,6 +391,8 @@ def event_calendar(request):
     next_month = next_month.replace(day=1)
 
     gig_count = events_this_month.filter(event_type='gig').count()
+    week_events = _build_week_events(cal, year, month, events_by_day)
+    cal_weeks = [{'days': w, 'event_spans': we} for w, we in zip(cal, week_events)]
 
     context = {
         'page_title':    'Event Calendar',
@@ -349,6 +400,7 @@ def event_calendar(request):
         'month':         month,
         'month_name':    month_name,
         'cal':           cal,
+        'cal_weeks':     cal_weeks,
         'events_by_day': events_by_day,
         'today':         today,
         'upcoming':      upcoming,

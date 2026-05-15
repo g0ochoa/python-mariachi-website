@@ -13,46 +13,32 @@
   </div>
 
   <div class="card border-0 shadow-sm mb-2">
-    <div class="card-body p-2">
-      <table class="table table-bordered mb-0 text-center" style="table-layout:fixed;">
-        <thead>
-          <tr class="table-dark">
-            {% for day in "Mon,Tue,Wed,Thu,Fri,Sat,Sun"|split:"," %}
-              <th class="py-2" style="font-size:.78rem;">{{ day }}</th>
-            {% endfor %}
-          </tr>
-        </thead>
-        <tbody>
-          {% for week in cal %}
-          <tr>
-            {% for day in week %}
-            <td class="p-1 align-top
-                {% if day == today.day and month == today.month and year == today.year %}bg-warning bg-opacity-25{% endif %}
-                {% if day != 0 and events_by_day|get_item:day %}cal-day-click{% endif %}"
-                {% if day != 0 and events_by_day|get_item:day %}onclick="showDayEvents({{ day }}, currentMonthData)"{% endif %}
-                style="height:80px; width:14.28%; overflow:hidden;">
-              {% if day != 0 %}
-                <div class="{% if day == today.day and month == today.month and year == today.year %}fw-bold text-danger{% else %}text-muted{% endif %} mb-1"
-                     style="font-size:.8rem;">{{ day }}</div>
-                {% if events_by_day|get_item:day %}
-                  {% for ev in events_by_day|get_item:day %}
-                    <a href="/portal/calendar/events/{{ ev.id }}/"
-                       class="d-block text-decoration-none mb-1 px-1 rounded text-truncate
-                         {% if ev.event_type == 'gig' %}bg-danger text-white
-                         {% elif ev.event_type == 'rehearsal' %}bg-primary text-white
-                         {% else %}bg-secondary text-white{% endif %}"
-                       style="font-size:.65rem; line-height:1.7;">
-                      {% if ev.start_time %}{{ ev.start_time|time:"g:i A" }} · {% endif %}{{ ev.title }}
-                    </a>
-                  {% endfor %}
-                {% endif %}
-              {% endif %}
-            </td>
-            {% endfor %}
-          </tr>
-          {% endfor %}
-        </tbody>
-      </table>
+    <div class="card-body p-0">
+      <!-- Day-of-week header -->
+      <div class="cal-grid-hdr">
+        {% for d in "Mon,Tue,Wed,Thu,Fri,Sat,Sun"|split:"," %}<div>{{ d }}</div>{% endfor %}
+      </div>
+      <!-- Weeks -->
+      {% for week_data in cal_weeks %}
+      <div class="cal-week{% if forloop.last %} cal-week-last{% endif %}">
+        <!-- Day number cells → row 1 of this week's grid -->
+        {% for day in week_data.days %}
+        <div class="cal-dn{% if day == 0 %} cal-dn-empty{% endif %}{% if day != 0 and day == today.day and month == today.month and year == today.year %} cal-today{% endif %}"
+             {% if day != 0 %}onclick="showDayEvents({{ day }}, currentMonthData)"{% endif %}>
+          {% if day != 0 %}<span class="cal-dn-num">{{ day }}</span>{% endif %}
+        </div>
+        {% endfor %}
+        <!-- Event bars — CSS Grid auto-places these after the 7 day cells -->
+        {% for span in week_data.event_spans %}
+        <a href="/portal/calendar/events/{{ span.event.id }}/"
+           class="cal-ev cal-ev-{{ span.event.event_type }}{% if span.continues_from %} cal-cont-from{% endif %}{% if span.continues_after %} cal-cont-after{% endif %}"
+           style="grid-column:{{ span.col_start }}/span {{ span.col_span }};"
+           title="{{ span.event.title }}">
+          {% if not span.continues_from and span.event.start_time %}{{ span.event.start_time|time:"g:i A" }} · {% endif %}{{ span.event.title }}
+        </a>
+        {% endfor %}
+      </div>
+      {% endfor %}
     </div>
   </div>
 

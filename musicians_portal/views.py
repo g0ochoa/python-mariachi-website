@@ -15,7 +15,8 @@ from django.shortcuts import render, get_object_or_404, redirect
 from django.contrib.auth.decorators import login_required
 from django.core.cache import cache
 from django.core.exceptions import PermissionDenied
-from django.db.models import Q, Sum import JsonResponse
+from django.db.models import Q, Sum
+from django.http import JsonResponse
 from django.views.decorators.http import require_POST
 from .models import Song, Event, EventAttendance, Gig, MusicianPay
 

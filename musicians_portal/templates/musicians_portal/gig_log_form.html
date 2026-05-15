@@ -1,0 +1,125 @@
+{% extends "base.html" %}
+
+{% block content %}
+<div class="container py-4" style="max-width:640px;">
+
+  <a href="{% url 'portal_calendar' %}" class="btn btn-outline-secondary btn-sm mb-4">
+    <i class="bi bi-arrow-left me-1"></i>Back to Calendar
+  </a>
+
+  {% if not gcal_ready %}
+  <div class="alert alert-warning d-flex gap-2 align-items-start mb-4">
+    <i class="bi bi-exclamation-triangle-fill flex-shrink-0 mt-1"></i>
+    <div>
+      <strong>Google Calendar write not configured.</strong>
+      The gig will be saved locally but will <em>not</em> be pushed to Google Calendar.
+      Set <code>GCAL_SERVICE_ACCOUNT_JSON</code> and <code>GCAL_CALENDAR_ID</code> in <code>.env</code> to enable full sync.
+    </div>
+  </div>
+  {% endif %}
+
+  <div class="card border-0 shadow-sm">
+    <div class="card-header bg-danger text-white py-3">
+      <h2 class="h5 mb-0">
+        <i class="bi bi-music-note-beamed me-2"></i>{{ page_title }}
+      </h2>
+      <small class="opacity-75">Creates a Gig record, adds it to the portal calendar{% if gcal_ready %}, and syncs to Google Calendar{% endif %}.</small>
+    </div>
+    <div class="card-body">
+      <form method="post">
+        {% csrf_token %}
+
+        <!-- Client & Type -->
+        <div class="row g-3 mb-3">
+          <div class="col-sm-8">
+            <label class="form-label fw-semibold">Client Name <span class="text-danger">*</span></label>
+            <input type="text" name="client_name" required class="form-control"
+                   placeholder="e.g. Sandra Vega">
+          </div>
+          <div class="col-sm-4">
+            <label class="form-label fw-semibold">Type</label>
+            <select name="event_type" class="form-select">
+              {% for value, label in event_types %}
+              <option value="{{ value }}">{{ label }}</option>
+              {% endfor %}
+            </select>
+          </div>
+        </div>
+
+        <!-- Date & Times -->
+        <div class="row g-3 mb-3">
+          <div class="col-sm-4">
+            <label class="form-label fw-semibold">Date <span class="text-danger">*</span></label>
+            <input type="date" name="date" required class="form-control">
+          </div>
+          <div class="col-sm-4">
+            <label class="form-label fw-semibold">Start Time <span class="text-danger">*</span></label>
+            <input type="time" name="start_time" required class="form-control">
+          </div>
+          <div class="col-sm-4">
+            <label class="form-label fw-semibold">End Time <span class="text-danger">*</span></label>
+            <input type="time" name="end_time" required class="form-control">
+          </div>
+        </div>
+
+        <!-- Venue & City -->
+        <div class="row g-3 mb-3">
+          <div class="col-sm-7">
+            <label class="form-label fw-semibold">Venue</label>
+            <input type="text" name="venue" class="form-control"
+                   placeholder="e.g. Amigos Event Center">
+          </div>
+          <div class="col-sm-5">
+            <label class="form-label fw-semibold">City</label>
+            <input type="text" name="city" class="form-control"
+                   placeholder="e.g. Springdale, AR">
+          </div>
+        </div>
+
+        <!-- Musicians -->
+        <div class="mb-3">
+          <label class="form-label fw-semibold">Musicians Count</label>
+          <input type="number" name="musicians_count" class="form-control"
+                 min="1" max="20" value="1" style="max-width:120px;">
+        </div>
+
+        <!-- Financials -->
+        <div class="row g-3 mb-3">
+          <div class="col-sm-6">
+            <label class="form-label fw-semibold">Rate / Hour <span class="text-muted fw-normal">(optional)</span></label>
+            <div class="input-group">
+              <span class="input-group-text">$</span>
+              <input type="number" name="rate_per_hour" class="form-control"
+                     step="0.01" min="0" placeholder="—">
+            </div>
+          </div>
+          <div class="col-sm-6">
+            <label class="form-label fw-semibold">Total Charged <span class="text-muted fw-normal">(optional)</span></label>
+            <div class="input-group">
+              <span class="input-group-text">$</span>
+              <input type="number" name="total_charged" class="form-control"
+                     step="0.01" min="0" placeholder="—">
+            </div>
+          </div>
+        </div>
+
+        <!-- Notes -->
+        <div class="mb-4">
+          <label class="form-label fw-semibold">Notes</label>
+          <textarea name="notes" rows="3" class="form-control"
+                    placeholder="Dress code, song requests, parking, special instructions…"></textarea>
+        </div>
+
+        <div class="d-flex gap-2">
+          <button type="submit" class="btn btn-danger px-4">
+            <i class="bi bi-check-lg me-1"></i>Save Gig{% if gcal_ready %} &amp; Sync to Google{% endif %}
+          </button>
+          <a href="{% url 'portal_calendar' %}" class="btn btn-outline-secondary">Cancel</a>
+        </div>
+
+      </form>
+    </div>
+  </div>
+
+</div>
+{% endblock %}

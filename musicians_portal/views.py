@@ -15,8 +15,7 @@ from django.shortcuts import render, get_object_or_404, redirect
 from django.contrib.auth.decorators import login_required
 from django.core.cache import cache
 from django.core.exceptions import PermissionDenied
-from django.db.models import Q
-from django.http import JsonResponse
+from django.db.models import Q, Sum import JsonResponse
 from django.views.decorators.http import require_POST
 from .models import Song, Event, EventAttendance, Gig, MusicianPay
 
@@ -291,6 +290,29 @@ def _is_finance_user(user):
     return user.role in ('admin', 'lead')
 
 
+def _month_financial_stats(user, year, month, today):
+    """Compute monthly and YTD financial stats for admin/lead users.
+    Returns a dict or None if user is not a finance user."""
+    if not _is_finance_user(user):
+        return None
+    jan_first = date(today.year, 1, 1)
+    earned = Event.objects.filter(
+        date__year=year, date__month=month,
+        date__lte=today,
+        total_charged__isnull=False,
+    ).aggregate(t=Sum('total_charged'))['t'] or 0
+    potential = Event.objects.filter(
+        date__year=year, date__month=month,
+        total_charged__isnull=False,
+    ).aggregate(t=Sum('total_charged'))['t'] or 0
+    ytd = Event.objects.filter(
+        date__gte=jan_first,
+        date__lte=today,
+        total_charged__isnull=False,
+    ).aggregate(t=Sum('total_charged'))['t'] or 0
+    return {'earned': earned, 'potential': potential, 'ytd': ytd}
+
+
 @login_required
 def calendar_month_partial(request):
     """Returns just the calendar grid HTML fragment for AJAX month navigation."""
@@ -308,7 +330,6 @@ def calendar_month_partial(request):
     last_day  = date(year, month, calendar.monthrange(year, month)[1])
 
     # Events that overlap this month (single-day or spanning)
-    from django.db.models import Q
     events_this_month = Event.objects.filter(
         Q(date__lte=last_day) & (Q(end_date__isnull=True, date__gte=first_day) | Q(end_date__gte=first_day))
     )
@@ -333,6 +354,7 @@ def calendar_month_partial(request):
         'prev_year': prev_month.year, 'prev_month': prev_month.month,
         'next_year': next_month.year, 'next_month': next_month.month,
         'gig_count': gig_count,
+        'month_stats': _month_financial_stats(request.user, year, month, today),
     }
     return render(request, 'musicians_portal/partials/calendar_month.html', context)
 
@@ -412,6 +434,7 @@ def event_calendar(request):
         'next_year':     next_month.year,
         'next_month':    next_month.month,
         'gig_count':     gig_count,
+        'month_stats':   _month_financial_stats(request.user, year, month, today),
     }
     return render(request, 'musicians_portal/calendar.html', context)
 

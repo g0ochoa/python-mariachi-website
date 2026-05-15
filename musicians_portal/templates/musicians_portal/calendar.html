@@ -91,6 +91,29 @@
     </button>
   </div>
 
+  {% if month_stats %}
+  <div class="row g-2 mb-3">
+    <div class="col-4">
+      <div class="card border-0 shadow-sm text-center py-2 px-1">
+        <div class="text-muted mb-1" style="font-size:.7rem;"><i class="bi bi-check-circle-fill text-success me-1"></i>Earned this month</div>
+        <div class="fw-bold text-success" style="font-size:1rem;">${{ month_stats.earned|floatformat:2 }}</div>
+      </div>
+    </div>
+    <div class="col-4">
+      <div class="card border-0 shadow-sm text-center py-2 px-1">
+        <div class="text-muted mb-1" style="font-size:.7rem;"><i class="bi bi-calendar-check-fill text-primary me-1"></i>Potential this month</div>
+        <div class="fw-bold text-primary" style="font-size:1rem;">${{ month_stats.potential|floatformat:2 }}</div>
+      </div>
+    </div>
+    <div class="col-4">
+      <div class="card border-0 shadow-sm text-center py-2 px-1">
+        <div class="text-muted mb-1" style="font-size:.7rem;"><i class="bi bi-graph-up-arrow text-warning me-1"></i>YTD since Jan 1</div>
+        <div class="fw-bold" style="font-size:1rem; color:#e6a817;">${{ month_stats.ytd|floatformat:2 }}</div>
+      </div>
+    </div>
+  </div>
+  {% endif %}
+
   <div class="card border-0 shadow-sm mb-2">
     <div class="card-body p-0">
       <!-- Day-of-week header -->
@@ -231,22 +254,33 @@
 .cal-dn {
   padding: 4px 6px 2px;
   text-align: right;
-  min-height: 28px;
+  min-height: 32px;
   cursor: pointer;
   user-select: none;
+  transition: background .12s;
 }
-.cal-dn:hover:not(.cal-dn-empty) { background: rgba(0,0,0,.05); }
+.cal-dn:hover:not(.cal-dn-empty) { background: rgba(220,53,69,.06); }
+.cal-dn:active:not(.cal-dn-empty) { background: rgba(220,53,69,.14); }
 .cal-dn-empty { cursor: default; }
-.cal-dn-num { font-size: .75rem; color: #6c757d; }
-.cal-today .cal-dn-num {
-  background: #dc3545;
-  color: #fff;
-  border-radius: 50%;
+.cal-dn-num {
+  font-size: .75rem;
+  color: #495057;
   display: inline-flex;
   align-items: center;
   justify-content: center;
-  width: 20px;
-  height: 20px;
+  width: 22px;
+  height: 22px;
+  border-radius: 50%;
+  transition: background .12s, color .12s;
+}
+.cal-dn:hover:not(.cal-dn-empty) .cal-dn-num {
+  background: rgba(220,53,69,.15);
+  color: #dc3545;
+  font-weight: 600;
+}
+.cal-today .cal-dn-num {
+  background: #dc3545;
+  color: #fff;
   font-size: .72rem;
   font-weight: 700;
 }

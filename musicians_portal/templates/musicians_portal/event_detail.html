@@ -196,7 +196,20 @@
           </tbody>
         </table>
         {% if all_musicians %}
-        <div class="p-3 border-top d-flex justify-content-end">
+        <div class="p-3 border-top d-flex justify-content-between align-items-center flex-wrap gap-2">
+          <form method="post" action="{% url 'portal_mark_event_paid' event.id %}">
+            {% csrf_token %}
+            {% if event.is_paid %}
+            <button type="submit" class="btn btn-outline-success btn-sm" disabled>
+              <i class="bi bi-patch-check-fill me-1"></i>Paid ✓
+            </button>
+            {% else %}
+            <button type="submit" class="btn btn-warning btn-sm"
+                    onclick="return confirm('Mark all musicians as paid for this event?')">
+              <i class="bi bi-cash-coin me-1"></i>Mark All as Paid
+            </button>
+            {% endif %}
+          </form>
           <button type="submit" class="btn btn-success btn-sm">
             <i class="bi bi-check-lg me-1"></i>Save All Pay
           </button>

@@ -59,6 +59,7 @@ class Event(models.Model):
     rate_per_hour   = models.DecimalField(max_digits=8, decimal_places=2, null=True, blank=True, help_text='Rate charged per hour (admin/lead only)')
     total_charged   = models.DecimalField(max_digits=10, decimal_places=2, null=True, blank=True, help_text='Total amount charged to client (admin/lead only)')
     billed_hours    = models.DecimalField(max_digits=5, decimal_places=2, null=True, blank=True, help_text='Actual hours billed (overrides start/end time calculation)')
+    is_paid     = models.BooleanField(default=False, help_text='Marked by admin/lead once the client has paid the band')
     created_by = models.ForeignKey(
         settings.AUTH_USER_MODEL,
         on_delete=models.SET_NULL,
@@ -163,6 +164,7 @@ class MusicianPay(models.Model):
     )
     amount     = models.DecimalField(max_digits=8, decimal_places=2, help_text='Amount paid to this musician for this event')
     notes      = models.CharField(max_length=200, blank=True, help_text='Optional note (e.g. cash, Venmo, etc.)')
+    is_paid    = models.BooleanField(default=False, help_text='Set by admin/lead once this musician has been paid')
     created_by = models.ForeignKey(
         settings.AUTH_USER_MODEL,
         on_delete=models.SET_NULL,

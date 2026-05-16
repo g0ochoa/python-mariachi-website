@@ -307,7 +307,7 @@ def _month_financial_stats(user, year, month, today):
         musician=user,
         event__date__year=year,
         event__date__month=month,
-        event__date__lte=today,
+        is_paid=True,
     ).aggregate(t=Sum('amount'))['t'] or 0
 
     my_potential = MusicianPay.objects.filter(
@@ -320,6 +320,7 @@ def _month_financial_stats(user, year, month, today):
         musician=user,
         event__date__gte=jan_first,
         event__date__lte=today,
+        is_paid=True,
     ).aggregate(t=Sum('amount'))['t'] or 0
 
     result = {
@@ -334,7 +335,7 @@ def _month_financial_stats(user, year, month, today):
         # --- Business stats (Event.total_charged) ---
         result['biz_earned'] = Event.objects.filter(
             date__year=year, date__month=month,
-            date__lte=today,
+            is_paid=True,
             total_charged__isnull=False,
         ).aggregate(t=Sum('total_charged'))['t'] or 0
 
@@ -346,6 +347,7 @@ def _month_financial_stats(user, year, month, today):
         result['biz_ytd'] = Event.objects.filter(
             date__gte=jan_first,
             date__lte=today,
+            is_paid=True,
             total_charged__isnull=False,
         ).aggregate(t=Sum('total_charged'))['t'] or 0
 
@@ -897,6 +899,22 @@ def musician_pay_bulk(request, event_id):
             pay.amount = amount
             pay.notes  = notes_str
             pay.save()
+
+    return redirect('portal_event_detail', event_id=event_id)
+
+
+@login_required
+@require_POST
+def mark_event_paid(request, event_id):
+    """Mark all MusicianPay records for an event as is_paid=True and set Event.is_paid=True."""
+    _require_portal(request)
+    if not _is_finance_user(request.user):
+        raise PermissionDenied
+
+    event = get_object_or_404(Event, id=event_id)
+    event.is_paid = True
+    event.save(update_fields=['is_paid'])
+    MusicianPay.objects.filter(event=event).update(is_paid=True)
 
     return redirect('portal_event_detail', event_id=event_id)
 

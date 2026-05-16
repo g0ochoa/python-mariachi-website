@@ -227,6 +227,15 @@
   (function () {
     var totalCharged = parseFloat("{{ event.total_charged|default:'0' }}") || 0;
 
+    // Track which inputs the user has manually edited
+    document.querySelectorAll('.pay-amount-input').forEach(function (input) {
+      var originalValue = input.value;
+      input.addEventListener('input', function () {
+        // Mark as manual only if the user actually changed the value
+        input.dataset.manual = 'true';
+      });
+    });
+
     document.getElementById('btn-auto-calc').addEventListener('click', function () {
       var hours = parseFloat(document.getElementById('event-hours').value) || 0;
       if (hours <= 0) {
@@ -238,15 +247,28 @@
       var leadInputs = [];
 
       document.querySelectorAll('.pay-amount-input').forEach(function (input) {
-        var rate   = parseFloat(input.dataset.rate) || 0;
-        var isLead = input.dataset.isLead === 'true';
+        var rate     = parseFloat(input.dataset.rate) || 0;
+        var isLead   = input.dataset.isLead === 'true';
+        var isManual = input.dataset.manual === 'true';
 
-        if (!isLead && rate > 0) {
-          var amount = parseFloat((rate * hours).toFixed(2));
-          input.value = amount.toFixed(2);
-          fixedTotal += amount;
+        if (!isLead) {
+          if (isManual) {
+            // Respect the manually entered value — just add it to fixedTotal
+            var manualAmount = parseFloat(input.value) || 0;
+            fixedTotal += manualAmount;
+          } else if (rate > 0) {
+            var amount = parseFloat((rate * hours).toFixed(2));
+            input.value = amount.toFixed(2);
+            fixedTotal += amount;
+          }
         } else if (isLead) {
-          leadInputs.push(input);
+          if (isManual) {
+            // Lead manually set — treat like a fixed musician (subtract from remainder)
+            var manualAmount = parseFloat(input.value) || 0;
+            fixedTotal += manualAmount;
+          } else {
+            leadInputs.push(input);
+          }
         }
       });
 

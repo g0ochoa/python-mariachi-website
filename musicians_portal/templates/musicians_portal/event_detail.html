@@ -246,10 +246,13 @@
       var fixedTotal = 0;
       var leadInputs = [];
 
+      console.log('[AutoCalc] totalCharged=' + totalCharged + ' hours=' + hours);
       document.querySelectorAll('.pay-amount-input').forEach(function (input) {
         var rate    = parseFloat(input.dataset.rate) || 0;
         var isLead  = input.dataset.isLead === 'true';
         var currVal = parseFloat(input.value) || 0;
+
+        console.log('[AutoCalc] input name=' + input.name + ' isLead=' + isLead + ' currVal=' + currVal + ' manual=' + input.dataset.manual);
 
         if (!isLead) {
           if (currVal > 0) {
@@ -268,7 +271,9 @@
         }
       });
 
-      if (leadInputs.length === 0) return; // no leads to fill
+      console.log('[AutoCalc] fixedTotal=' + fixedTotal + ' leadCount=' + leadInputs.length);
+
+      if (leadInputs.length === 0) { console.log('[AutoCalc] No leads to fill'); return; }
 
       if (totalCharged <= 0) {
         alert(

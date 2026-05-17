@@ -16,7 +16,7 @@ from django.shortcuts import render, get_object_or_404, redirect
 from django.contrib.auth.decorators import login_required
 from django.core.cache import cache
 from django.core.exceptions import PermissionDenied
-from django.db.models import Q, Sum
+from django.db.models import Q, Sum, Case, When, DecimalField
 from django.http import JsonResponse
 from django.views.decorators.http import require_POST
 from .models import Song, Event, EventAttendance, Gig, MusicianPay
@@ -302,20 +302,19 @@ def _month_financial_stats(user, year, month, today):
     is_finance = user.role in ('admin', 'lead')
     jan_first = date(today.year, 1, 1)
 
-    # --- Personal stats (MusicianPay for this user) ---
-    my_earned = MusicianPay.objects.filter(
+    # Single query: both earned (paid) and potential (all) for this month
+    personal_month = MusicianPay.objects.filter(
         musician=user,
         event__date__year=year,
         event__date__month=month,
-        is_paid=True,
-    ).aggregate(t=Sum('amount'))['t'] or 0
+    ).aggregate(
+        potential=Sum('amount'),
+        earned=Sum(Case(When(is_paid=True, then='amount'), output_field=DecimalField())),
+    )
+    my_potential = personal_month['potential'] or 0
+    my_earned    = personal_month['earned']    or 0
 
-    my_potential = MusicianPay.objects.filter(
-        musician=user,
-        event__date__year=year,
-        event__date__month=month,
-    ).aggregate(t=Sum('amount'))['t'] or 0
-
+    # Single query for YTD
     my_ytd = MusicianPay.objects.filter(
         musician=user,
         event__date__gte=jan_first,
@@ -332,26 +331,28 @@ def _month_financial_stats(user, year, month, today):
     }
 
     if is_finance:
-        # --- Business stats (Event.total_charged) ---
-        result['biz_earned'] = Event.objects.filter(
-            date__year=year, date__month=month,
-            is_paid=True,
-            total_charged__isnull=False,
-        ).aggregate(t=Sum('total_charged'))['t'] or 0
-
-        result['biz_potential'] = Event.objects.filter(
+        # Single query: earned + potential for business this month
+        biz_month = Event.objects.filter(
             date__year=year, date__month=month,
             total_charged__isnull=False,
-        ).aggregate(t=Sum('total_charged'))['t'] or 0
+        ).aggregate(
+            potential=Sum('total_charged'),
+            earned=Sum(Case(When(is_paid=True, then='total_charged'), output_field=DecimalField())),
+        )
+        biz_potential = biz_month['potential'] or 0
+        biz_earned    = biz_month['earned']    or 0
 
-        result['biz_ytd'] = Event.objects.filter(
+        biz_ytd = Event.objects.filter(
             date__gte=jan_first,
             date__lte=today,
             is_paid=True,
             total_charged__isnull=False,
         ).aggregate(t=Sum('total_charged'))['t'] or 0
 
-        result['biz_pending'] = result['biz_potential'] - result['biz_earned']
+        result['biz_earned']    = biz_earned
+        result['biz_potential'] = biz_potential
+        result['biz_pending']   = biz_potential - biz_earned
+        result['biz_ytd']       = biz_ytd
 
     return result
 
@@ -387,7 +388,7 @@ def calendar_month_partial(request):
     prev_month = (date(year, month, 1) - timedelta(days=1)).replace(day=1)
     next_month = (date(year, month, 1) + timedelta(days=32)).replace(day=1)
 
-    gig_count = events_this_month.filter(event_type='gig').count()
+    gig_count = sum(1 for ev in events_this_month if ev.event_type == 'gig')
     week_events = _build_week_events(cal, year, month, events_by_day)
     cal_weeks = [{'days': w, 'event_spans': we} for w, we in zip(cal, week_events)]
 
@@ -456,7 +457,7 @@ def event_calendar(request):
     prev_month = prev_month.replace(day=1)
     next_month = next_month.replace(day=1)
 
-    gig_count = events_this_month.filter(event_type='gig').count()
+    gig_count = sum(1 for ev in events_this_month if ev.event_type == 'gig')
     week_events = _build_week_events(cal, year, month, events_by_day)
     cal_weeks = [{'days': w, 'event_spans': we} for w, we in zip(cal, week_events)]
 

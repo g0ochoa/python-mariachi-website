@@ -24,6 +24,11 @@
         <i class="bi bi-plus-lg me-1"></i>Log Gig
       </a>
       {% endif %}
+      {% if request.user.role == 'admin' or request.user.role == 'lead' %}
+      <a href="{% url 'portal_pay_summary' %}" class="btn btn-outline-success btn-sm">
+        <i class="bi bi-table me-1"></i>Pay Summary
+      </a>
+      {% endif %}
       <a href="{% url 'portal_dashboard' %}" class="btn btn-outline-secondary btn-sm">
         <i class="bi bi-arrow-left me-1"></i>Portal
       </a>

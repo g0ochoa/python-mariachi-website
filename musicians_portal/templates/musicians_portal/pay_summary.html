@@ -1,103 +1,234 @@
 {% extends "base.html" %}
+{% load portal_extras %}
 
 {% block content %}
-<div class="container py-4" style="max-width:1100px;">
+<div class="container-fluid py-4" style="max-width:1400px;">
 
   <a href="{% url 'portal_dashboard' %}" class="btn btn-outline-secondary btn-sm mb-4">
     <i class="bi bi-arrow-left me-1"></i>Back to Portal
   </a>
 
   <!-- Header -->
-  <div class="d-flex justify-content-between align-items-center mb-4 flex-wrap gap-2">
+  <div class="d-flex justify-content-between align-items-center mb-3 flex-wrap gap-2">
     <h1 class="h3 mb-0"><i class="bi bi-wallet2 me-2 text-success"></i>{{ page_title }}</h1>
-
-    <!-- Filters -->
-    <form method="get" class="d-flex align-items-center gap-2 flex-wrap">
-      <label class="fw-semibold text-muted small mb-0">Year:</label>
-      <select name="year" class="form-select form-select-sm" style="width:auto;" onchange="this.form.submit()">
-        {% for y in year_list %}
-          <option value="{{ y }}" {% if y == selected_year %}selected{% endif %}>{{ y }}</option>
-        {% endfor %}
-      </select>
-
-      <label class="fw-semibold text-muted small mb-0 ms-2">Musician:</label>
-      <select name="musician" class="form-select form-select-sm" style="width:auto;" onchange="this.form.submit()">
-        <option value="">— All —</option>
-        {% for m in musician_list %}
-          <option value="{{ m.id }}" {% if m.id|stringformat:"s" == selected_musician_id %}selected{% endif %}>
-            {{ m.get_full_name|default:m.username }}{% if m.instrument %} ({{ m.instrument }}){% endif %}
-          </option>
-        {% endfor %}
-      </select>
-    </form>
   </div>
 
-  {% if summary %}
-    {% for row in summary %}
-    <div class="card border-0 shadow-sm mb-4">
-      <div class="card-header bg-white d-flex justify-content-between align-items-center border-bottom py-3">
-        <div class="d-flex align-items-center gap-2">
-          <i class="bi bi-person-circle fs-4 text-muted"></i>
-          <div>
-            <span class="fw-bold">{{ row.musician.get_full_name|default:row.musician.username }}</span>
-            {% if row.musician.instrument %}
-              <small class="text-muted ms-1">({{ row.musician.instrument }})</small>
-            {% endif %}
+  <!-- ── Filters ─────────────────────────────────────────────────────── -->
+  <form method="get" id="filter-form" class="card border-0 shadow-sm mb-4">
+    <div class="card-body py-3">
+      <div class="row g-3 align-items-end">
+
+        <!-- Year -->
+        <div class="col-auto">
+          <label class="form-label small fw-semibold text-muted mb-1">Year</label>
+          <select name="year" class="form-select form-select-sm" style="width:90px;"
+                  onchange="document.getElementById('filter-form').submit()">
+            {% for y in year_list %}
+              <option value="{{ y }}" {% if y == selected_year %}selected{% endif %}>{{ y }}</option>
+            {% endfor %}
+          </select>
+        </div>
+
+        <!-- Date from -->
+        <div class="col-auto">
+          <label class="form-label small fw-semibold text-muted mb-1">From</label>
+          <input type="date" name="date_from" class="form-control form-control-sm"
+                 value="{{ date_from }}" style="width:145px;">
+        </div>
+
+        <!-- Date to -->
+        <div class="col-auto">
+          <label class="form-label small fw-semibold text-muted mb-1">To</label>
+          <input type="date" name="date_to" class="form-control form-control-sm"
+                 value="{{ date_to }}" style="width:145px;">
+        </div>
+
+        <!-- Paid status -->
+        <div class="col-auto">
+          <label class="form-label small fw-semibold text-muted mb-1">Status</label>
+          <select name="paid" class="form-select form-select-sm" style="width:130px;">
+            <option value=""       {% if paid_filter == '' %}selected{% endif %}>— All —</option>
+            <option value="paid"   {% if paid_filter == 'paid' %}selected{% endif %}>✅ Paid</option>
+            <option value="unpaid" {% if paid_filter == 'unpaid' %}selected{% endif %}>⏳ Unpaid</option>
+          </select>
+        </div>
+
+        <!-- Musicians multi-select (dropdown with checkboxes) -->
+        <div class="col-auto">
+          <label class="form-label small fw-semibold text-muted mb-1">Musicians</label>
+          <div class="dropdown">
+            <button class="btn btn-outline-secondary btn-sm dropdown-toggle"
+                    type="button" data-bs-toggle="dropdown" data-bs-auto-close="outside"
+                    style="min-width:150px; text-align:left;">
+              {% if selected_musician_ids %}
+                {{ selected_musician_ids|length }} selected
+              {% else %}
+                — All —
+              {% endif %}
+            </button>
+            <ul class="dropdown-menu p-2 shadow"
+                style="min-width:200px; max-height:280px; overflow-y:auto;">
+              {% for m in musician_list %}
+              <li>
+                <label class="dropdown-item d-flex align-items-center gap-2 py-1 px-2 rounded"
+                       style="cursor:pointer; white-space:nowrap;">
+                  <input type="checkbox" name="musician" value="{{ m.id }}"
+                         class="form-check-input mt-0"
+                         {% if m.id|stringformat:"s" in selected_musician_ids %}checked{% endif %}>
+                  <span class="small">
+                    {{ m.get_full_name|default:m.username }}
+                    {% if m.instrument %}
+                      <span class="text-muted">({{ m.instrument }})</span>
+                    {% endif %}
+                  </span>
+                </label>
+              </li>
+              {% endfor %}
+            </ul>
           </div>
         </div>
-        <span class="badge bg-success fs-6">${{ row.total }}</span>
+
+        <!-- Apply / Reset -->
+        <div class="col-auto d-flex gap-2">
+          <button type="submit" class="btn btn-primary btn-sm">
+            <i class="bi bi-funnel me-1"></i>Apply
+          </button>
+          <a href="?year={{ selected_year }}" class="btn btn-outline-secondary btn-sm">
+            <i class="bi bi-x-circle me-1"></i>Reset
+          </a>
+        </div>
+
       </div>
-      <div class="card-body p-0">
-        <table class="table table-sm table-hover mb-0">
-          <thead class="table-light">
-            <tr>
-              <th class="ps-3">Date</th>
-              <th>Time</th>
-              <th>Hrs</th>
-              <th>Event</th>
-              <th>Rate/hr</th>
-              <th>Total Charged</th>
-              <th>Amount Paid</th>
-              <th>Note</th>
-            </tr>
-          </thead>
-          <tbody>
-            {% for pay in row.pays %}
-            <tr>
-              <td class="ps-3 text-muted small">{{ pay.event.date|date:"M j, Y" }}</td>
-              <td class="text-muted small">
-                {% if pay.event.start_time %}{{ pay.event.start_time|time:"g:i A" }}{% if pay.event.end_time %} – {{ pay.event.end_time|time:"g:i A" }}{% endif %}{% else %}—{% endif %}
-              </td>
-              <td class="text-muted small">
-                {% if pay.event.billed_hours %}{{ pay.event.billed_hours }}{% else %}—{% endif %}
-              </td>
-              <td>
-                <a href="{% url 'portal_event_detail' pay.event.id %}" class="text-decoration-none">
-                  {{ pay.event.title }}
-                </a>
-              </td>
-              <td class="text-muted small">{% if pay.event.rate_per_hour %}${{ pay.event.rate_per_hour }}{% else %}—{% endif %}</td>
-              <td class="text-muted small">{% if pay.event.total_charged %}<span class="text-dark fw-semibold">${{ pay.event.total_charged }}</span>{% else %}—{% endif %}</td>
-              <td class="fw-semibold text-success">${{ pay.amount }}</td>
-              <td class="text-muted small">{{ pay.notes|default:"—" }}</td>
-            </tr>
+    </div>
+  </form>
+
+  <!-- ── Pivot Table ──────────────────────────────────────────────────── -->
+  {% if event_rows %}
+  <div class="card border-0 shadow-sm">
+    <div class="card-body p-0" style="overflow-x:auto;">
+      <table class="table table-sm table-hover mb-0 align-middle" style="min-width:700px;">
+        <thead class="table-dark">
+          <tr>
+            <th class="ps-3" style="white-space:nowrap;">Date</th>
+            <th style="min-width:220px;">Event</th>
+            <th style="white-space:nowrap;">Time</th>
+            <th class="text-center">Hrs</th>
+            <th class="text-end" style="white-space:nowrap;">Rate/hr</th>
+            <th class="text-end" style="white-space:nowrap;">Total Charged</th>
+            {% for m in musician_columns %}
+            <th class="text-end" style="white-space:nowrap; min-width:110px;">
+              {{ m.first_name|default:m.username }}
+              {% if m.instrument %}
+                <br><small class="fw-normal" style="opacity:.7;">{{ m.instrument }}</small>
+              {% endif %}
+            </th>
             {% endfor %}
-          </tbody>
-          <tfoot class="table-light">
-            <tr>
-              <td colspan="6" class="ps-3 fw-semibold text-end">Total {{ selected_year }}:</td>
-              <td colspan="2" class="fw-bold text-success">${{ row.total }}</td>
-            </tr>
-          </tfoot>
-        </table>
-      </div>
+          </tr>
+        </thead>
+        <tbody>
+          {% for row in event_rows %}
+          {% with event=row.event %}
+          <tr>
+            <!-- Date + paid badge -->
+            <td class="ps-3 text-muted small" style="white-space:nowrap;">
+              {{ event.date|date:"M j, Y" }}
+              {% if event.is_paid %}
+                <span class="badge bg-success-subtle text-success border border-success-subtle ms-1"
+                      style="font-size:10px;">✓</span>
+              {% else %}
+                <span class="badge bg-warning-subtle text-warning border border-warning-subtle ms-1"
+                      style="font-size:10px;">⏳</span>
+              {% endif %}
+            </td>
+
+            <!-- Event title (link) -->
+            <td>
+              <a href="{% url 'portal_event_detail' event.id %}"
+                 class="text-decoration-none fw-semibold">
+                {{ event.title }}
+              </a>
+            </td>
+
+            <!-- Time -->
+            <td class="text-muted small" style="white-space:nowrap;">
+              {% if event.start_time %}
+                {{ event.start_time|time:"g:i A" }}
+                {% if event.end_time %} – {{ event.end_time|time:"g:i A" }}{% endif %}
+              {% else %}—{% endif %}
+            </td>
+
+            <!-- Hours -->
+            <td class="text-center text-muted small">
+              {% if event.billed_hours %}{{ event.billed_hours }}{% else %}—{% endif %}
+            </td>
+
+            <!-- Rate/hr -->
+            <td class="text-end text-muted small">
+              {% if event.rate_per_hour %}${{ event.rate_per_hour }}{% else %}—{% endif %}
+            </td>
+
+            <!-- Total charged -->
+            <td class="text-end fw-semibold small">
+              {% if event.total_charged %}${{ event.total_charged }}{% else %}—{% endif %}
+            </td>
+
+            <!-- One cell per musician -->
+            {% for pay in row.musician_pays %}
+            <td class="text-end small">
+              {% if pay %}
+                {% if pay.is_paid %}
+                  <span class="fw-bold text-success">${{ pay.amount }}</span>
+                {% else %}
+                  <span class="fw-semibold text-warning">${{ pay.amount }}</span>
+                {% endif %}
+                {% if pay.notes %}
+                  <br><span class="text-muted" style="font-size:10px;">{{ pay.notes }}</span>
+                {% endif %}
+              {% else %}
+                <span class="text-muted">—</span>
+              {% endif %}
+            </td>
+            {% endfor %}
+          </tr>
+          {% endwith %}
+          {% endfor %}
+        </tbody>
+
+        <!-- Totals footer -->
+        <tfoot class="table-light border-top border-2">
+          <tr>
+            <td colspan="6" class="ps-3 fw-bold text-end pe-3">
+              Total {{ selected_year }}
+              <span class="text-muted fw-normal small ms-1">({{ event_rows|length }} events)</span>
+            </td>
+            {% for total in musician_totals %}
+            <td class="text-end fw-bold text-success">${{ total }}</td>
+            {% endfor %}
+          </tr>
+        </tfoot>
+      </table>
     </div>
-    {% endfor %}
+  </div>
+
+  <!-- Legend -->
+  <div class="d-flex flex-wrap gap-3 mt-2 ps-1">
+    <span class="small text-muted"><span class="text-success fw-bold">$0.00</span> = musician paid</span>
+    <span class="small text-muted"><span class="text-warning fw-bold">$0.00</span> = assigned, not yet paid</span>
+    <span class="small text-muted">
+      <span class="badge bg-success-subtle text-success border border-success-subtle">✓</span>
+      = client paid band
+    </span>
+    <span class="small text-muted">
+      <span class="badge bg-warning-subtle text-warning border border-warning-subtle">⏳</span>
+      = awaiting client payment
+    </span>
+  </div>
+
   {% else %}
-    <div class="text-center py-5 text-muted">
-      <i class="bi bi-inbox fs-1 d-block mb-3"></i>
-      No pay records found for {{ selected_year }}.
-    </div>
+  <div class="text-center py-5 text-muted">
+    <i class="bi bi-inbox fs-1 d-block mb-3"></i>
+    No pay records found for the selected filters.
+  </div>
   {% endif %}
 
 </div>

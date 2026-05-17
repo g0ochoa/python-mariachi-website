@@ -921,19 +921,23 @@ def mark_event_paid(request, event_id):
 
 @login_required
 def pay_summary(request):
-    """Yearly pay summary per musician — visible to admin/lead only."""
+    """Consolidated pay summary — pivot table of events × musicians."""
     _require_portal(request)
     if not _is_finance_user(request.user):
         raise PermissionDenied
 
-    from django.db.models import Sum
+    from decimal import Decimal
+    from collections import defaultdict
     from django.contrib.auth import get_user_model
     User = get_user_model()
 
-    selected_year = int(request.GET.get('year', date.today().year))
-    selected_musician_id = request.GET.get('musician', '')
+    selected_year         = int(request.GET.get('year', date.today().year))
+    selected_musician_ids = request.GET.getlist('musician')   # multi-value list
+    date_from             = request.GET.get('date_from', '').strip()
+    date_to               = request.GET.get('date_to', '').strip()
+    paid_filter           = request.GET.get('paid', '')        # '' | 'paid' | 'unpaid'
 
-    # All years that have pay records (for the year filter dropdown)
+    # Year dropdown
     available_years = (
         MusicianPay.objects
         .filter(event__date__isnull=False)
@@ -943,44 +947,82 @@ def pay_summary(request):
     if selected_year not in year_list:
         year_list = [selected_year] + year_list
 
-    # All musicians who have ever had pay records (for the musician dropdown)
-    musician_list = (
-        User.objects.filter(
-            id__in=MusicianPay.objects.values_list('musician_id', flat=True)
-        ).order_by('first_name', 'username')
-    )
-
-    # Pay records for the selected year
-    pays = (
+    # Base queryset for selected year
+    pays_qs = (
         MusicianPay.objects
         .filter(event__date__year=selected_year)
         .select_related('musician', 'event')
-        .order_by('musician__first_name', 'event__date')
+        .order_by('event__date', 'event__start_time', 'musician__first_name')
     )
 
-    # Apply musician filter if selected
-    if selected_musician_id:
-        pays = pays.filter(musician_id=selected_musician_id)
+    # Date range
+    if date_from:
+        pays_qs = pays_qs.filter(event__date__gte=date_from)
+    if date_to:
+        pays_qs = pays_qs.filter(event__date__lte=date_to)
 
-    # Group by musician
-    from collections import defaultdict
-    by_musician = defaultdict(list)
-    totals      = defaultdict(lambda: 0)
-    for p in pays:
-        by_musician[p.musician].append(p)
-        totals[p.musician] += p.amount
+    # Paid / unpaid (based on Event.is_paid — whether client paid the band)
+    if paid_filter == 'paid':
+        pays_qs = pays_qs.filter(event__is_paid=True)
+    elif paid_filter == 'unpaid':
+        pays_qs = pays_qs.filter(event__is_paid=False)
 
-    summary = [
-        {'musician': m, 'pays': by_musician[m], 'total': totals[m]}
-        for m in sorted(by_musician.keys(), key=lambda u: u.first_name or u.username)
+    # All musicians who have pay records this year (for filter UI)
+    musician_list = list(
+        User.objects.filter(
+            id__in=MusicianPay.objects
+            .filter(event__date__year=selected_year)
+            .values_list('musician_id', flat=True)
+        ).order_by('first_name', 'username')
+    )
+
+    # Build pivot: event_id → {musician_id → MusicianPay}
+    event_pay_map = defaultdict(dict)
+    events_map    = {}
+    for pay in pays_qs:
+        event_pay_map[pay.event_id][pay.musician_id] = pay
+        events_map[pay.event_id] = pay.event
+
+    # Musician columns — respect multi-select filter
+    if selected_musician_ids:
+        col_ids          = set(selected_musician_ids)
+        musician_columns = [m for m in musician_list if str(m.id) in col_ids]
+    else:
+        present_ids      = set()
+        for pays in event_pay_map.values():
+            present_ids.update(pays.keys())
+        musician_columns = [m for m in musician_list if m.id in present_ids]
+
+    # Build ordered event rows (date asc)
+    sorted_events = sorted(events_map.values(), key=lambda e: (e.date, e.start_time or date.min))
+    event_rows = []
+    for event in sorted_events:
+        row_pays = event_pay_map[event.id]
+        event_rows.append({
+            'event':         event,
+            'musician_pays': [row_pays.get(m.id) for m in musician_columns],
+        })
+
+    # Per-musician column totals
+    musician_totals = [
+        sum(
+            (row['musician_pays'][i].amount for row in event_rows if row['musician_pays'][i]),
+            Decimal('0')
+        )
+        for i, _ in enumerate(musician_columns)
     ]
 
     context = {
-        'page_title':            f'Pay Summary {selected_year}',
-        'summary':               summary,
-        'selected_year':         selected_year,
-        'year_list':             year_list,
-        'musician_list':         musician_list,
-        'selected_musician_id':  selected_musician_id,
+        'page_title':             f'Pay Summary {selected_year}',
+        'event_rows':             event_rows,
+        'musician_columns':       musician_columns,
+        'musician_totals':        musician_totals,
+        'musician_list':          musician_list,
+        'selected_year':          selected_year,
+        'year_list':              year_list,
+        'selected_musician_ids':  selected_musician_ids,
+        'date_from':              date_from,
+        'date_to':                date_to,
+        'paid_filter':            paid_filter,
     }
     return render(request, 'musicians_portal/pay_summary.html', context)

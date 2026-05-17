@@ -225,9 +225,9 @@
 
   <script>
   (function () {
-    var totalCharged = parseFloat("{{ event.total_charged|default:'0' }}") || 0;
+    var totalCharged = parseFloat("{{ event.total_charged|default:'' }}") || 0;
 
-    // Track if a lead/admin field was manually overridden by the user this session
+    // Track if a lead/admin field was manually overridden this session
     document.querySelectorAll('.pay-amount-input').forEach(function (input) {
       if (input.dataset.isLead === 'true') {
         input.addEventListener('input', function () {
@@ -247,24 +247,20 @@
       var leadInputs = [];
 
       document.querySelectorAll('.pay-amount-input').forEach(function (input) {
-        var rate      = parseFloat(input.dataset.rate) || 0;
-        var isLead    = input.dataset.isLead === 'true';
-        var currVal   = parseFloat(input.value) || 0;
+        var rate    = parseFloat(input.dataset.rate) || 0;
+        var isLead  = input.dataset.isLead === 'true';
+        var currVal = parseFloat(input.value) || 0;
 
         if (!isLead) {
           if (currVal > 0) {
-            // Already has a value (saved from DB or typed) — treat as fixed
             fixedTotal += currVal;
           } else if (rate > 0) {
-            // Empty field with a known rate — auto-fill with rate × hours
             var amount = parseFloat((rate * hours).toFixed(2));
             input.value = amount.toFixed(2);
             fixedTotal += amount;
           }
-          // else: empty, no rate — leave as 0
         } else {
           if (input.dataset.manual === 'true') {
-            // Lead manually overridden this session — treat as fixed
             fixedTotal += currVal;
           } else {
             leadInputs.push(input);
@@ -272,21 +268,32 @@
         }
       });
 
-      if (leadInputs.length > 0 && totalCharged > 0) {
-        var remainder = totalCharged - fixedTotal;
-        var leadShare = (remainder / leadInputs.length).toFixed(2);
-        leadInputs.forEach(function (input) {
-          input.value = leadShare;
-        });
-      } else if (leadInputs.length > 0) {
-        // No total charged — fall back to rate × hours if rate is set
-        leadInputs.forEach(function (input) {
-          var rate = parseFloat(input.dataset.rate) || 0;
-          if (rate > 0) {
-            input.value = (rate * hours).toFixed(2);
-          }
-        });
+      if (leadInputs.length === 0) return; // no leads to fill
+
+      if (totalCharged <= 0) {
+        alert(
+          'This event has no Total Charged set.\n\n' +
+          'Musicians subtotal: $' + fixedTotal.toFixed(2) + '\n\n' +
+          'Go to Edit Event and set the Total Charged to auto-fill lead/admin amounts.'
+        );
+        return;
       }
+
+      var remainder = totalCharged - fixedTotal;
+      var leadShare = (remainder / leadInputs.length).toFixed(2);
+      leadInputs.forEach(function (input) {
+        input.value = leadShare;
+      });
+
+      // Show a brief confirmation
+      var btn = document.getElementById('btn-auto-calc');
+      var orig = btn.innerHTML;
+      btn.innerHTML = '<i class="bi bi-check-lg me-1"></i>Done — $' + leadShare + ' each';
+      btn.classList.replace('btn-outline-primary', 'btn-success');
+      setTimeout(function () {
+        btn.innerHTML = orig;
+        btn.classList.replace('btn-success', 'btn-outline-primary');
+      }, 3000);
     });
   })();
   </script>

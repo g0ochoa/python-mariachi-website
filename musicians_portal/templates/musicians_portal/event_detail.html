@@ -227,13 +227,13 @@
   (function () {
     var totalCharged = parseFloat("{{ event.total_charged|default:'0' }}") || 0;
 
-    // Track which inputs the user has manually edited
+    // Track if a lead/admin field was manually overridden by the user this session
     document.querySelectorAll('.pay-amount-input').forEach(function (input) {
-      var originalValue = input.value;
-      input.addEventListener('input', function () {
-        // Mark as manual only if the user actually changed the value
-        input.dataset.manual = 'true';
-      });
+      if (input.dataset.isLead === 'true') {
+        input.addEventListener('input', function () {
+          input.dataset.manual = 'true';
+        });
+      }
     });
 
     document.getElementById('btn-auto-calc').addEventListener('click', function () {
@@ -247,25 +247,25 @@
       var leadInputs = [];
 
       document.querySelectorAll('.pay-amount-input').forEach(function (input) {
-        var rate     = parseFloat(input.dataset.rate) || 0;
-        var isLead   = input.dataset.isLead === 'true';
-        var isManual = input.dataset.manual === 'true';
+        var rate      = parseFloat(input.dataset.rate) || 0;
+        var isLead    = input.dataset.isLead === 'true';
+        var currVal   = parseFloat(input.value) || 0;
 
         if (!isLead) {
-          if (isManual) {
-            // Respect the manually entered value — just add it to fixedTotal
-            var manualAmount = parseFloat(input.value) || 0;
-            fixedTotal += manualAmount;
+          if (currVal > 0) {
+            // Already has a value (saved from DB or typed) — treat as fixed
+            fixedTotal += currVal;
           } else if (rate > 0) {
+            // Empty field with a known rate — auto-fill with rate × hours
             var amount = parseFloat((rate * hours).toFixed(2));
             input.value = amount.toFixed(2);
             fixedTotal += amount;
           }
-        } else if (isLead) {
-          if (isManual) {
-            // Lead manually set — treat like a fixed musician (subtract from remainder)
-            var manualAmount = parseFloat(input.value) || 0;
-            fixedTotal += manualAmount;
+          // else: empty, no rate — leave as 0
+        } else {
+          if (input.dataset.manual === 'true') {
+            // Lead manually overridden this session — treat as fixed
+            fixedTotal += currVal;
           } else {
             leadInputs.push(input);
           }
@@ -273,8 +273,8 @@
       });
 
       if (leadInputs.length > 0 && totalCharged > 0) {
-        var remainder  = totalCharged - fixedTotal;
-        var leadShare  = (remainder / leadInputs.length).toFixed(2);
+        var remainder = totalCharged - fixedTotal;
+        var leadShare = (remainder / leadInputs.length).toFixed(2);
         leadInputs.forEach(function (input) {
           input.value = leadShare;
         });
@@ -284,8 +284,6 @@
           var rate = parseFloat(input.dataset.rate) || 0;
           if (rate > 0) {
             input.value = (rate * hours).toFixed(2);
-          } else {
-            if (!input.value) input.placeholder = 'Enter manually';
           }
         });
       }

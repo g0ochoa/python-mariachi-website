@@ -894,11 +894,18 @@ def musician_pay_bulk(request, event_id):
         pay, created = MusicianPay.objects.get_or_create(
             event=event,
             musician=musician,
-            defaults={'amount': amount, 'notes': notes_str, 'created_by': request.user},
+            defaults={
+                'amount': amount,
+                'notes': notes_str,
+                'created_by': request.user,
+                'is_paid': event.is_paid,  # inherit event paid status
+            },
         )
         if not created:
             pay.amount = amount
             pay.notes  = notes_str
+            if event.is_paid:
+                pay.is_paid = True  # keep in sync if event already marked paid
             pay.save()
 
     return redirect('portal_event_detail', event_id=event_id)

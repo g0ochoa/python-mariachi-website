@@ -302,17 +302,19 @@ def _month_financial_stats(user, year, month, today):
     is_finance = user.role in ('admin', 'lead')
     jan_first = date(today.year, 1, 1)
 
-    # Single query: both earned (paid) and potential (all) for this month
+    # Single query: earned, owed (played but unpaid), upcoming (future, unpaid)
     personal_month = MusicianPay.objects.filter(
         musician=user,
         event__date__year=year,
         event__date__month=month,
     ).aggregate(
-        potential=Sum('amount'),
         earned=Sum(Case(When(is_paid=True, then='amount'), output_field=DecimalField())),
+        owed=Sum(Case(When(is_paid=False, event__date__lte=today, then='amount'), output_field=DecimalField())),
+        upcoming=Sum(Case(When(is_paid=False, event__date__gt=today, then='amount'), output_field=DecimalField())),
     )
-    my_potential = personal_month['potential'] or 0
-    my_earned    = personal_month['earned']    or 0
+    my_earned   = personal_month['earned']   or 0
+    my_owed     = personal_month['owed']     or 0
+    my_upcoming = personal_month['upcoming'] or 0
 
     # Single query for YTD
     my_ytd = MusicianPay.objects.filter(
@@ -323,24 +325,26 @@ def _month_financial_stats(user, year, month, today):
     ).aggregate(t=Sum('amount'))['t'] or 0
 
     result = {
-        'is_finance':   is_finance,
-        'my_earned':    my_earned,
-        'my_pending':   my_potential - my_earned,
-        'my_potential': my_potential,
-        'my_ytd':       my_ytd,
+        'is_finance': is_finance,
+        'my_earned':  my_earned,
+        'my_owed':    my_owed,
+        'my_upcoming': my_upcoming,
+        'my_ytd':     my_ytd,
     }
 
     if is_finance:
-        # Single query: earned + potential for business this month
+        # Single query: earned, owed, upcoming for band revenue this month
         biz_month = Event.objects.filter(
             date__year=year, date__month=month,
             total_charged__isnull=False,
         ).aggregate(
-            potential=Sum('total_charged'),
             earned=Sum(Case(When(is_paid=True, then='total_charged'), output_field=DecimalField())),
+            owed=Sum(Case(When(is_paid=False, date__lte=today, then='total_charged'), output_field=DecimalField())),
+            upcoming=Sum(Case(When(is_paid=False, date__gt=today, then='total_charged'), output_field=DecimalField())),
         )
-        biz_potential = biz_month['potential'] or 0
-        biz_earned    = biz_month['earned']    or 0
+        biz_earned   = biz_month['earned']   or 0
+        biz_owed     = biz_month['owed']     or 0
+        biz_upcoming = biz_month['upcoming'] or 0
 
         biz_ytd = Event.objects.filter(
             date__gte=jan_first,
@@ -349,10 +353,10 @@ def _month_financial_stats(user, year, month, today):
             total_charged__isnull=False,
         ).aggregate(t=Sum('total_charged'))['t'] or 0
 
-        result['biz_earned']    = biz_earned
-        result['biz_potential'] = biz_potential
-        result['biz_pending']   = biz_potential - biz_earned
-        result['biz_ytd']       = biz_ytd
+        result['biz_earned']   = biz_earned
+        result['biz_owed']     = biz_owed
+        result['biz_upcoming'] = biz_upcoming
+        result['biz_ytd']      = biz_ytd
 
     return result
 

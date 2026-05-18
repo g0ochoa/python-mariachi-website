@@ -908,6 +908,11 @@ def musician_pay_bulk(request, event_id):
                 pay.is_paid = True  # keep in sync if event already marked paid
             pay.save()
 
+    # If event is already marked paid, ensure ALL pay records are in sync
+    # (catches records that existed before mark_event_paid was called)
+    if event.is_paid:
+        MusicianPay.objects.filter(event=event).update(is_paid=True)
+
     return redirect('portal_event_detail', event_id=event_id)
 
 

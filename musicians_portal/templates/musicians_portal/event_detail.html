@@ -260,7 +260,8 @@
         console.log('[AutoCalc] input name=' + input.name + ' isLead=' + isLead + ' currVal=' + currVal + ' manual=' + input.dataset.manual);
 
         if (!isLead) {
-          if (currVal > 0) {
+          if (input.value.trim() !== '') {
+            // Field has an explicit value (including 0) — respect it
             fixedTotal += currVal;
           } else if (rate > 0) {
             var amount = parseFloat((rate * hours).toFixed(2));

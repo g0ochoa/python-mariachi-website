@@ -393,6 +393,12 @@ def calendar_month_partial(request):
     next_month = (date(year, month, 1) + timedelta(days=32)).replace(day=1)
 
     gig_count = sum(1 for ev in events_this_month if ev.event_type == 'gig')
+    gig_ids = [ev.id for ev in events_this_month if ev.event_type == 'gig']
+    gigs_with_pay = 0
+    if _is_finance_user(request.user) and gig_ids:
+        gigs_with_pay = MusicianPay.objects.filter(
+            event_id__in=gig_ids
+        ).values('event_id').distinct().count()
     week_events = _build_week_events(cal, year, month, events_by_day)
     cal_weeks = [{'days': w, 'event_spans': we} for w, we in zip(cal, week_events)]
 
@@ -402,6 +408,7 @@ def calendar_month_partial(request):
         'prev_year': prev_month.year, 'prev_month': prev_month.month,
         'next_year': next_month.year, 'next_month': next_month.month,
         'gig_count': gig_count,
+        'gigs_with_pay': gigs_with_pay,
         'month_stats': _month_financial_stats(request.user, year, month, today),
     }
     return render(request, 'musicians_portal/partials/calendar_month.html', context)
@@ -462,6 +469,12 @@ def event_calendar(request):
     next_month = next_month.replace(day=1)
 
     gig_count = sum(1 for ev in events_this_month if ev.event_type == 'gig')
+    gig_ids = [ev.id for ev in events_this_month if ev.event_type == 'gig']
+    gigs_with_pay = 0
+    if _is_finance_user(request.user) and gig_ids:
+        gigs_with_pay = MusicianPay.objects.filter(
+            event_id__in=gig_ids
+        ).values('event_id').distinct().count()
     week_events = _build_week_events(cal, year, month, events_by_day)
     cal_weeks = [{'days': w, 'event_spans': we} for w, we in zip(cal, week_events)]
 
@@ -482,6 +495,7 @@ def event_calendar(request):
         'next_year':     next_month.year,
         'next_month':    next_month.month,
         'gig_count':     gig_count,
+        'gigs_with_pay': gigs_with_pay,
         'month_stats':   _month_financial_stats(request.user, year, month, today),
     }
     return render(request, 'musicians_portal/calendar.html', context)

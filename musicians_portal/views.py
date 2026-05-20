@@ -579,18 +579,21 @@ def event_create(request):
 
     if request.method == 'POST':
         p = request.POST
+        event_type = p.get('event_type', 'gig')
+        is_absence = event_type == 'absence'
         event = Event.objects.create(
             title         = p['title'],
-            event_type    = p.get('event_type', 'gig'),
+            event_type    = event_type,
             date          = p['date'],
+            end_date      = p.get('end_date') or None,
             start_time    = p.get('start_time') or None,
             end_time      = p.get('end_time')   or None,
             venue         = p.get('venue', ''),
             client        = p.get('client', ''),
             notes         = p.get('notes', ''),
-            rate_per_hour = p.get('rate_per_hour') or None,
-            total_charged = p.get('total_charged') or None,
-            billed_hours  = p.get('billed_hours')  or None,
+            rate_per_hour = None if is_absence else (p.get('rate_per_hour') or None),
+            total_charged = None if is_absence else (p.get('total_charged') or None),
+            billed_hours  = None if is_absence else (p.get('billed_hours')  or None),
             created_by    = request.user,
         )
         return redirect('portal_event_detail', event_id=event.id)
@@ -609,17 +612,20 @@ def event_edit(request, event_id):
 
     if request.method == 'POST':
         p = request.POST
+        event_type = p.get('event_type', 'gig')
+        is_absence = event_type == 'absence'
         event.title         = p['title']
-        event.event_type    = p.get('event_type', 'gig')
+        event.event_type    = event_type
         event.date          = p['date']
+        event.end_date      = p.get('end_date') or None
         event.start_time    = p.get('start_time') or None
         event.end_time      = p.get('end_time')   or None
         event.venue         = p.get('venue', '')
         event.client        = p.get('client', '')
         event.notes         = p.get('notes', '')
-        event.rate_per_hour = p.get('rate_per_hour') or None
-        event.total_charged = p.get('total_charged') or None
-        event.billed_hours  = p.get('billed_hours')  or None
+        event.rate_per_hour = None if is_absence else (p.get('rate_per_hour') or None)
+        event.total_charged = None if is_absence else (p.get('total_charged') or None)
+        event.billed_hours  = None if is_absence else (p.get('billed_hours')  or None)
         event.save()
         _update_gcal(event)
         return redirect('portal_event_detail', event_id=event.id)

@@ -14,11 +14,13 @@
     <div class="card-header border-0 py-3
       {% if event.event_type == 'gig' %}bg-danger text-white
       {% elif event.event_type == 'rehearsal' %}bg-primary text-white
+      {% elif event.event_type == 'absence' %}bg-dark text-white
       {% else %}bg-secondary text-white{% endif %}">
       <div class="d-flex justify-content-between align-items-center">
         <span class="badge bg-white
           {% if event.event_type == 'gig' %}text-danger
           {% elif event.event_type == 'rehearsal' %}text-primary
+          {% elif event.event_type == 'absence' %}text-dark
           {% else %}text-secondary{% endif %}">
           {{ event.get_event_type_display }}
         </span>
@@ -49,6 +51,9 @@
           <dd class="col-sm-9">
             {{ event.start_time|time:"g:i A" }}
             {% if event.end_time %} – {{ event.end_time|time:"g:i A" }}{% endif %}
+            {% if event.end_date %}
+              <span class="text-muted small ms-1">(ends {{ event.end_date|date:"M j" }})</span>
+            {% endif %}
           </dd>
         {% endif %}
 

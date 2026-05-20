@@ -43,6 +43,7 @@ class Event(models.Model):
     TYPE_CHOICES = [
         ('gig',       'Gig'),
         ('rehearsal', 'Rehearsal'),
+        ('absence',   'Absence'),
         ('other',     'Other'),
     ]
 

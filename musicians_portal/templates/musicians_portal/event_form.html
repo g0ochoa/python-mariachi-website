@@ -22,42 +22,35 @@
                  value="{% if event %}{{ event.title }}{% endif %}">
         </div>
 
-        <div class="row g-3 mb-3">
-          <div class="col-sm-6">
-            <label class="form-label fw-semibold">Type</label>
-            <select name="event_type" id="id_event_type" class="form-select">
-              <option value="gig"       {% if event.event_type == 'gig' %}selected{% endif %}>🎺 Gig</option>
-              <option value="rehearsal" {% if event.event_type == 'rehearsal' %}selected{% endif %}>🎙 Rehearsal</option>
-              <option value="absence"   {% if event.event_type == 'absence' %}selected{% endif %}>🚫 Absence</option>
-              <option value="other"     {% if event.event_type == 'other' %}selected{% endif %}>📅 Other</option>
-            </select>
-          </div>
-          <div class="col-sm-6">
-            <label class="form-label fw-semibold">Date <span class="text-danger">*</span></label>
-            <input type="date" name="date" id="id_date" required class="form-control"
-                   value="{% if event %}{{ event.date|date:'Y-m-d' }}{% endif %}">
-          </div>
+        <div class="mb-3">
+          <label class="form-label fw-semibold">Type</label>
+          <select name="event_type" id="id_event_type" class="form-select">
+            <option value="gig"       {% if event.event_type == 'gig' %}selected{% endif %}>🎺 Gig</option>
+            <option value="rehearsal" {% if event.event_type == 'rehearsal' %}selected{% endif %}>🎙 Rehearsal</option>
+            <option value="absence"   {% if event.event_type == 'absence' %}selected{% endif %}>🚫 Absence</option>
+            <option value="other"     {% if event.event_type == 'other' %}selected{% endif %}>📅 Other</option>
+          </select>
         </div>
 
         <div class="row g-3 mb-3">
           <div class="col-sm-6">
-            <label class="form-label fw-semibold">Start Time</label>
+            <label class="form-label fw-semibold text-muted small mb-1">START</label>
+            <label class="form-label fw-semibold">Date <span class="text-danger">*</span></label>
+            <input type="date" name="date" id="id_date" required class="form-control mb-2"
+                   value="{% if event %}{{ event.date|date:'Y-m-d' }}{% endif %}">
+            <label class="form-label fw-semibold">Time</label>
             <input type="time" name="start_time" id="id_start_time" class="form-control"
                    value="{% if event and event.start_time %}{{ event.start_time|time:'H:i' }}{% endif %}">
           </div>
           <div class="col-sm-6">
-            <label class="form-label fw-semibold">End Time</label>
-            <div class="d-flex gap-2 align-items-center">
-              <input type="time" name="end_time" id="id_end_time" class="form-control"
-                     value="{% if event and event.end_time %}{{ event.end_time|time:'H:i' }}{% endif %}">
-              <input type="date" name="end_date" id="id_end_date" class="form-control"
-                     title="End date (fill if event crosses midnight)"
-                     value="{% if event and event.end_date %}{{ event.end_date|date:'Y-m-d' }}{% endif %}">
-            </div>
-            <div class="form-text" id="end-date-hint"
-                 {% if not event or not event.end_date %}style="display:none"{% endif %}>
-              <span id="end-date-hint-text">{% if event and event.end_date %}Ends {{ event.end_date|date:'M j' }}{% endif %}</span>
-            </div>
+            <label class="form-label fw-semibold text-muted small mb-1">END</label>
+            <label class="form-label fw-semibold">Date</label>
+            <input type="date" name="end_date" id="id_end_date" class="form-control mb-2"
+                   title="End date (leave blank if same day)"
+                   value="{% if event and event.end_date %}{{ event.end_date|date:'Y-m-d' }}{% endif %}">
+            <label class="form-label fw-semibold">Time</label>
+            <input type="time" name="end_time" id="id_end_time" class="form-control"
+                   value="{% if event and event.end_time %}{{ event.end_time|time:'H:i' }}{% endif %}">
           </div>
         </div>
 
@@ -120,8 +113,6 @@
           var endInput    = document.getElementById('id_end_time');
           var dateInput   = document.getElementById('id_date');
           var endDateInput= document.getElementById('id_end_date');
-          var endDateHint = document.getElementById('end-date-hint');
-          var endDateHintText = document.getElementById('end-date-hint-text');
           var hoursInput  = document.getElementById('id_billed_hours');
           var hoursHint   = document.getElementById('billed-hours-hint');
           var rateInput   = document.getElementById('id_rate_per_hour');
@@ -139,17 +130,6 @@
           }
           eventTypeSelect.addEventListener('change', updateAbsenceMode);
           updateAbsenceMode();
-
-          // ── Overnight end-date auto-suggest ─────────────────────
-          function updateEndDateHint() {
-            var d = endDateInput.value;
-            if (!d) { endDateHint.style.display = 'none'; return; }
-            var parts = d.split('-');
-            var dt = new Date(parseInt(parts[0]), parseInt(parts[1])-1, parseInt(parts[2]));
-            var label = dt.toLocaleDateString('en-US', { month: 'short', day: 'numeric' });
-            endDateHintText.textContent = 'Ends ' + label;
-            endDateHint.style.display = '';
-          }
 
           function suggestEndDate() {
             var start = startInput.value;
@@ -170,12 +150,11 @@
               var dd   = String(dt.getDate()).padStart(2,'0');
               if (!endDateInput.value) {
                 endDateInput.value = yyyy+'-'+mm+'-'+dd;
-                updateEndDateHint();
               }
             }
           }
 
-          endDateInput.addEventListener('change', updateEndDateHint);
+          endDateInput.addEventListener('change', function() {});
           dateInput.addEventListener('change', function() {
             // If end date was auto-set, re-suggest when start date changes
             suggestEndDate();

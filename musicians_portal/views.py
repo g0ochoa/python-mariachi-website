@@ -898,7 +898,7 @@ def musician_pay_bulk(request, event_id):
             amount = float(amount_str)
         except ValueError:
             continue
-        if amount <= 0:
+        if amount < 0:
             continue
 
         pay, created = MusicianPay.objects.get_or_create(

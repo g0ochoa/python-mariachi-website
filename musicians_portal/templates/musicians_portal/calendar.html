@@ -19,7 +19,7 @@
         {% elif request.user.role == 'lead' %}<span class="badge bg-warning text-dark ms-1" style="font-size:.65rem;">Lead</span>
         {% else %}<span class="badge bg-secondary ms-1" style="font-size:.65rem;">Musician</span>{% endif %}
       </span>
-      {% if request.user.role == 'admin' %}
+      {% if request.user.role == 'admin' or request.user.role == 'lead' %}
       <a href="{% url 'portal_gig_log' %}" class="btn btn-danger btn-sm">
         <i class="bi bi-plus-lg me-1"></i>Log Gig
       </a>

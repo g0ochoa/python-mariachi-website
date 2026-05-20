@@ -435,12 +435,12 @@ function attachMonthNavListeners() {
 function updateTopStats(data) {
   var map = {
     'stat-my-earned':    data.my_earned,
-    'stat-my-pending':   data.my_pending,
-    'stat-my-potential': data.my_potential,
+    'stat-my-owed':      data.my_owed,
+    'stat-my-upcoming':  data.my_upcoming,
     'stat-my-ytd':       data.my_ytd,
     'stat-biz-earned':   data.biz_earned,
-    'stat-biz-pending':  data.biz_pending,
-    'stat-biz-potential':data.biz_potential,
+    'stat-biz-owed':     data.biz_owed,
+    'stat-biz-upcoming': data.biz_upcoming,
     'stat-biz-ytd':      data.biz_ytd
   };
   Object.keys(map).forEach(function(id) {

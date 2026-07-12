@@ -46,6 +46,20 @@
           </div>
         </div>
 
+        <!-- Client contact -->
+        <div class="row g-3 mb-3">
+          <div class="col-sm-6">
+            <label class="form-label fw-semibold">Client Phone <span class="text-muted fw-normal">(for texting the contract)</span></label>
+            <input type="tel" name="client_phone" class="form-control"
+                   placeholder="e.g. +1 479 555 1234">
+          </div>
+          <div class="col-sm-6">
+            <label class="form-label fw-semibold">Client Email <span class="text-muted fw-normal">(optional)</span></label>
+            <input type="email" name="client_email" class="form-control"
+                   placeholder="e.g. sandra@example.com">
+          </div>
+        </div>
+
         <!-- Date & Times -->
         <div class="row g-3 mb-3">
           <div class="col-sm-4">
@@ -99,6 +113,48 @@
               <span class="input-group-text">$</span>
               <input type="number" name="total_charged" class="form-control"
                      step="0.01" min="0" placeholder="—">
+            </div>
+          </div>
+        </div>
+
+        <!-- Contract financials -->
+        <div class="row g-3 mb-3">
+          <div class="col-sm-6">
+            <label class="form-label fw-semibold">Deposit <span class="text-muted fw-normal">(for the contract)</span></label>
+            <div class="input-group">
+              <span class="input-group-text">$</span>
+              <input type="number" name="deposit_amount" class="form-control"
+                     step="0.01" min="0" placeholder="—">
+            </div>
+          </div>
+          <div class="col-sm-6">
+            <label class="form-label fw-semibold">Overtime Rate / Hour <span class="text-muted fw-normal">(optional)</span></label>
+            <div class="input-group">
+              <span class="input-group-text">$</span>
+              <input type="number" name="overtime_rate" class="form-control"
+                     step="0.01" min="0" placeholder="—">
+            </div>
+          </div>
+        </div>
+
+        <!-- Contract -->
+        <div class="border rounded p-3 mb-3 bg-light">
+          <div class="form-check mb-2">
+            <input class="form-check-input" type="checkbox" name="create_contract" id="create-contract" checked>
+            <label class="form-check-label fw-semibold" for="create-contract">
+              <i class="bi bi-file-earmark-text me-1"></i>Create a contract for this gig
+            </label>
+            <div class="text-muted small">You'll get a signing link to text or email to the client.</div>
+          </div>
+          <div class="d-flex align-items-center gap-3">
+            <span class="small fw-semibold">Contract language:</span>
+            <div class="form-check form-check-inline mb-0">
+              <input class="form-check-input" type="radio" name="contract_language" id="lang-es" value="es" checked>
+              <label class="form-check-label small" for="lang-es">Español</label>
+            </div>
+            <div class="form-check form-check-inline mb-0">
+              <input class="form-check-input" type="radio" name="contract_language" id="lang-en" value="en">
+              <label class="form-check-label small" for="lang-en">English</label>
             </div>
           </div>
         </div>

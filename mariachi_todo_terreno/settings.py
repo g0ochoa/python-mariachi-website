@@ -198,6 +198,15 @@ SOCIAL_AUTH_GOOGLE_OAUTH2_AUTH_EXTRA_ARGUMENTS = {'prompt': 'select_account'}
 SOCIAL_AUTH_REDIRECT_IS_HTTPS = True
 LOGOUT_REDIRECT_URL = 'home'
 
-# Email — console backend for development (prints to terminal instead of sending)
-# Switch to smtp.EmailBackend in production with real SMTP credentials in .env
-EMAIL_BACKEND = 'django.core.mail.backends.console.EmailBackend'
+# Email — real SMTP when EMAIL_HOST is set in .env, console backend otherwise
+# (console prints the message to the terminal instead of sending)
+if os.getenv('EMAIL_HOST'):
+    EMAIL_BACKEND       = 'django.core.mail.backends.smtp.EmailBackend'
+    EMAIL_HOST          = os.getenv('EMAIL_HOST')
+    EMAIL_PORT          = int(os.getenv('EMAIL_PORT', '587'))
+    EMAIL_USE_TLS       = os.getenv('EMAIL_USE_TLS', 'True') == 'True'
+    EMAIL_HOST_USER     = os.getenv('EMAIL_HOST_USER', '')
+    EMAIL_HOST_PASSWORD = os.getenv('EMAIL_HOST_PASSWORD', '')
+    DEFAULT_FROM_EMAIL  = os.getenv('DEFAULT_FROM_EMAIL', EMAIL_HOST_USER)
+else:
+    EMAIL_BACKEND = 'django.core.mail.backends.console.EmailBackend'

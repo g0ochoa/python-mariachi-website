@@ -19,7 +19,7 @@ from django.core.exceptions import PermissionDenied
 from django.db.models import Q, Sum, Case, When, DecimalField
 from django.http import JsonResponse
 from django.views.decorators.http import require_POST
-from .models import Song, Event, EventAttendance, Gig, MusicianPay
+from .models import Song, Event, EventAttendance, Gig, MusicianPay, Contract, ContractTemplate
 
 GCAL_SYNC_CACHE_KEY    = 'gcal_last_sync'
 GCAL_SYNC_INTERVAL     = 30 * 60   # seconds — re-sync at most every 30 minutes
@@ -27,6 +27,11 @@ GCAL_SYNC_INTERVAL     = 30 * 60   # seconds — re-sync at most every 30 minute
 GOOGLE_ICAL_URL              = os.environ.get('GOOGLE_ICAL_URL', '')
 GCAL_CALENDAR_ID             = os.environ.get('GCAL_CALENDAR_ID', '')
 GCAL_SERVICE_ACCOUNT_JSON    = os.environ.get('GCAL_SERVICE_ACCOUNT_JSON', '')
+
+# Twilio — automated contract SMS lights up when all three are set (see .env.example)
+TWILIO_ACCOUNT_SID = os.environ.get('TWILIO_ACCOUNT_SID', '')
+TWILIO_AUTH_TOKEN  = os.environ.get('TWILIO_AUTH_TOKEN', '')
+TWILIO_FROM_NUMBER = os.environ.get('TWILIO_FROM_NUMBER', '')
 
 
 def _detect_event_type(summary):
@@ -563,6 +568,7 @@ def event_detail(request, event_id):
         'pay_map':        pay_map,
         'event_hours':    event_hours,
         'is_finance_user': _is_finance_user(request.user),
+        'active_contract': _active_contract(event) if _is_finance_user(request.user) else None,
     }
     return render(request, 'musicians_portal/event_detail.html', context)
 
@@ -795,6 +801,8 @@ def gig_log(request):
         p = request.POST
 
         client_name     = p.get('client_name', '').strip()
+        client_phone    = p.get('client_phone', '').strip()
+        client_email    = p.get('client_email', '').strip()
         event_type      = p.get('event_type', 'private')
         date_val        = p.get('date', '')
         start_time_val  = p.get('start_time') or None
@@ -808,6 +816,8 @@ def gig_log(request):
 
         gig = Gig.objects.create(
             client_name     = client_name,
+            client_phone    = client_phone,
+            client_email    = client_email,
             event_type      = event_type,
             date            = date_val,
             start_time      = start_time_val,
@@ -840,6 +850,22 @@ def gig_log(request):
         if gcal_id:
             event.google_event_id = gcal_id
             event.save()
+
+        # Optionally create a contract for the client to sign
+        if p.get('create_contract'):
+            contract = _build_contract(
+                event, gig, request.user,
+                client_name  = client_name,
+                client_phone = client_phone,
+                client_email = client_email,
+                total_amount   = total_charged,
+                deposit_amount = p.get('deposit_amount') or None,
+                overtime_rate  = p.get('overtime_rate')  or None,
+                language       = p.get('contract_language', 'es'),
+                event_type_label = gig.get_event_type_display(),
+                city           = city,
+            )
+            return redirect('portal_contract_detail', contract_id=contract.id)
 
         return redirect('portal_event_detail', event_id=event.id)
 
@@ -1031,6 +1057,258 @@ def guest_musician_deactivate(request, event_id, musician_id):
     guest.save(update_fields=['active_until'])
 
     return redirect('portal_event_detail', event_id=event_id)
+
+
+# ---------------------------------------------------------------------------
+# Contracts — client e-signing (clickwrap)
+# ---------------------------------------------------------------------------
+
+def _client_ip(request):
+    """First hop of X-Forwarded-For (nginx sets it) or REMOTE_ADDR."""
+    xff = request.META.get('HTTP_X_FORWARDED_FOR', '')
+    return xff.split(',')[0].strip() or request.META.get('REMOTE_ADDR')
+
+
+def _twilio_ready():
+    return bool(TWILIO_ACCOUNT_SID and TWILIO_AUTH_TOKEN and TWILIO_FROM_NUMBER)
+
+
+def _active_contract(event):
+    """The event's current (non-voided) contract, or None."""
+    return event.contracts.exclude(status='voided').first()
+
+
+def _build_contract(event, gig, user, *, client_name, client_phone='', client_email='',
+                    total_amount=None, deposit_amount=None, overtime_rate=None,
+                    language='es', event_type_label='', city=''):
+    """Snapshot event facts + the active template's terms into a new draft Contract."""
+    template = ContractTemplate.objects.filter(is_active=True).first()
+    return Contract.objects.create(
+        event            = event,
+        gig              = gig,
+        client_name      = client_name,
+        client_phone     = client_phone,
+        client_email     = client_email,
+        event_type_label = event_type_label,
+        event_date       = event.date if isinstance(event.date, date) else date.fromisoformat(str(event.date)),
+        start_time       = event.start_time,
+        end_time         = event.end_time,
+        venue            = event.venue,
+        city             = city,
+        total_amount     = total_amount or None,
+        deposit_amount   = deposit_amount or None,
+        overtime_rate    = overtime_rate or None,
+        terms_en         = template.terms_en if template else '',
+        terms_es         = template.terms_es if template else '',
+        language         = language if language in ('en', 'es') else 'es',
+        created_by       = user,
+    )
+
+
+def _contract_share_message(contract, url):
+    """Prefilled SMS/email body, in the contract's default language."""
+    if contract.language == 'es':
+        return (f"Hola {contract.client_name}, le saluda Mariachi Todo Terreno. "
+                f"Aquí está su contrato para el {contract.event_date.strftime('%d/%m/%Y')}. "
+                f"Por favor revíselo y fírmelo aquí: {url}")
+    return (f"Hi {contract.client_name}, this is Mariachi Todo Terreno. "
+            f"Here is your contract for {contract.event_date.strftime('%m/%d/%Y')}. "
+            f"Please review and sign it here: {url}")
+
+
+def _mark_sent(contract, via):
+    """Flip draft → sent; later sends update the via/timestamp but never regress status."""
+    if contract.status == 'draft':
+        contract.status = 'sent'
+    contract.sent_via = via
+    contract.sent_at  = timezone.now()
+    contract.save(update_fields=['status', 'sent_via', 'sent_at'])
+
+
+@login_required
+@require_POST
+def contract_create(request, event_id):
+    """Create a contract for an existing event (from the event detail page)."""
+    _require_portal(request)
+    if not _is_finance_user(request.user):
+        raise PermissionDenied
+
+    event = get_object_or_404(Event, id=event_id)
+
+    existing = _active_contract(event)
+    if existing:
+        return redirect('portal_contract_detail', contract_id=existing.id)
+
+    client_name = request.POST.get('client_name', '').strip()
+    if not client_name:
+        return redirect('portal_event_detail', event_id=event_id)
+
+    contract = _build_contract(
+        event, None, request.user,
+        client_name    = client_name,
+        client_phone   = request.POST.get('client_phone', '').strip(),
+        client_email   = request.POST.get('client_email', '').strip(),
+        total_amount   = request.POST.get('total_amount') or event.total_charged,
+        deposit_amount = request.POST.get('deposit_amount') or None,
+        overtime_rate  = request.POST.get('overtime_rate') or None,
+        language       = request.POST.get('contract_language', 'es'),
+        event_type_label = 'Gig',
+    )
+    return redirect('portal_contract_detail', contract_id=contract.id)
+
+
+@login_required
+def contract_detail(request, contract_id):
+    """Admin view of a contract: preview, send options, signature audit, void."""
+    _require_portal(request)
+    if not _is_finance_user(request.user):
+        raise PermissionDenied
+
+    from django.urls import reverse
+    contract   = get_object_or_404(Contract, id=contract_id)
+    public_url = request.build_absolute_uri(reverse('contract_sign', args=[contract.token]))
+    share_message = _contract_share_message(contract, public_url)
+    # `?&body=` is deliberate — the one sms: form both iOS and Android parse.
+    # quote() encodes spaces as %20 (a literal '+' would render as '+' in iOS Messages).
+    sms_href = f"sms:{contract.client_phone}?&body={quote(share_message)}" if contract.client_phone else ''
+
+    context = {
+        'page_title':    f'Contract — {contract.client_name}',
+        'contract':      contract,
+        'public_url':    public_url,
+        'share_message': share_message,
+        'sms_href':      sms_href,
+        'twilio_ready':  _twilio_ready(),
+        'email_ready':   bool(os.environ.get('EMAIL_HOST')),
+        'sent_flag':     request.GET.get('sent', ''),
+        'error_flag':    request.GET.get('err', ''),
+    }
+    return render(request, 'musicians_portal/contract_detail.html', context)
+
+
+@login_required
+@require_POST
+def contract_send_email(request, contract_id):
+    _require_portal(request)
+    if not _is_finance_user(request.user):
+        raise PermissionDenied
+
+    from django.core.mail import send_mail
+    from django.urls import reverse
+    contract = get_object_or_404(Contract, id=contract_id)
+    if not contract.client_email:
+        return redirect(f"/portal/contracts/{contract.id}/?err=noemail")
+
+    public_url = request.build_absolute_uri(reverse('contract_sign', args=[contract.token]))
+    subject = ('Su contrato — Mariachi Todo Terreno' if contract.language == 'es'
+               else 'Your contract — Mariachi Todo Terreno')
+    try:
+        send_mail(subject, _contract_share_message(contract, public_url),
+                  None, [contract.client_email])
+        _mark_sent(contract, 'email')
+        return redirect(f"/portal/contracts/{contract.id}/?sent=email")
+    except Exception as exc:
+        logging.getLogger(__name__).error('Contract email failed: %s', exc)
+        return redirect(f"/portal/contracts/{contract.id}/?err=email")
+
+
+@login_required
+@require_POST
+def contract_send_twilio(request, contract_id):
+    _require_portal(request)
+    if not _is_finance_user(request.user):
+        raise PermissionDenied
+
+    from django.urls import reverse
+    contract = get_object_or_404(Contract, id=contract_id)
+    if not _twilio_ready() or not contract.client_phone:
+        return redirect(f"/portal/contracts/{contract.id}/?err=twilio")
+
+    public_url = request.build_absolute_uri(reverse('contract_sign', args=[contract.token]))
+    try:
+        resp = http_requests.post(
+            f"https://api.twilio.com/2010-04-01/Accounts/{TWILIO_ACCOUNT_SID}/Messages.json",
+            auth=(TWILIO_ACCOUNT_SID, TWILIO_AUTH_TOKEN),
+            data={
+                'To':   contract.client_phone,
+                'From': TWILIO_FROM_NUMBER,
+                'Body': _contract_share_message(contract, public_url),
+            },
+            timeout=10,
+        )
+        if resp.status_code == 201:
+            _mark_sent(contract, 'twilio')
+            return redirect(f"/portal/contracts/{contract.id}/?sent=twilio")
+        logging.getLogger(__name__).error('Twilio send failed (%s): %s', resp.status_code, resp.text[:500])
+    except Exception as exc:
+        logging.getLogger(__name__).error('Twilio send failed: %s', exc)
+    return redirect(f"/portal/contracts/{contract.id}/?err=twilio")
+
+
+@login_required
+@require_POST
+def contract_mark_sent(request, contract_id):
+    """Best-effort beacon fired by the Text-it / Copy-link buttons."""
+    _require_portal(request)
+    if not _is_finance_user(request.user):
+        raise PermissionDenied
+
+    contract = get_object_or_404(Contract, id=contract_id)
+    via = request.POST.get('via', '')
+    if via in ('sms', 'link'):
+        _mark_sent(contract, via)
+    return JsonResponse({'ok': True})
+
+
+@login_required
+@require_POST
+def contract_void(request, contract_id):
+    _require_portal(request)
+    if not _is_finance_user(request.user):
+        raise PermissionDenied
+
+    contract = get_object_or_404(Contract, id=contract_id)
+    contract.status    = 'voided'
+    contract.voided_at = timezone.now()
+    contract.save(update_fields=['status', 'voided_at'])
+    return redirect('portal_event_detail', event_id=contract.event_id)
+
+
+def contract_sign(request, token):
+    """PUBLIC contract page — the unguessable token is the capability.
+    GET renders the contract (sign form / signed confirmation / voided notice).
+    POST records the clickwrap signature with an atomic conditional update."""
+    contract = get_object_or_404(Contract, token=token)
+
+    if request.method == 'POST' and contract.status != 'voided':
+        if contract.signed_at:
+            return redirect(request.path)          # already signed — idempotent
+        name  = request.POST.get('signed_name', '').strip()
+        agree = request.POST.get('agree') == 'on'
+        lang  = request.POST.get('lang', contract.language)
+        if name and agree:
+            Contract.objects.filter(pk=contract.pk, signed_at__isnull=True).exclude(
+                status='voided'
+            ).update(
+                signed_name       = name[:200],
+                signed_at         = timezone.now(),
+                signed_ip         = _client_ip(request),
+                signed_user_agent = request.META.get('HTTP_USER_AGENT', '')[:500],
+                signed_language   = lang if lang in ('en', 'es') else contract.language,
+                status            = 'signed',
+            )
+            return redirect(request.path)          # PRG → confirmation view
+        error = 'missing'
+    else:
+        error = ''
+
+    resp = render(request, 'musicians_portal/contract_public.html', {
+        'contract': contract,
+        'error':    error,
+        'initial_lang': request.GET.get('lang') if request.GET.get('lang') in ('en', 'es') else contract.language,
+    })
+    resp['X-Robots-Tag'] = 'noindex, nofollow'
+    return resp
 
 
 @login_required

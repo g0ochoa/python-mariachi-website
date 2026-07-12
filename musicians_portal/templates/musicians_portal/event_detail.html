@@ -130,6 +130,88 @@
     </div>
   </div>
 
+  <!-- Contract (admin/lead only, gigs) -->
+  {% if is_finance_user and event.event_type == 'gig' %}
+  <div class="card border-0 shadow-sm mb-4">
+    <div class="card-header bg-white border-bottom py-3 d-flex justify-content-between align-items-center">
+      <span class="fw-bold"><i class="bi bi-file-earmark-text me-2 text-danger"></i>Contract</span>
+      {% if active_contract %}
+        {% if active_contract.status == 'signed' %}<span class="badge bg-success">Signed ✓</span>
+        {% elif active_contract.status == 'sent' %}<span class="badge bg-info text-dark">Sent — awaiting signature</span>
+        {% else %}<span class="badge bg-secondary">Draft</span>{% endif %}
+      {% endif %}
+    </div>
+    <div class="card-body">
+      {% if active_contract %}
+        <div class="d-flex justify-content-between align-items-center flex-wrap gap-2">
+          <div class="small">
+            <strong>{{ active_contract.contract_number }}</strong> · {{ active_contract.client_name }}
+            {% if active_contract.signed_at %}
+              <span class="text-success">— signed by {{ active_contract.signed_name }} on {{ active_contract.signed_at|date:"M j, Y" }}</span>
+            {% elif active_contract.sent_at %}
+              <span class="text-muted">— sent {{ active_contract.sent_at|date:"M j, Y" }} via {{ active_contract.get_sent_via_display }}</span>
+            {% endif %}
+          </div>
+          <a href="{% url 'portal_contract_detail' active_contract.id %}" class="btn btn-sm btn-outline-danger">
+            <i class="bi bi-file-earmark-text me-1"></i>Open Contract
+          </a>
+        </div>
+      {% else %}
+        <button class="btn btn-sm btn-outline-danger mb-2" type="button"
+                onclick="document.getElementById('contract-create-form').classList.toggle('d-none');">
+          <i class="bi bi-plus-lg me-1"></i>Create Contract
+        </button>
+        <form id="contract-create-form" class="d-none border-top pt-3"
+              method="post" action="{% url 'portal_contract_create' event.id %}">
+          {% csrf_token %}
+          <div class="row g-2">
+            <div class="col-sm-6">
+              <label class="form-label small text-muted mb-1">Client name *</label>
+              <input type="text" name="client_name" required class="form-control form-control-sm"
+                     value="{{ event.client|default:'' }}">
+            </div>
+            <div class="col-sm-6">
+              <label class="form-label small text-muted mb-1">Client phone</label>
+              <input type="tel" name="client_phone" class="form-control form-control-sm" placeholder="+1 …">
+            </div>
+            <div class="col-sm-6">
+              <label class="form-label small text-muted mb-1">Client email</label>
+              <input type="email" name="client_email" class="form-control form-control-sm">
+            </div>
+            <div class="col-sm-2">
+              <label class="form-label small text-muted mb-1">Total $</label>
+              <input type="number" name="total_amount" step="0.01" min="0" class="form-control form-control-sm"
+                     value="{{ event.total_charged|default:'' }}">
+            </div>
+            <div class="col-sm-2">
+              <label class="form-label small text-muted mb-1">Deposit $</label>
+              <input type="number" name="deposit_amount" step="0.01" min="0" class="form-control form-control-sm">
+            </div>
+            <div class="col-sm-2">
+              <label class="form-label small text-muted mb-1">OT $/hr</label>
+              <input type="number" name="overtime_rate" step="0.01" min="0" class="form-control form-control-sm">
+            </div>
+            <div class="col-12 d-flex align-items-center gap-3 mt-2">
+              <span class="small fw-semibold">Language:</span>
+              <div class="form-check form-check-inline mb-0">
+                <input class="form-check-input" type="radio" name="contract_language" id="cl-es" value="es" checked>
+                <label class="form-check-label small" for="cl-es">Español</label>
+              </div>
+              <div class="form-check form-check-inline mb-0">
+                <input class="form-check-input" type="radio" name="contract_language" id="cl-en" value="en">
+                <label class="form-check-label small" for="cl-en">English</label>
+              </div>
+              <button type="submit" class="btn btn-sm btn-danger ms-auto">
+                <i class="bi bi-file-earmark-plus me-1"></i>Create
+              </button>
+            </div>
+          </div>
+        </form>
+      {% endif %}
+    </div>
+  </div>
+  {% endif %}
+
   <!-- Member Pay (admin/lead only) -->
   <div class="card border-0 shadow-sm mb-4">
     <div class="card-header bg-white border-bottom py-3">

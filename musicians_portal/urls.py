@@ -26,4 +26,15 @@ urlpatterns = [
     path('portal/calendar/events/<int:event_id>/guests/new/', views.guest_musician_create, name='portal_guest_create'),
     path('portal/calendar/events/<int:event_id>/guests/<int:musician_id>/deactivate/', views.guest_musician_deactivate, name='portal_guest_deactivate'),
     path('portal/pay/summary/', views.pay_summary, name='portal_pay_summary'),
+
+    # Contracts (portal, finance-gated)
+    path('portal/contracts/<int:contract_id>/', views.contract_detail, name='portal_contract_detail'),
+    path('portal/calendar/events/<int:event_id>/contract/new/', views.contract_create, name='portal_contract_create'),
+    path('portal/contracts/<int:contract_id>/send/email/', views.contract_send_email, name='portal_contract_send_email'),
+    path('portal/contracts/<int:contract_id>/send/twilio/', views.contract_send_twilio, name='portal_contract_send_twilio'),
+    path('portal/contracts/<int:contract_id>/mark-sent/', views.contract_mark_sent, name='portal_contract_mark_sent'),
+    path('portal/contracts/<int:contract_id>/void/', views.contract_void, name='portal_contract_void'),
+
+    # Contract signing (PUBLIC — the unguessable token is the capability)
+    path('contract/<uuid:token>/', views.contract_sign, name='contract_sign'),
 ]

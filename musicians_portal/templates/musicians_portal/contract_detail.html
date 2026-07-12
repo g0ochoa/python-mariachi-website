@@ -1,0 +1,196 @@
+{% extends "base.html" %}
+
+{% block content %}
+<div class="container py-4" style="max-width:720px;">
+
+  <a href="{% url 'portal_event_detail' contract.event_id %}" class="btn btn-outline-secondary btn-sm mb-4">
+    <i class="bi bi-arrow-left me-1"></i>Back to Event
+  </a>
+
+  {% if sent_flag %}
+  <div class="alert alert-success py-2">
+    <i class="bi bi-check-circle me-1"></i>
+    {% if sent_flag == 'email' %}Contract emailed to {{ contract.client_email }}.
+    {% elif sent_flag == 'twilio' %}Contract texted to {{ contract.client_phone }} via Twilio.
+    {% else %}Marked as sent.{% endif %}
+  </div>
+  {% endif %}
+  {% if error_flag %}
+  <div class="alert alert-danger py-2">
+    <i class="bi bi-exclamation-triangle me-1"></i>
+    {% if error_flag == 'noemail' %}This contract has no client email — add one by voiding and recreating, or text the link instead.
+    {% elif error_flag == 'email' %}Email failed to send — check the server logs / EMAIL_* settings.
+    {% elif error_flag == 'twilio' %}Twilio send failed — check credentials, the client phone number, and the server logs.
+    {% else %}Something went wrong.{% endif %}
+  </div>
+  {% endif %}
+
+  <!-- Status card -->
+  <div class="card border-0 shadow-sm mb-4">
+    <div class="card-header bg-white border-bottom py-3 d-flex justify-content-between align-items-center">
+      <span class="fw-bold"><i class="bi bi-file-earmark-text me-2 text-danger"></i>{{ contract.contract_number }}</span>
+      {% if contract.status == 'draft' %}<span class="badge bg-secondary">Draft</span>
+      {% elif contract.status == 'sent' %}<span class="badge bg-info text-dark">Sent</span>
+      {% elif contract.status == 'signed' %}<span class="badge bg-success">Signed ✓</span>
+      {% else %}<span class="badge bg-dark">Voided</span>{% endif %}
+    </div>
+    <div class="card-body">
+      <dl class="row mb-0 small">
+        <dt class="col-sm-3">Client</dt>
+        <dd class="col-sm-9">{{ contract.client_name }}
+          {% if contract.client_phone %} · <i class="bi bi-telephone"></i> {{ contract.client_phone }}{% endif %}
+          {% if contract.client_email %} · <i class="bi bi-envelope"></i> {{ contract.client_email }}{% endif %}
+        </dd>
+        <dt class="col-sm-3">Event</dt>
+        <dd class="col-sm-9">{{ contract.event_date }}{% if contract.start_time %} · {{ contract.start_time|time:"g:i A" }}{% if contract.end_time %}–{{ contract.end_time|time:"g:i A" }}{% endif %}{% endif %}{% if contract.venue %} · {{ contract.venue }}{% endif %}</dd>
+        <dt class="col-sm-3">Financials</dt>
+        <dd class="col-sm-9">
+          {% if contract.total_amount %}Total ${{ contract.total_amount }}{% endif %}
+          {% if contract.deposit_amount %} · Deposit ${{ contract.deposit_amount }}{% endif %}
+          {% if contract.balance_due %} · Balance ${{ contract.balance_due }}{% endif %}
+          {% if contract.overtime_rate %} · OT ${{ contract.overtime_rate }}/hr{% endif %}
+          {% if not contract.total_amount %}<span class="text-muted">—</span>{% endif %}
+        </dd>
+        <dt class="col-sm-3">Language</dt>
+        <dd class="col-sm-9">{{ contract.get_language_display }}</dd>
+        {% if contract.sent_at %}
+        <dt class="col-sm-3">Sent</dt>
+        <dd class="col-sm-9">{{ contract.sent_at }} via {{ contract.get_sent_via_display }}</dd>
+        {% endif %}
+      </dl>
+    </div>
+  </div>
+
+  {% if contract.status != 'voided' and not contract.signed_at %}
+  <!-- Send card -->
+  <div class="card border-0 shadow-sm mb-4">
+    <div class="card-header bg-white border-bottom py-3">
+      <span class="fw-bold"><i class="bi bi-send me-2 text-success"></i>Send to Client</span>
+    </div>
+    <div class="card-body">
+
+      <label class="form-label small text-muted mb-1">Signing link</label>
+      <div class="input-group input-group-sm mb-3">
+        <input type="text" class="form-control" id="public-url" value="{{ public_url }}" readonly>
+        <button class="btn btn-outline-secondary" type="button" onclick="copyLink()">
+          <i class="bi bi-clipboard me-1"></i>Copy
+        </button>
+      </div>
+
+      <div class="d-flex gap-2 flex-wrap">
+        {% if sms_href %}
+        <a href="{{ sms_href }}" class="btn btn-success btn-sm" onclick="beacon('sms')">
+          <i class="bi bi-chat-dots me-1"></i>Text it ({{ contract.client_phone }})
+        </a>
+        {% endif %}
+
+        {% if contract.client_email %}
+        <form method="post" action="{% url 'portal_contract_send_email' contract.id %}" class="d-inline">
+          {% csrf_token %}
+          <button type="submit" class="btn btn-primary btn-sm">
+            <i class="bi bi-envelope me-1"></i>Email it
+          </button>
+        </form>
+        {% endif %}
+
+        {% if twilio_ready and contract.client_phone %}
+        <form method="post" action="{% url 'portal_contract_send_twilio' contract.id %}" class="d-inline">
+          {% csrf_token %}
+          <button type="submit" class="btn btn-warning btn-sm">
+            <i class="bi bi-phone-vibrate me-1"></i>Send SMS (Twilio)
+          </button>
+        </form>
+        {% endif %}
+
+        <a href="{{ public_url }}" target="_blank" rel="noopener" class="btn btn-outline-secondary btn-sm">
+          <i class="bi bi-eye me-1"></i>View as client
+        </a>
+      </div>
+
+      {% if contract.client_email and not email_ready %}
+      <div class="alert alert-warning small mt-3 mb-0">
+        <i class="bi bi-exclamation-triangle me-1"></i>
+        <strong>Email not configured.</strong> Set <code>EMAIL_HOST</code> (+ user/password) in <code>.env</code> —
+        until then "Email it" prints the message to the server log instead of sending.
+      </div>
+      {% endif %}
+      {% if not twilio_ready %}
+      <div class="text-muted small mt-3 mb-0">
+        <i class="bi bi-info-circle me-1"></i>Automated SMS available once <code>TWILIO_*</code> vars are set in <code>.env</code>
+        (needs a Twilio account + A2P 10DLC registration). Until then, "Text it" opens your own messaging app prefilled.
+      </div>
+      {% endif %}
+    </div>
+  </div>
+  {% endif %}
+
+  {% if contract.signed_at %}
+  <!-- Signature audit -->
+  <div class="card border-0 shadow-sm mb-4">
+    <div class="card-header bg-white border-bottom py-3">
+      <span class="fw-bold"><i class="bi bi-patch-check me-2 text-success"></i>Signature</span>
+    </div>
+    <div class="card-body small">
+      <dl class="row mb-0">
+        <dt class="col-sm-3">Signed by</dt><dd class="col-sm-9">{{ contract.signed_name }}</dd>
+        <dt class="col-sm-3">When</dt><dd class="col-sm-9">{{ contract.signed_at }}</dd>
+        <dt class="col-sm-3">IP</dt><dd class="col-sm-9">{{ contract.signed_ip|default:"—" }}</dd>
+        <dt class="col-sm-3">Device</dt><dd class="col-sm-9 text-truncate">{{ contract.signed_user_agent|default:"—" }}</dd>
+        <dt class="col-sm-3">Language</dt><dd class="col-sm-9">{{ contract.signed_language|upper|default:"—" }}</dd>
+      </dl>
+      <a href="{{ public_url }}" target="_blank" rel="noopener" class="btn btn-outline-secondary btn-sm mt-3">
+        <i class="bi bi-printer me-1"></i>Open signed contract (print/PDF)
+      </a>
+    </div>
+  </div>
+  {% endif %}
+
+  {% if contract.status != 'voided' %}
+  <!-- Danger zone -->
+  <div class="card border-danger-subtle border shadow-sm mb-4">
+    <div class="card-body d-flex justify-content-between align-items-center py-3">
+      <div class="small">
+        <strong>Void this contract</strong><br>
+        <span class="text-muted">The signing link stops working. Needed before creating a corrected contract for this event.</span>
+      </div>
+      <form method="post" action="{% url 'portal_contract_void' contract.id %}"
+            onsubmit="return confirm('{% if contract.signed_at %}This contract is SIGNED. Voiding keeps the record but invalidates the link. Continue?{% else %}Void this contract? The signing link will stop working.{% endif %}');">
+        {% csrf_token %}
+        <button type="submit" class="btn btn-outline-danger btn-sm">
+          <i class="bi bi-slash-circle me-1"></i>Void
+        </button>
+      </form>
+    </div>
+  </div>
+  {% endif %}
+
+</div>
+
+<script>
+  function getCsrf() {
+    var el = document.querySelector('input[name=csrfmiddlewaretoken]');
+    return el ? el.value : '';
+  }
+  function beacon(via) {
+    // Best-effort "sent" marker — user is leaving for the SMS app, don't block
+    try {
+      fetch("{% url 'portal_contract_mark_sent' contract.id %}", {
+        method: 'POST',
+        headers: { 'X-CSRFToken': getCsrf(), 'Content-Type': 'application/x-www-form-urlencoded' },
+        body: 'via=' + via,
+        keepalive: true,
+      });
+    } catch (e) { /* ignore */ }
+  }
+  function copyLink() {
+    var input = document.getElementById('public-url');
+    input.select();
+    if (navigator.clipboard && navigator.clipboard.writeText) {
+      navigator.clipboard.writeText(input.value);
+    } else {
+      document.execCommand('copy');
+    }
+    beacon('link');
+  }
+</script>
+{% endblock %}

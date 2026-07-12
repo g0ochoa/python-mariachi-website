@@ -1,0 +1,221 @@
+{# PUBLIC client-facing contract page — standalone (no portal navbar/footer). #}
+{# The unguessable token URL is the capability; noindex everywhere.           #}
+<!DOCTYPE html>
+<html lang="{{ initial_lang }}">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="robots" content="noindex, nofollow">
+  <title>Contrato / Contract — Mariachi Todo Terreno</title>
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.2/font/bootstrap-icons.min.css">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@700;900&family=Open+Sans:wght@400;600;700&display=swap" rel="stylesheet">
+  <style>
+    body { font-family: 'Open Sans', sans-serif; background: #f6f3ee; }
+    .brand { font-family: 'Playfair Display', serif; }
+    body[data-lang="en"] .lang-es { display: none; }
+    body[data-lang="es"] .lang-en { display: none; }
+    .terms { white-space: normal; font-size: 0.92rem; }
+    @media print {
+      .no-print { display: none !important; }
+      body { background: #fff; }
+      .card { border: none !important; box-shadow: none !important; }
+    }
+  </style>
+</head>
+<body data-lang="{{ initial_lang }}">
+<div class="container py-4" style="max-width:760px;">
+
+  <!-- Header -->
+  <div class="text-center mb-3">
+    <h1 class="brand h3 mb-0"><i class="bi bi-music-note-beamed me-2"></i>Mariachi Todo Terreno</h1>
+    <p class="text-muted small mb-0">
+      <span class="lang-es">Contrato de Presentación · {{ contract.contract_number }}</span>
+      <span class="lang-en">Performance Contract · {{ contract.contract_number }}</span>
+    </p>
+  </div>
+
+  <!-- Language toggle -->
+  <div class="d-flex justify-content-center gap-2 mb-3 no-print">
+    <button type="button" class="btn btn-sm btn-outline-dark" onclick="setLang('es')">Español</button>
+    <button type="button" class="btn btn-sm btn-outline-dark" onclick="setLang('en')">English</button>
+  </div>
+
+  {% if contract.status == 'voided' %}
+  <!-- Voided -->
+  <div class="card border-0 shadow-sm">
+    <div class="card-body text-center py-5">
+      <i class="bi bi-slash-circle text-muted" style="font-size:2rem;"></i>
+      <p class="mt-3 mb-1 lang-es">Este enlace de contrato ya no es válido.</p>
+      <p class="mt-3 mb-1 lang-en">This contract link is no longer valid.</p>
+      <p class="text-muted small lang-es">Por favor comuníquese con Mariachi Todo Terreno.</p>
+      <p class="text-muted small lang-en">Please contact Mariachi Todo Terreno.</p>
+    </div>
+  </div>
+  {% else %}
+
+  {% if contract.signed_at %}
+  <!-- Signed banner -->
+  <div class="alert alert-success d-flex align-items-center gap-2">
+    <i class="bi bi-patch-check-fill fs-4"></i>
+    <div>
+      <strong class="lang-es">Contrato firmado</strong>
+      <strong class="lang-en">Contract signed</strong>
+      <div class="small">
+        <span class="lang-es">Firmado por <strong>{{ contract.signed_name }}</strong> el {{ contract.signed_at|date:"d/m/Y H:i" }}</span>
+        <span class="lang-en">Signed by <strong>{{ contract.signed_name }}</strong> on {{ contract.signed_at|date:"m/d/Y H:i" }}</span>
+      </div>
+    </div>
+  </div>
+  {% endif %}
+
+  <!-- Event details -->
+  <div class="card border-0 shadow-sm mb-3">
+    <div class="card-header bg-white py-3">
+      <strong><i class="bi bi-calendar-event me-2 text-danger"></i>
+        <span class="lang-es">Detalles del Evento</span>
+        <span class="lang-en">Event Details</span>
+      </strong>
+    </div>
+    <div class="card-body">
+      <dl class="row mb-0 small">
+        <dt class="col-5 col-sm-4"><span class="lang-es">Cliente</span><span class="lang-en">Client</span></dt>
+        <dd class="col-7 col-sm-8">{{ contract.client_name }}</dd>
+
+        {% if contract.event_type_label %}
+        <dt class="col-5 col-sm-4"><span class="lang-es">Tipo de evento</span><span class="lang-en">Event type</span></dt>
+        <dd class="col-7 col-sm-8">{{ contract.event_type_label }}</dd>
+        {% endif %}
+
+        <dt class="col-5 col-sm-4"><span class="lang-es">Fecha</span><span class="lang-en">Date</span></dt>
+        <dd class="col-7 col-sm-8">
+          <span class="lang-es">{{ contract.event_date|date:"d/m/Y" }}</span>
+          <span class="lang-en">{{ contract.event_date|date:"m/d/Y" }}</span>
+        </dd>
+
+        {% if contract.start_time %}
+        <dt class="col-5 col-sm-4"><span class="lang-es">Horario</span><span class="lang-en">Time</span></dt>
+        <dd class="col-7 col-sm-8">{{ contract.start_time|time:"g:i A" }}{% if contract.end_time %} – {{ contract.end_time|time:"g:i A" }}{% endif %}</dd>
+        {% endif %}
+
+        {% if contract.venue or contract.city %}
+        <dt class="col-5 col-sm-4"><span class="lang-es">Lugar</span><span class="lang-en">Venue</span></dt>
+        <dd class="col-7 col-sm-8">{{ contract.venue }}{% if contract.city %}, {{ contract.city }}{% endif %}</dd>
+        {% endif %}
+
+        {% if contract.total_amount %}
+        <dt class="col-5 col-sm-4"><span class="lang-es">Precio total</span><span class="lang-en">Total price</span></dt>
+        <dd class="col-7 col-sm-8">${{ contract.total_amount }}</dd>
+        {% endif %}
+
+        {% if contract.deposit_amount %}
+        <dt class="col-5 col-sm-4"><span class="lang-es">Depósito</span><span class="lang-en">Deposit</span></dt>
+        <dd class="col-7 col-sm-8">${{ contract.deposit_amount }}</dd>
+        {% endif %}
+
+        {% if contract.balance_due %}
+        <dt class="col-5 col-sm-4"><span class="lang-es">Saldo restante</span><span class="lang-en">Balance due</span></dt>
+        <dd class="col-7 col-sm-8"><strong>${{ contract.balance_due }}</strong></dd>
+        {% endif %}
+
+        {% if contract.overtime_rate %}
+        <dt class="col-5 col-sm-4"><span class="lang-es">Tiempo extra</span><span class="lang-en">Overtime rate</span></dt>
+        <dd class="col-7 col-sm-8">${{ contract.overtime_rate }}/hr</dd>
+        {% endif %}
+      </dl>
+    </div>
+  </div>
+
+  <!-- Terms -->
+  <div class="card border-0 shadow-sm mb-3">
+    <div class="card-header bg-white py-3">
+      <strong><i class="bi bi-file-earmark-text me-2 text-danger"></i>
+        <span class="lang-es">Términos y Condiciones</span>
+        <span class="lang-en">Terms &amp; Conditions</span>
+      </strong>
+    </div>
+    <div class="card-body terms">
+      <div class="lang-es">{{ contract.terms_es|linebreaks }}</div>
+      <div class="lang-en">{{ contract.terms_en|linebreaks }}</div>
+    </div>
+  </div>
+
+  {% if contract.signed_at %}
+  <!-- Signature record + print -->
+  <div class="card border-0 shadow-sm mb-3">
+    <div class="card-body small">
+      <strong class="lang-es">Firma electrónica:</strong>
+      <strong class="lang-en">Electronic signature:</strong>
+      {{ contract.signed_name }} —
+      <span class="lang-es">{{ contract.signed_at|date:"d/m/Y H:i" }}</span>
+      <span class="lang-en">{{ contract.signed_at|date:"m/d/Y H:i" }}</span>
+    </div>
+  </div>
+  <div class="text-center no-print mb-4">
+    <button class="btn btn-outline-dark" onclick="window.print()">
+      <i class="bi bi-printer me-1"></i>
+      <span class="lang-es">Imprimir / Guardar PDF</span>
+      <span class="lang-en">Print / Save as PDF</span>
+    </button>
+  </div>
+  {% else %}
+
+  <!-- Sign form -->
+  <div class="card border-0 shadow-sm mb-4 no-print">
+    <div class="card-header bg-white py-3">
+      <strong><i class="bi bi-pen me-2 text-danger"></i>
+        <span class="lang-es">Firmar Contrato</span>
+        <span class="lang-en">Sign Contract</span>
+      </strong>
+    </div>
+    <div class="card-body">
+      {% if error %}
+      <div class="alert alert-danger py-2 small">
+        <span class="lang-es">Por favor escriba su nombre completo y marque la casilla de aceptación.</span>
+        <span class="lang-en">Please type your full name and check the acceptance box.</span>
+      </div>
+      {% endif %}
+      <form method="post">
+        {% csrf_token %}
+        <input type="hidden" name="lang" id="lang-input" value="{{ initial_lang }}">
+        <div class="mb-3">
+          <label class="form-label fw-semibold">
+            <span class="lang-es">Nombre completo</span>
+            <span class="lang-en">Full name</span>
+          </label>
+          <input type="text" name="signed_name" required maxlength="200" class="form-control"
+                 placeholder="">
+        </div>
+        <div class="form-check mb-3">
+          <input class="form-check-input" type="checkbox" name="agree" id="agree" required>
+          <label class="form-check-label small" for="agree">
+            <span class="lang-es">He leído y acepto los términos de este contrato. Entiendo que esto constituye mi firma electrónica.</span>
+            <span class="lang-en">I have read and agree to the terms of this contract. I understand this constitutes my electronic signature.</span>
+          </label>
+        </div>
+        <button type="submit" class="btn btn-danger w-100 py-2">
+          <span class="lang-es"><i class="bi bi-pen me-1"></i>Firmar Contrato</span>
+          <span class="lang-en"><i class="bi bi-pen me-1"></i>Sign Contract</span>
+        </button>
+      </form>
+    </div>
+  </div>
+  {% endif %}
+
+  {% endif %}{# voided #}
+
+  <p class="text-center text-muted small mb-2">Mariachi Todo Terreno · mariachitodoterreno.com</p>
+</div>
+
+<script>
+  function setLang(l) {
+    document.body.dataset.lang = l;
+    document.documentElement.lang = l;
+    var input = document.getElementById('lang-input');
+    if (input) input.value = l;
+  }
+</script>
+</body>
+</html>

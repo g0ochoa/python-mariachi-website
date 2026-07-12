@@ -1,7 +1,8 @@
 from django.contrib import admin
 from django.db.models import Sum, Count, Avg
+from django.urls import reverse
 from django.utils.html import format_html
-from .models import Song, Gig, MusicianPay
+from .models import Song, Gig, MusicianPay, Contract, ContractTemplate
 
 
 @admin.register(Song)
@@ -83,6 +84,28 @@ class GigAdmin(admin.ModelAdmin):
         )
         response.context_data['summary'] = stats
         return response
+
+
+@admin.register(ContractTemplate)
+class ContractTemplateAdmin(admin.ModelAdmin):
+    list_display = ('name', 'is_active', 'updated_at')
+
+
+@admin.register(Contract)
+class ContractAdmin(admin.ModelAdmin):
+    list_display    = ('contract_number', 'client_name', 'event_date', 'status', 'language',
+                       'sent_via', 'sent_at', 'signed_at')
+    list_filter     = ('status', 'language', 'event_date')
+    search_fields   = ('client_name', 'client_phone', 'client_email', 'venue')
+    readonly_fields = ('token', 'public_link', 'signed_name', 'signed_at', 'signed_ip',
+                       'signed_user_agent', 'signed_language', 'created_at')
+    raw_id_fields   = ('event', 'gig')
+    date_hierarchy  = 'event_date'
+
+    def public_link(self, obj):
+        url = reverse('contract_sign', args=[obj.token])
+        return format_html('<a href="{}" target="_blank" rel="noopener">{}</a>', url, url)
+    public_link.short_description = 'Signing link'
 
 
 @admin.register(MusicianPay)

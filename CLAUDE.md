@@ -26,6 +26,8 @@ There is no linter/formatter configured — match existing style (aligned `=` in
 
 Push to `main` → GitHub Actions (`.github/workflows/deploy-staging.yml`) rsyncs to the VPS behind **mariachiesencia.com** (nginx → gunicorn), installs deps, migrates, runs collectstatic to `/var/www/mariachi-django-static/`, and restarts the `mariachi-django` systemd service. There is no separate production pipeline — main IS the live site. The scores files served by the portal live on the same box (`/var/www/mariachiesencia/scores/`).
 
+⚠️ **Static-file cache busting:** nginx serves `/django-static/` with `Cache-Control: immutable` for 30 days. Whenever `static/css/style.css` or `static/js/main.js` changes, **bump the `?v=` date in `templates/base.html`** or every returning visitor keeps the stale file for up to a month (this has bitten before — a homepage restyle rendered half-broken for visitors with the old CSS cached).
+
 Two domains front the same app: **mariachitodoterreno.com** (customer-facing) and **mariachiesencia.com** (also hosts the scores files + a legacy PHP API). The SSH host/user/project-path are **not in the repo** (it's public): they're GitHub Actions variables `STAGING_HOST` / `STAGING_USER` / `STAGING_PROJECT_PATH` plus the `STAGING_SSH_KEY` secret (`gh variable list` to view). Full pipeline + server layout: `deployment/README.md`.
 
 ## Architecture

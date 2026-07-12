@@ -60,6 +60,10 @@ class User(AbstractUser):
         default=False,
         help_text='Test/demo accounts are hidden from pay entry and pay summary',
     )
+    is_guest = models.BooleanField(
+        default=False,
+        help_text='Temporary/substitute musician added from an event page; cannot log in',
+    )
     active_from = models.DateField(
         null=True,
         blank=True,

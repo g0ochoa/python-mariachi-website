@@ -23,5 +23,7 @@ urlpatterns = [
     path('portal/calendar/events/<int:event_id>/pay/', views.musician_pay_set, name='portal_musician_pay_set'),
     path('portal/calendar/events/<int:event_id>/pay/bulk/', views.musician_pay_bulk, name='portal_musician_pay_bulk'),
     path('portal/calendar/events/<int:event_id>/pay/mark-paid/', views.mark_event_paid, name='portal_mark_event_paid'),
+    path('portal/calendar/events/<int:event_id>/guests/new/', views.guest_musician_create, name='portal_guest_create'),
+    path('portal/calendar/events/<int:event_id>/guests/<int:musician_id>/deactivate/', views.guest_musician_deactivate, name='portal_guest_deactivate'),
     path('portal/pay/summary/', views.pay_summary, name='portal_pay_summary'),
 ]

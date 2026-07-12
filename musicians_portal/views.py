@@ -957,6 +957,83 @@ def mark_event_paid(request, event_id):
 
 
 @login_required
+@require_POST
+def guest_musician_create(request, event_id):
+    """Add a temporary/substitute musician from the event page.
+    Creates a login-less User (role=musician, is_guest=True) active from this
+    event's date onward, so they appear in this and later events' pay tables
+    until deactivated."""
+    _require_portal(request)
+    if not _is_finance_user(request.user):
+        raise PermissionDenied
+
+    event = get_object_or_404(Event, id=event_id)
+
+    first_name = request.POST.get('first_name', '').strip()
+    last_name  = request.POST.get('last_name', '').strip()
+    instrument = request.POST.get('instrument', '').strip()
+    rate_str   = request.POST.get('default_hourly_rate', '').strip()
+
+    if not first_name:
+        return redirect('portal_event_detail', event_id=event_id)
+
+    rate = None
+    if rate_str:
+        try:
+            rate = float(rate_str)
+        except ValueError:
+            rate = None
+
+    from django.contrib.auth import get_user_model
+    from django.utils.text import slugify
+    User = get_user_model()
+
+    base_username = slugify(f'guest-{first_name}-{last_name}'.rstrip('-')) or 'guest'
+    username = base_username
+    suffix = 2
+    while User.objects.filter(username=username).exists():
+        username = f'{base_username}-{suffix}'
+        suffix += 1
+
+    guest = User(
+        username            = username,
+        first_name          = first_name,
+        last_name           = last_name,
+        role                = 'musician',
+        instrument          = instrument,
+        default_hourly_rate = rate,
+        is_guest            = True,
+        active_from         = event.date,
+    )
+    guest.set_unusable_password()
+    guest.save()
+
+    return redirect('portal_event_detail', event_id=event_id)
+
+
+@login_required
+@require_POST
+def guest_musician_deactivate(request, event_id, musician_id):
+    """End a guest musician's stint: active_until = this event's date.
+    They remain on this event's pay table (and keep all pay history) but stop
+    appearing on later events."""
+    _require_portal(request)
+    if not _is_finance_user(request.user):
+        raise PermissionDenied
+
+    event = get_object_or_404(Event, id=event_id)
+
+    from django.contrib.auth import get_user_model
+    User = get_user_model()
+    guest = get_object_or_404(User, id=musician_id, is_guest=True)
+
+    guest.active_until = event.date
+    guest.save(update_fields=['active_until'])
+
+    return redirect('portal_event_detail', event_id=event_id)
+
+
+@login_required
 def pay_summary(request):
     """Consolidated pay summary — pivot table of events × musicians."""
     _require_portal(request)

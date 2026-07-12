@@ -10,10 +10,10 @@ class CustomUserAdmin(UserAdmin):
     Extends Django's built-in UserAdmin with our custom fields.
     """
     # Fields to display in the user list
-    list_display = ('username', 'email', 'role', 'first_name', 'last_name', 'is_staff', 'is_active', 'is_test_account', 'active_from', 'active_until')
-    
+    list_display = ('username', 'email', 'role', 'first_name', 'last_name', 'is_staff', 'is_active', 'is_test_account', 'is_guest', 'active_from', 'active_until')
+
     # Filters in the right sidebar
-    list_filter = ('role', 'is_staff', 'is_active', 'promo_opt_in', 'is_test_account')
+    list_filter = ('role', 'is_staff', 'is_active', 'promo_opt_in', 'is_test_account', 'is_guest')
     
     # Search functionality
     search_fields = ('username', 'email', 'first_name', 'last_name', 'phone')
@@ -28,7 +28,7 @@ class CustomUserAdmin(UserAdmin):
             'description': 'Fields for customer accounts'
         }),
         ('Musician Information', {
-            'fields': ('instrument', 'google_id', 'default_hourly_rate', 'active_from', 'active_until', 'is_test_account'),
+            'fields': ('instrument', 'google_id', 'default_hourly_rate', 'active_from', 'active_until', 'is_test_account', 'is_guest'),
             'description': 'Fields for musician accounts (band members)'
         }),
     )

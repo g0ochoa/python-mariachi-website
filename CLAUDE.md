@@ -24,7 +24,9 @@ There is no linter/formatter configured — match existing style (aligned `=` in
 
 ### Deployment
 
-Push to `main` → GitHub Actions (`.github/workflows/deploy-staging.yml`) rsyncs to a VPS, installs deps, migrates, runs collectstatic, and restarts the `mariachi-django` systemd (gunicorn) service. There is no separate production pipeline — main IS the deployed site. Config for the VPS lives in `deployment/` (nginx, gunicorn, systemd unit).
+Push to `main` → GitHub Actions (`.github/workflows/deploy-staging.yml`) rsyncs to the VPS behind **mariachiesencia.com** (nginx → gunicorn), installs deps, migrates, runs collectstatic to `/var/www/mariachi-django-static/`, and restarts the `mariachi-django` systemd service. There is no separate production pipeline — main IS the live site. The scores files served by the portal live on the same box (`/var/www/mariachiesencia/scores/`).
+
+The SSH host/user/project-path are **not in the repo** (it's public): they're GitHub Actions variables `STAGING_HOST` / `STAGING_USER` / `STAGING_PROJECT_PATH` plus the `STAGING_SSH_KEY` secret (`gh variable list` to view). ⚠️ The `deployment/` directory (nginx/gunicorn/systemd templates, `deploy.sh`) is **stale** — it references a `mariachi-website` service, `/var/www/mariachi-website`, and a `dev` branch, none of which match the live workflow. Trust the workflow file, not `deployment/`.
 
 ## Architecture
 

@@ -19,10 +19,11 @@
     <!-- Custom CSS -->
     {% load static %}
     <link rel="stylesheet" href="{% static 'css/style.css' %}">
-    
+
+    {% block extra_head %}{% endblock %}
     {% block extra_css %}{% endblock %}
 </head>
-<body>
+<body class="{% block body_class %}{% endblock %}">
     <!-- Navigation -->
     <nav class="navbar navbar-expand-lg navbar-light navbar-vintage sticky-top">
         <div class="container">
@@ -55,7 +56,7 @@
                         <a class="nav-link" href="#gallery">Gallery</a>
                     </li>
                     <li class="nav-item">
-                        <a class="nav-link" href="#events">Events</a>
+                        <a class="nav-link" href="#services">Services</a>
                     </li>
                     <li class="nav-item">
                         <a class="nav-link" href="#contact">Contact</a>
@@ -120,14 +121,11 @@
                     <h5>Contact</h5>
                     <p class="text-muted">
                         <i class="bi bi-envelope"></i> info@mariachitodoterreno.com<br>
-                        <i class="bi bi-telephone"></i> (555) 123-4567<br>
-                        <i class="bi bi-geo-alt"></i> Your City, State
+                        <i class="bi bi-telephone"></i> Gerardo Ochoa — <a href="tel:+14795866060" class="text-muted text-decoration-none">(479) 586-6060</a><br>
+                        <i class="bi bi-telephone"></i> Jose Amezcua — <a href="tel:+14795374897" class="text-muted text-decoration-none">(479) 537-4897</a><br>
+                        <i class="bi bi-geo-alt"></i> Northwest Arkansas
                     </p>
-                    <div class="mt-3">
-                        <a href="#" class="me-3"><i class="bi bi-facebook fs-4"></i></a>
-                        <a href="#" class="me-3"><i class="bi bi-instagram fs-4"></i></a>
-                        <a href="#"><i class="bi bi-youtube fs-4"></i></a>
-                    </div>
+                    {# Social links removed until official band accounts exist — re-add real URLs here #}
                 </div>
             </div>
             <hr class="bg-secondary">

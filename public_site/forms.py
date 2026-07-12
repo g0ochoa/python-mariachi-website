@@ -21,7 +21,7 @@ class ContactForm(forms.ModelForm):
             }),
             'phone': forms.TextInput(attrs={
                 'class': 'form-control',
-                'placeholder': '(555) 123-4567',
+                'placeholder': '(479) 555-0100',
             }),
             'event_type': forms.Select(attrs={'class': 'form-select'}),
             'message': forms.Textarea(attrs={

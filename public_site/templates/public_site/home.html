@@ -1,55 +1,90 @@
 {% extends 'base.html' %}
 {% load static %}
 
-{% block title %}Mariachi Todo Terreno — Authentic Mexican Music for Every Occasion{% endblock %}
+{% block title %}Mariachi en Northwest Arkansas — Mariachi Todo Terreno | Springdale, Rogers, Fayetteville, Bentonville{% endblock %}
+
+{% block body_class %}home-modern{% endblock %}
+
+{% block extra_head %}
+<meta name="description" content="Mariachi profesional en el noroeste de Arkansas — bodas, quinceañeras, serenatas y eventos en Springdale, Rogers, Fayetteville y Bentonville. Professional mariachi band serving Northwest Arkansas.">
+<!-- Open Graph — link previews on Facebook/WhatsApp/iMessage -->
+<meta property="og:type" content="website">
+<meta property="og:site_name" content="Mariachi Todo Terreno">
+<meta property="og:title" content="Mariachi Todo Terreno — Mariachi en Northwest Arkansas">
+<meta property="og:description" content="Bodas, quinceañeras, serenatas y eventos. Weddings, quinceañeras, serenades & events across Northwest Arkansas.">
+<meta property="og:url" content="https://mariachitodoterreno.com/">
+<meta property="og:image" content="https://mariachitodoterreno.com{% if site_media.hero_image %}{{ site_media.hero_image.file.url }}{% else %}{% static 'images/mariachi-photo-2.jpeg' %}{% endif %}">
+<meta name="twitter:card" content="summary_large_image">
+<!-- Local business structured data for Google -->
+<script type="application/ld+json">
+{
+  "@context": "https://schema.org",
+  "@type": "MusicGroup",
+  "name": "Mariachi Todo Terreno",
+  "url": "https://mariachitodoterreno.com/",
+  "image": "https://mariachitodoterreno.com{% if site_media.hero_image %}{{ site_media.hero_image.file.url }}{% else %}{% static 'images/mariachi-photo-2.jpeg' %}{% endif %}",
+  "genre": "Mariachi",
+  "telephone": "+14795866060",
+  "email": "info@mariachitodoterreno.com",
+  "areaServed": ["Springdale AR", "Rogers AR", "Fayetteville AR", "Bentonville AR", "Northwest Arkansas"],
+  "knowsLanguage": ["es", "en"]
+}
+</script>
+{% endblock %}
 
 {% block content %}
 
-<!-- HERO -->
-<section class="hero-home">
-    <div class="container">
-        <div class="row justify-content-center">
-            <div class="col-lg-9 col-xl-8 text-center">
-                <div class="hero-frame">
-                    <span class="hero-pill">Est. &nbsp;&#9834;&nbsp; Professional Mariachi</span>
-                    <p class="hero-script">Authentic Mexican Music</p>
-                    <h1 class="hero-title">Mariachi<br>Todo Terreno</h1>
-                    <div class="mt-3 mb-3 rounded-4 overflow-hidden shadow" style="border: 2px solid var(--blush);">
-                        <img src="{% if site_media.hero_image %}{{ site_media.hero_image.file.url }}{% else %}{% static 'images/mariachi-photo-2.jpeg' %}{% endif %}"
-                             alt="{% if site_media.hero_image %}{{ site_media.hero_image.alt_text|default:'Mariachi Todo Terreno' }}{% else %}Mariachi Todo Terreno — full band{% endif %}"
-                             class="img-fluid w-100"
-                             style="object-fit:cover; max-height:380px;">
-                    </div>
-                    <span class="hero-ornament">&#9834; &ensp; &#9833; &ensp; &#9835;</span>
-                    <p class="hero-subtitle">
-                        Bringing the soul of authentic Mexican music to weddings, quinceañeras,
-                        anniversaries, and every occasion worth celebrating.
-                    </p>
-                    <div class="hero-cta-row">
-                        <a href="#contact" class="btn btn-wine btn-lg px-5 py-3">
-                            <i class="bi bi-calendar-check-fill me-2"></i> Book Your Event
-                        </a>
-                        <a href="#about" class="btn btn-vintage-outline btn-lg px-5 py-3">
-                            <i class="bi bi-music-note-beamed me-2"></i> Our Story
-                        </a>
-                    </div>
-                </div>
-            </div>
+<!-- Language toggle (floating chip) -->
+<div class="lang-toggle no-print" role="group" aria-label="Idioma / Language">
+  <button type="button" class="lang-toggle-btn" data-setlang="es" onclick="setSiteLang('es')">ES</button>
+  <button type="button" class="lang-toggle-btn" data-setlang="en" onclick="setSiteLang('en')">EN</button>
+</div>
+
+<!-- HERO — full-bleed photo with charcoal overlay -->
+<section class="hero-full" style="background-image: linear-gradient(rgba(18,16,14,.62), rgba(18,16,14,.78)), url('{% if site_media.hero_image %}{{ site_media.hero_image.file.url }}{% else %}{% static 'images/mariachi-photo-2.jpeg' %}{% endif %}');">
+    <div class="container text-center">
+        <span class="hero-pill-gold">
+            <span class="lang-es">Mariachi Profesional · Noroeste de Arkansas</span>
+            <span class="lang-en">Professional Mariachi · Northwest Arkansas</span>
+        </span>
+        <h1 class="hero-title-light">Mariachi<br>Todo Terreno</h1>
+        <span class="hero-ornament-gold">&#9834; &ensp; &#9833; &ensp; &#9835;</span>
+        <p class="hero-subtitle-light">
+            <span class="lang-es">La esencia de la música mexicana para bodas, quinceañeras, serenatas y toda ocasión que merece celebrarse.</span>
+            <span class="lang-en">The soul of authentic Mexican music for weddings, quinceañeras, serenades, and every occasion worth celebrating.</span>
+        </p>
+        <div class="hero-cta-row">
+            <a href="https://wa.me/14795866060" target="_blank" rel="noopener" class="btn btn-whatsapp btn-lg px-4 py-3">
+                <i class="bi bi-whatsapp me-2"></i>WhatsApp
+            </a>
+            <a href="#contact" class="btn btn-gold btn-lg px-4 py-3">
+                <span class="lang-es"><i class="bi bi-calendar-check-fill me-2"></i>Reserva tu Evento</span>
+                <span class="lang-en"><i class="bi bi-calendar-check-fill me-2"></i>Book Your Event</span>
+            </a>
+            <a href="tel:+14795866060" class="btn btn-outline-light btn-lg px-4 py-3">
+                <span class="lang-es"><i class="bi bi-telephone-fill me-2"></i>Llámanos</span>
+                <span class="lang-en"><i class="bi bi-telephone-fill me-2"></i>Call Us</span>
+            </a>
         </div>
     </div>
 </section>
 
-<!-- STATS -->
 <!-- VIDEO SHOWCASE -->
-<section class="py-section" style="background: #1a1a1a;">
+<section class="py-section" style="background: #14110e;">
     <div class="container">
-        <p class="eyebrow-label text-center" style="color:#c09a6b;">See Us Live</p>
-        <h2 class="section-title text-center text-white mb-4">Watch Us Perform</h2>
+        <p class="eyebrow-label text-center" style="color:#cfa855;">
+            <span class="lang-es">Míranos en Vivo</span>
+            <span class="lang-en">See Us Live</span>
+        </p>
+        <h2 class="section-title text-center text-white mb-4">
+            <span class="lang-es">Nuestra Música</span>
+            <span class="lang-en">Watch Us Perform</span>
+        </h2>
         <div id="video-row" class="row g-4 align-items-start justify-content-center">
             <!-- Main video player -->
             <div id="video-col" class="col-lg-8">
                 <div id="video-frame" class="mx-auto" style="max-width:100%; transition: max-width .3s ease;">
-                  <div class="rounded-3 overflow-hidden shadow-lg">
+                  <div class="rounded-3 overflow-hidden shadow-lg" style="border:1px solid rgba(207,168,85,.35);">
                     <video id="main-video" controls preload="metadata"
                            class="w-100 d-block"
                            style="background:#000; max-height:72vh; object-fit:contain;"
@@ -58,7 +93,7 @@
                     </video>
                   </div>
                 </div>
-                <p id="video-title" class="text-center mt-2 fw-semibold" style="color:#c09a6b; font-size:.9rem;">
+                <p id="video-title" class="text-center mt-2 fw-semibold" style="color:#cfa855; font-size:.9rem;">
                     ♪ {% if site_media.video_1 and site_media.video_1.caption %}{{ site_media.video_1.caption }}{% else %}Amor Eterno{% endif %}
                 </p>
             </div>
@@ -72,7 +107,7 @@
                         <i class="bi bi-play-circle-fill me-2" style="font-size:1.2rem;"></i>
                         <div class="text-start">
                             <div class="fw-semibold" style="font-size:.85rem;">{% if site_media.video_1 and site_media.video_1.caption %}{{ site_media.video_1.caption }}{% else %}Amor Eterno{% endif %}</div>
-                            <div style="font-size:.72rem; opacity:.7;">Ballad</div>
+                            <div style="font-size:.72rem; opacity:.7;"><span class="lang-es">Balada</span><span class="lang-en">Ballad</span></div>
                         </div>
                     </button>
                     <button class="video-thumb-btn"
@@ -102,59 +137,36 @@
                         <i class="bi bi-play-circle-fill me-2" style="font-size:1.2rem;"></i>
                         <div class="text-start">
                             <div class="fw-semibold" style="font-size:.85rem;">{% if site_media.video_4 and site_media.video_4.caption %}{{ site_media.video_4.caption }}{% else %}Toro y el Relajo{% endif %}</div>
-                            <div style="font-size:.72rem; opacity:.7;">Lively / Fiesta</div>
+                            <div style="font-size:.72rem; opacity:.7;"><span class="lang-es">Fiesta</span><span class="lang-en">Lively / Fiesta</span></div>
                         </div>
                     </button>
                 </div>
             </div>
         </div>
-        <!-- Stats moved here -->
+        <!-- Stats -->
         <div class="row g-4 text-center mt-5">
             <div class="col-md-4">
-                <div class="stat-card stat-card--blush">
-                    <div class="stat-number">15<span>+</span></div>
-                    <div class="stat-label">Years of Experience</div>
+                <div class="stat-card-dark">
+                    <div class="stat-number-gold">15<span>+</span></div>
+                    <div class="stat-label-light"><span class="lang-es">Años de Experiencia</span><span class="lang-en">Years of Experience</span></div>
                 </div>
             </div>
             <div class="col-md-4">
-                <div class="stat-card stat-card--mint">
-                    <div class="stat-number">1,000<span>+</span></div>
-                    <div class="stat-label">Songs in Repertoire</div>
+                <div class="stat-card-dark">
+                    <div class="stat-number-gold">1,000<span>+</span></div>
+                    <div class="stat-label-light"><span class="lang-es">Canciones en Repertorio</span><span class="lang-en">Songs in Repertoire</span></div>
                 </div>
             </div>
             <div class="col-md-4">
-                <div class="stat-card stat-card--peach">
-                    <div class="stat-number">500<span>+</span></div>
-                    <div class="stat-label">Events Performed</div>
+                <div class="stat-card-dark">
+                    <div class="stat-number-gold">500<span>+</span></div>
+                    <div class="stat-label-light"><span class="lang-es">Eventos Realizados</span><span class="lang-en">Events Performed</span></div>
                 </div>
             </div>
         </div>
     </div>
 </section>
 
-<style>
-.video-thumb-btn {
-    display: flex;
-    align-items: center;
-    background: rgba(255,255,255,.07);
-    border: 1px solid rgba(255,255,255,.12);
-    border-radius: 10px;
-    color: #fff;
-    padding: .65rem .9rem;
-    cursor: pointer;
-    transition: background .15s, border-color .15s;
-    width: 100%;
-}
-.video-thumb-btn:hover {
-    background: rgba(255,255,255,.14);
-    border-color: rgba(192,154,107,.5);
-}
-.video-thumb-btn.active {
-    background: rgba(192,154,107,.18);
-    border-color: #c09a6b;
-    color: #c09a6b;
-}
-</style>
 <script>
 function applyVideoLayout(isPortrait) {
     const frame       = document.getElementById('video-frame');
@@ -193,43 +205,45 @@ function switchVideo(btn) {
                 <div class="about-img-wrapper">
                     <img src="{% if site_media.about_image %}{{ site_media.about_image.file.url }}{% else %}{% static 'images/mariachi-photo-2.jpeg' %}{% endif %}"
                          alt="{% if site_media.about_image %}{{ site_media.about_image.alt_text|default:'Mariachi Todo Terreno' }}{% else %}Mariachi Todo Terreno — full band in traje de charro{% endif %}"
-                         class="img-fluid rounded-3 shadow-lg"
+                         class="img-fluid rounded-3 shadow-lg" loading="lazy"
                          style="width:100%; object-fit:cover; max-height:420px;">
                     <div class="about-badge">
                         <span class="badge-years">15</span>
-                        <span class="badge-label">Years<br>Exp.</span>
+                        <span class="badge-label"><span class="lang-es">Años<br>Exp.</span><span class="lang-en">Years<br>Exp.</span></span>
                     </div>
                 </div>
             </div>
             <div class="col-lg-7">
-                <p class="eyebrow-label">Who We Are</p>
-                <h2 class="section-title text-start">Authentic Mariachi<br>Rooted in Tradition</h2>
+                <p class="eyebrow-label"><span class="lang-es">Quiénes Somos</span><span class="lang-en">Who We Are</span></p>
+                <h2 class="section-title text-start">
+                    <span class="lang-es">Mariachi Auténtico<br>con Raíces y Tradición</span>
+                    <span class="lang-en">Authentic Mariachi<br>Rooted in Tradition</span>
+                </h2>
                 <p class="lead mb-4" style="color: var(--coffee);">
-                    Mariachi Todo Terreno was born from a deep love for the rich cultural heritage of
-                    Mexican music. Led by Gerry Ochoa, our ensemble has performed across California,
-                    delivering world-class mariachi entertainment to thousands of guests.
+                    <span class="lang-es">Mariachi Todo Terreno nació del amor profundo por la herencia cultural de la música mexicana. Dirigido por Gerry Ochoa, nuestro grupo se ha presentado por todo el noroeste de Arkansas, llevando entretenimiento de primera a miles de invitados.</span>
+                    <span class="lang-en">Mariachi Todo Terreno was born from a deep love for the rich cultural heritage of Mexican music. Led by Gerry Ochoa, our ensemble performs across Northwest Arkansas, delivering world-class mariachi entertainment to thousands of guests.</span>
                 </p>
                 <p class="mb-4" style="color: var(--text-muted);">
-                    From heartfelt rancheras to romantic boleros, our musicians master every style.
-                    Each performance is tailored to your event — we arrive in traditional traje de charro,
-                    ready to make your celebration unforgettable.
+                    <span class="lang-es">De rancheras sentidas a boleros románticos, nuestros músicos dominan todos los estilos. Cada presentación se adapta a su evento — llegamos con traje de charro tradicional, listos para hacer su celebración inolvidable.</span>
+                    <span class="lang-en">From heartfelt rancheras to romantic boleros, our musicians master every style. Each performance is tailored to your event — we arrive in traditional traje de charro, ready to make your celebration unforgettable.</span>
                 </p>
                 <div class="row g-2 mb-4">
                     <div class="col-sm-6">
-                        <div class="feature-point"><i class="bi bi-check-circle-fill me-2"></i>Professional musicians</div>
+                        <div class="feature-point"><i class="bi bi-check-circle-fill me-2"></i><span class="lang-es">Músicos profesionales</span><span class="lang-en">Professional musicians</span></div>
                     </div>
                     <div class="col-sm-6">
-                        <div class="feature-point"><i class="bi bi-check-circle-fill me-2"></i>Traditional traje de charro</div>
+                        <div class="feature-point"><i class="bi bi-check-circle-fill me-2"></i><span class="lang-es">Traje de charro tradicional</span><span class="lang-en">Traditional traje de charro</span></div>
                     </div>
                     <div class="col-sm-6">
-                        <div class="feature-point"><i class="bi bi-check-circle-fill me-2"></i>1,000+ song repertoire</div>
+                        <div class="feature-point"><i class="bi bi-check-circle-fill me-2"></i><span class="lang-es">Repertorio de 1,000+ canciones</span><span class="lang-en">1,000+ song repertoire</span></div>
                     </div>
                     <div class="col-sm-6">
-                        <div class="feature-point"><i class="bi bi-check-circle-fill me-2"></i>All events — any size</div>
+                        <div class="feature-point"><i class="bi bi-check-circle-fill me-2"></i><span class="lang-es">Todo evento — cualquier tamaño</span><span class="lang-en">All events — any size</span></div>
                     </div>
                 </div>
                 <a href="#contact" class="btn btn-wine btn-lg">
-                    <i class="bi bi-envelope-fill me-2"></i> Get in Touch
+                    <span class="lang-es"><i class="bi bi-envelope-fill me-2"></i>Contáctanos</span>
+                    <span class="lang-en"><i class="bi bi-envelope-fill me-2"></i>Get in Touch</span>
                 </a>
             </div>
         </div>
@@ -239,35 +253,47 @@ function switchVideo(btn) {
 <!-- SERVICES -->
 <section id="services" class="py-section bg-cream-dark">
     <div class="container">
-        <p class="eyebrow-label text-center">What We Offer</p>
-        <h2 class="section-title text-center">Perfect for Every Occasion</h2>
+        <p class="eyebrow-label text-center"><span class="lang-es">Nuestros Servicios</span><span class="lang-en">What We Offer</span></p>
+        <h2 class="section-title text-center"><span class="lang-es">Para Toda Ocasión</span><span class="lang-en">Perfect for Every Occasion</span></h2>
         <div class="row g-4">
             <div class="col-md-6 col-lg-3">
-                <div class="service-card service-card--blush">
-                    <div class="service-icon service-icon--blush"><i class="bi bi-heart-fill"></i></div>
-                    <h4>Weddings</h4>
-                    <p>From the ceremony processional to the last dance, we create the soundtrack to your perfect day.</p>
+                <div class="service-card-modern">
+                    <div class="service-icon-gold"><i class="bi bi-heart-fill"></i></div>
+                    <h4><span class="lang-es">Bodas</span><span class="lang-en">Weddings</span></h4>
+                    <p>
+                        <span class="lang-es">Desde la entrada de la ceremonia hasta el último baile, creamos la música de su día perfecto.</span>
+                        <span class="lang-en">From the ceremony processional to the last dance, we create the soundtrack to your perfect day.</span>
+                    </p>
                 </div>
             </div>
             <div class="col-md-6 col-lg-3">
-                <div class="service-card service-card--mint">
-                    <div class="service-icon service-icon--mint"><i class="bi bi-stars"></i></div>
+                <div class="service-card-modern">
+                    <div class="service-icon-gold"><i class="bi bi-stars"></i></div>
                     <h4>Quinceañeras</h4>
-                    <p>Honor this milestone with the music and culture that makes this tradition so special.</p>
+                    <p>
+                        <span class="lang-es">Celebre este gran momento con la música y la cultura que hacen esta tradición tan especial.</span>
+                        <span class="lang-en">Honor this milestone with the music and culture that makes this tradition so special.</span>
+                    </p>
                 </div>
             </div>
             <div class="col-md-6 col-lg-3">
-                <div class="service-card service-card--peach">
-                    <div class="service-icon service-icon--peach"><i class="bi bi-balloon-heart-fill"></i></div>
-                    <h4>Birthdays &amp; Anniversaries</h4>
-                    <p>Surprise your loved ones with a personal serenade or lively entertainment for any age.</p>
+                <div class="service-card-modern">
+                    <div class="service-icon-gold"><i class="bi bi-balloon-heart-fill"></i></div>
+                    <h4><span class="lang-es">Cumpleaños y Serenatas</span><span class="lang-en">Birthdays &amp; Serenades</span></h4>
+                    <p>
+                        <span class="lang-es">Sorprenda a sus seres queridos con una serenata personal o música alegre para toda edad.</span>
+                        <span class="lang-en">Surprise your loved ones with a personal serenade or lively entertainment for any age.</span>
+                    </p>
                 </div>
             </div>
             <div class="col-md-6 col-lg-3">
-                <div class="service-card service-card--lavender">
-                    <div class="service-icon service-icon--lavender"><i class="bi bi-building"></i></div>
-                    <h4>Corporate Events</h4>
-                    <p>Bring authentic Mexican culture to company parties, galas, and team celebrations.</p>
+                <div class="service-card-modern">
+                    <div class="service-icon-gold"><i class="bi bi-building"></i></div>
+                    <h4><span class="lang-es">Eventos Corporativos</span><span class="lang-en">Corporate Events</span></h4>
+                    <p>
+                        <span class="lang-es">Lleve la auténtica cultura mexicana a fiestas de empresa, galas y celebraciones de equipo.</span>
+                        <span class="lang-en">Bring authentic Mexican culture to company parties, galas, and team celebrations.</span>
+                    </p>
                 </div>
             </div>
         </div>
@@ -277,8 +303,8 @@ function switchVideo(btn) {
 <!-- GALLERY -->
 <section id="gallery" class="py-section">
     <div class="container">
-        <p class="eyebrow-label text-center">Moments We've Created</p>
-        <h2 class="section-title text-center">Photo Gallery</h2>
+        <p class="eyebrow-label text-center"><span class="lang-es">Momentos que Hemos Creado</span><span class="lang-en">Moments We've Created</span></p>
+        <h2 class="section-title text-center"><span class="lang-es">Galería</span><span class="lang-en">Photo Gallery</span></h2>
         <div class="gallery-grid">
             <div class="gallery-item" style="background-image:url('{% if site_media.gallery_1 %}{{ site_media.gallery_1.file.url }}{% else %}{% static "images/mariachi-photo-2.jpeg" %}{% endif %}');background-size:cover;background-position:center;">
                 <div class="gallery-overlay"><span>{% if site_media.gallery_1 and site_media.gallery_1.caption %}{{ site_media.gallery_1.caption }}{% else %}Mariachi Todo Terreno{% endif %}</span></div>
@@ -287,89 +313,54 @@ function switchVideo(btn) {
                 <div class="gallery-overlay"><span>{% if site_media.gallery_2 and site_media.gallery_2.caption %}{{ site_media.gallery_2.caption }}{% else %}Quinceañera{% endif %}</span></div>
             </div>
             <div class="gallery-item" style="background-image:url('{% if site_media.gallery_3 %}{{ site_media.gallery_3.file.url }}{% else %}{% static "images/mariachi-photo-3.jpeg" %}{% endif %}');background-size:cover;background-position:center;">
-                <div class="gallery-overlay"><span>{% if site_media.gallery_3 and site_media.gallery_3.caption %}{{ site_media.gallery_3.caption }}{% else %}Live Performance{% endif %}</span></div>
+                <div class="gallery-overlay"><span>{% if site_media.gallery_3 and site_media.gallery_3.caption %}{{ site_media.gallery_3.caption }}{% else %}En Vivo{% endif %}</span></div>
             </div>
             <div class="gallery-item" style="background-image:url('{% if site_media.gallery_4 %}{{ site_media.gallery_4.file.url }}{% else %}{% static "images/mariachi-photo-4.jpeg" %}{% endif %}');background-size:cover;background-position:center;">
-                <div class="gallery-overlay"><span>{% if site_media.gallery_4 and site_media.gallery_4.caption %}{{ site_media.gallery_4.caption }}{% else %}The Band{% endif %}</span></div>
+                <div class="gallery-overlay"><span>{% if site_media.gallery_4 and site_media.gallery_4.caption %}{{ site_media.gallery_4.caption }}{% else %}La Banda{% endif %}</span></div>
             </div>
             <div class="gallery-item" style="background-image:url('{% if site_media.gallery_5 %}{{ site_media.gallery_5.file.url }}{% else %}{% static "images/quinceanera-2.jpeg" %}{% endif %}');background-size:cover;background-position:center;">
-                <div class="gallery-overlay"><span>{% if site_media.gallery_5 and site_media.gallery_5.caption %}{{ site_media.gallery_5.caption }}{% else %}Quinceañera Night{% endif %}</span></div>
+                <div class="gallery-overlay"><span>{% if site_media.gallery_5 and site_media.gallery_5.caption %}{{ site_media.gallery_5.caption }}{% else %}Quinceañera{% endif %}</span></div>
             </div>
             <div class="gallery-item" style="background-image:url('{% if site_media.gallery_6 %}{{ site_media.gallery_6.file.url }}{% else %}{% static "images/mariachi-photo-1.jpeg" %}{% endif %}');background-size:cover;background-position:center;">
-                <div class="gallery-overlay"><span>{% if site_media.gallery_6 and site_media.gallery_6.caption %}{{ site_media.gallery_6.caption }}{% else %}Portrait{% endif %}</span></div>
+                <div class="gallery-overlay"><span>{% if site_media.gallery_6 and site_media.gallery_6.caption %}{{ site_media.gallery_6.caption }}{% else %}Retrato{% endif %}</span></div>
             </div>
         </div>
     </div>
 </section>
 
-<!-- TESTIMONIALS -->
-<section id="testimonials" class="testimonials-section">
-    <div class="container">
-        <p class="eyebrow-label text-center">What Clients Say</p>
-        <h2 class="section-title text-center">Stories from Happy Clients</h2>
-        <div class="row g-4">
-            <div class="col-md-4">
-                <div class="testimonial-card">
-                    <div class="stars mb-3">
-                        <i class="bi bi-star-fill"></i><i class="bi bi-star-fill"></i>
-                        <i class="bi bi-star-fill"></i><i class="bi bi-star-fill"></i>
-                        <i class="bi bi-star-fill"></i>
-                    </div>
-                    <p class="testimonial-text">"They made our wedding absolutely magical. Every guest was on their feet dancing. We couldn't have asked for better entertainment!"</p>
-                    <div class="testimonial-author">
-                        <strong>Maria &amp; Carlos R.</strong>
-                        <span>Wedding — Los Angeles</span>
-                    </div>
-                </div>
-            </div>
-            <div class="col-md-4">
-                <div class="testimonial-card">
-                    <div class="stars mb-3">
-                        <i class="bi bi-star-fill"></i><i class="bi bi-star-fill"></i>
-                        <i class="bi bi-star-fill"></i><i class="bi bi-star-fill"></i>
-                        <i class="bi bi-star-fill"></i>
-                    </div>
-                    <p class="testimonial-text">"My daughter's quinceañera was a dream come true. The mariachi arrived on time, looked amazing, and played beautifully all night."</p>
-                    <div class="testimonial-author">
-                        <strong>Ana Flores</strong>
-                        <span>Quinceañera — Santa Ana</span>
-                    </div>
-                </div>
-            </div>
-            <div class="col-md-4">
-                <div class="testimonial-card">
-                    <div class="stars mb-3">
-                        <i class="bi bi-star-fill"></i><i class="bi bi-star-fill"></i>
-                        <i class="bi bi-star-fill"></i><i class="bi bi-star-fill"></i>
-                        <i class="bi bi-star-fill"></i>
-                    </div>
-                    <p class="testimonial-text">"We hired them for a surprise birthday serenade. My mom was in tears! Truly professional, warm, and incredibly talented musicians."</p>
-                    <div class="testimonial-author">
-                        <strong>David Morales</strong>
-                        <span>Birthday Surprise — Riverside</span>
-                    </div>
-                </div>
-            </div>
-        </div>
-    </div>
-</section>
+{# TESTIMONIALS — hidden until real client quotes are collected.              #}
+{# The placeholder quotes referenced fictional people in California cities.    #}
+{# When you have 2-3 real quotes (name + city + a sentence), restore a section #}
+{# here — see git history for the card markup.                                 #}
 
 <!-- CTA BAND -->
 <section class="cta-band">
     <div class="container text-center">
-        <h2 class="mb-3 fw-bold">Ready to Make Your Event Unforgettable?</h2>
-        <p class="mb-4" style="color: rgba(255,255,255,0.8); font-size: 1.1rem;">Get a free quote — we respond within 24 hours.</p>
-        <a href="#contact" class="btn btn-cream btn-lg px-5 py-3">
-            <i class="bi bi-calendar-plus-fill me-2"></i> Request a Free Quote
-        </a>
+        <h2 class="mb-3 fw-bold">
+            <span class="lang-es">¿Listo para hacer su evento inolvidable?</span>
+            <span class="lang-en">Ready to Make Your Event Unforgettable?</span>
+        </h2>
+        <p class="mb-4" style="color: rgba(255,255,255,0.8); font-size: 1.1rem;">
+            <span class="lang-es">Cotización gratis — respondemos en menos de 24 horas.</span>
+            <span class="lang-en">Get a free quote — we respond within 24 hours.</span>
+        </p>
+        <div class="d-flex gap-2 justify-content-center flex-wrap">
+            <a href="https://wa.me/14795866060" target="_blank" rel="noopener" class="btn btn-whatsapp btn-lg px-4 py-3">
+                <i class="bi bi-whatsapp me-2"></i>WhatsApp
+            </a>
+            <a href="#contact" class="btn btn-cream btn-lg px-4 py-3">
+                <span class="lang-es"><i class="bi bi-calendar-plus-fill me-2"></i>Pedir Cotización</span>
+                <span class="lang-en"><i class="bi bi-calendar-plus-fill me-2"></i>Request a Free Quote</span>
+            </a>
+        </div>
     </div>
 </section>
 
 <!-- CONTACT -->
 <section id="contact" class="py-section">
     <div class="container">
-        <p class="eyebrow-label text-center">Let's Talk</p>
-        <h2 class="section-title text-center">Book Your Event</h2>
+        <p class="eyebrow-label text-center"><span class="lang-es">Hablemos</span><span class="lang-en">Let's Talk</span></p>
+        <h2 class="section-title text-center"><span class="lang-es">Reserva tu Evento</span><span class="lang-en">Book Your Event</span></h2>
         <div class="row g-5">
             <div class="col-lg-7">
                 <div class="contact-form-card">
@@ -382,12 +373,17 @@ function switchVideo(btn) {
                                         <div class="form-check mt-1">
                                             {{ field }}
                                             <label class="form-check-label" style="color: var(--text-muted);" for="{{ field.id_for_label }}">
-                                                {{ field.label }}
+                                                <span class="lang-es">Quiero recibir noticias y promociones</span>
+                                                <span class="lang-en">{{ field.label }}</span>
                                             </label>
                                         </div>
                                     {% else %}
                                         <label for="{{ field.id_for_label }}" class="form-label">
-                                            {{ field.label }}{% if field.field.required %} <span style="color: var(--blush-deep);">*</span>{% endif %}
+                                            <span class="lang-es">
+                                                {% if field.name == 'name' %}Su Nombre{% elif field.name == 'email' %}Correo Electrónico{% elif field.name == 'phone' %}Teléfono{% elif field.name == 'event_type' %}Tipo de Evento{% elif field.name == 'message' %}Mensaje{% else %}{{ field.label }}{% endif %}
+                                            </span>
+                                            <span class="lang-en">{{ field.label }}</span>
+                                            {% if field.field.required %} <span style="color: var(--blush-deep);">*</span>{% endif %}
                                         </label>
                                         {{ field }}
                                         {% if field.errors %}
@@ -398,7 +394,8 @@ function switchVideo(btn) {
                             {% endfor %}
                             <div class="col-12 mt-2">
                                 <button type="submit" class="btn btn-wine btn-lg w-100">
-                                    <i class="bi bi-send-fill me-2"></i> Send Message
+                                    <span class="lang-es"><i class="bi bi-send-fill me-2"></i>Enviar Mensaje</span>
+                                    <span class="lang-en"><i class="bi bi-send-fill me-2"></i>Send Message</span>
                                 </button>
                             </div>
                         </div>
@@ -407,12 +404,20 @@ function switchVideo(btn) {
             </div>
             <div class="col-lg-5">
                 <div class="contact-info-panel">
-                    <h4>Get In Touch</h4>
+                    <h4><span class="lang-es">Contáctanos</span><span class="lang-en">Get In Touch</span></h4>
+                    <div class="contact-info-item">
+                        <div class="contact-info-icon"><i class="bi bi-whatsapp"></i></div>
+                        <div>
+                            <strong>WhatsApp</strong>
+                            <a href="https://wa.me/14795866060" target="_blank" rel="noopener">(479) 586-6060</a>
+                        </div>
+                    </div>
                     <div class="contact-info-item">
                         <div class="contact-info-icon"><i class="bi bi-telephone-fill"></i></div>
                         <div>
-                            <strong>Phone / WhatsApp</strong>
-                            <a href="tel:+15551234567">(555) 123-4567</a>
+                            <strong><span class="lang-es">Teléfono</span><span class="lang-en">Phone</span></strong>
+                            Gerardo Ochoa — <a href="tel:+14795866060">(479) 586-6060</a><br>
+                            Jose Amezcua — <a href="tel:+14795374897">(479) 537-4897</a>
                         </div>
                     </div>
                     <div class="contact-info-item">
@@ -425,26 +430,54 @@ function switchVideo(btn) {
                     <div class="contact-info-item">
                         <div class="contact-info-icon"><i class="bi bi-geo-alt-fill"></i></div>
                         <div>
-                            <strong>Service Area</strong>
-                            Southern California &amp; Beyond
+                            <strong><span class="lang-es">Área de Servicio</span><span class="lang-en">Service Area</span></strong>
+                            <span class="lang-es">Noroeste de Arkansas — Springdale, Rogers, Fayetteville, Bentonville y alrededores</span>
+                            <span class="lang-en">Northwest Arkansas — Springdale, Rogers, Fayetteville, Bentonville &amp; beyond</span>
                         </div>
                     </div>
                     <div class="contact-info-item">
                         <div class="contact-info-icon"><i class="bi bi-clock-fill"></i></div>
                         <div>
-                            <strong>Response Time</strong>
-                            Within 24 hours
+                            <strong><span class="lang-es">Tiempo de Respuesta</span><span class="lang-en">Response Time</span></strong>
+                            <span class="lang-es">Menos de 24 horas</span>
+                            <span class="lang-en">Within 24 hours</span>
                         </div>
                     </div>
-                    <div class="social-links mt-4">
-                        <a href="#" class="social-link" aria-label="Facebook"><i class="bi bi-facebook"></i></a>
-                        <a href="#" class="social-link" aria-label="Instagram"><i class="bi bi-instagram"></i></a>
-                        <a href="#" class="social-link" aria-label="YouTube"><i class="bi bi-youtube"></i></a>
-                    </div>
+                    {# Social links: add here once official band accounts exist #}
                 </div>
             </div>
         </div>
     </div>
 </section>
+
+<!-- Sticky mobile call bar -->
+<div class="mobile-cta-bar d-lg-none no-print">
+    <a href="tel:+14795866060" class="mobile-cta-call">
+        <i class="bi bi-telephone-fill me-2"></i><span class="lang-es">Llamar</span><span class="lang-en">Call</span>
+    </a>
+    <a href="https://wa.me/14795866060" target="_blank" rel="noopener" class="mobile-cta-wa">
+        <i class="bi bi-whatsapp me-2"></i>WhatsApp
+    </a>
+</div>
+
+<script>
+// Site language: default Spanish; remembered per visitor; ?lang= overrides.
+function setSiteLang(l) {
+    document.body.dataset.lang = l;
+    document.documentElement.lang = l;
+    try { localStorage.setItem('mtt_lang', l); } catch (e) { /* private mode */ }
+    document.querySelectorAll('.lang-toggle-btn').forEach(function (b) {
+        b.classList.toggle('active', b.dataset.setlang === l);
+    });
+}
+(function () {
+    var params = new URLSearchParams(window.location.search);
+    var lang = params.get('lang');
+    if (lang !== 'es' && lang !== 'en') {
+        try { lang = localStorage.getItem('mtt_lang'); } catch (e) { lang = null; }
+    }
+    setSiteLang(lang === 'en' ? 'en' : 'es');
+})();
+</script>
 
 {% endblock %}

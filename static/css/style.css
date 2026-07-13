@@ -874,10 +874,18 @@ body.home-modern { padding-bottom: 0; }
     body.home-modern { padding-bottom: 52px; } /* room for the sticky bar */
 }
 
-/* ── Light-section harmonization (charcoal/gold replaces vintage accents) ── */
+/* ── Section-context color rules ──────────────────────────────────────────
+   Text color is decided by the SECTION a heading sits in, never by one-off
+   classes (a blanket heading rule once silently overrode the hero title —
+   .section-dark has higher specificity by design so that can't recur). */
 body.home-modern h1, body.home-modern h2, body.home-modern h3,
 body.home-modern h4, body.home-modern h5, body.home-modern h6 {
     color: var(--charcoal-soft);
+}
+body.home-modern .section-dark h1, body.home-modern .section-dark h2,
+body.home-modern .section-dark h3, body.home-modern .section-dark h4,
+body.home-modern .section-dark h5, body.home-modern .section-dark h6 {
+    color: #fff;
 }
 body.home-modern .eyebrow-label {
     font-family: 'Open Sans', sans-serif;
@@ -926,3 +934,25 @@ body.home-modern .contact-info-icon {
 }
 body.home-modern .contact-info-item a { color: var(--charcoal-soft); font-weight: 600; }
 body.home-modern .contact-info-item a:hover { color: var(--gold); }
+body.home-modern .footer-vintage { background-color: var(--charcoal); }
+body.home-modern .footer-vintage h5 { color: var(--gold-soft); }
+body.home-modern .footer-vintage a:hover { color: var(--gold-soft); }
+
+/* Mobile hero fit — title and pill must never clip (verified at 390px) */
+@media (max-width: 575.98px) {
+    .hero-full { padding: 4.5rem 0 5.5rem; }
+    .hero-title-light { font-size: clamp(2.1rem, 10.5vw, 3rem); }
+    .hero-pill-gold {
+        font-size: 0.66rem;
+        letter-spacing: 0.09em;
+        white-space: normal;
+        max-width: 92%;
+    }
+    .hero-subtitle-light { font-size: 1rem; }
+}
+.hero-cta-row {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.6rem;
+    justify-content: center;
+}

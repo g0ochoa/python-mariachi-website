@@ -873,3 +873,56 @@ body.home-modern { padding-bottom: 0; }
 @media (max-width: 991.98px) {
     body.home-modern { padding-bottom: 52px; } /* room for the sticky bar */
 }
+
+/* ── Light-section harmonization (charcoal/gold replaces vintage accents) ── */
+body.home-modern h1, body.home-modern h2, body.home-modern h3,
+body.home-modern h4, body.home-modern h5, body.home-modern h6 {
+    color: var(--charcoal-soft);
+}
+body.home-modern .eyebrow-label {
+    font-family: 'Open Sans', sans-serif;
+    font-size: 0.8rem;
+    font-weight: 700;
+    letter-spacing: 0.18em;
+    text-transform: uppercase;
+    color: var(--gold);
+}
+body.home-modern .section-title::after {
+    background: linear-gradient(90deg, var(--gold), var(--gold-soft));
+}
+body.home-modern .feature-point i { color: var(--gold) !important; }
+body.home-modern .about-badge {
+    background-color: var(--charcoal);
+    border: 2px solid var(--gold);
+}
+body.home-modern .about-badge .badge-years { color: var(--gold); }
+body.home-modern .btn-wine {
+    background-color: var(--charcoal);
+    border-color: var(--charcoal);
+}
+body.home-modern .btn-wine:hover, body.home-modern .btn-wine:focus {
+    background-color: var(--charcoal-soft);
+    border-color: var(--gold);
+    color: var(--gold-soft);
+    box-shadow: 0 6px 20px rgba(20, 17, 14, 0.3);
+}
+body.home-modern .cta-band {
+    background: linear-gradient(135deg, var(--charcoal-soft) 0%, var(--charcoal) 100%);
+    border-top: 1px solid rgba(207, 168, 85, 0.35);
+    border-bottom: 1px solid rgba(207, 168, 85, 0.35);
+}
+body.home-modern .btn-cream { color: var(--charcoal); }
+body.home-modern .btn-cream:hover, body.home-modern .btn-cream:focus { color: var(--charcoal); }
+body.home-modern .gallery-overlay {
+    background: linear-gradient(to top, rgba(20, 17, 14, 0.85) 0%, transparent 60%);
+}
+body.home-modern .contact-form-card {
+    border-color: var(--cream-darker);
+    box-shadow: 0 4px 30px rgba(20, 17, 14, 0.08);
+}
+body.home-modern .contact-info-icon {
+    background: rgba(207, 168, 85, 0.16) !important;
+    color: var(--gold) !important;
+}
+body.home-modern .contact-info-item a { color: var(--charcoal-soft); font-weight: 600; }
+body.home-modern .contact-info-item a:hover { color: var(--gold); }

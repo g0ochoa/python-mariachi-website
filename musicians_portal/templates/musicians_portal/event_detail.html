@@ -17,6 +17,24 @@
       {% elif event.event_type == 'absence' %}bg-dark text-white
       {% else %}bg-secondary text-white{% endif %}">
       <div class="d-flex justify-content-between align-items-center">
+        {% if is_finance_user %}
+        <div class="dropdown">
+          <button class="badge bg-white border-0
+            {% if event.event_type == 'gig' %}text-danger
+            {% elif event.event_type == 'rehearsal' %}text-primary
+            {% elif event.event_type == 'absence' %}text-dark
+            {% else %}text-secondary{% endif %}"
+            type="button" data-bs-toggle="dropdown" aria-expanded="false" style="cursor:pointer;">
+            {{ event.get_event_type_display }} <i class="bi bi-chevron-down ms-1" style="font-size:.6rem;"></i>
+          </button>
+          <ul class="dropdown-menu">
+            {% for val, label in event.TYPE_CHOICES %}
+            <li><a class="dropdown-item{% if event.event_type == val %} active{% endif %}" href="#"
+                   onclick="changeEventType({{ event.id }}, '{{ val }}', '{{ label|escapejs }}'); return false;">{{ label }}</a></li>
+            {% endfor %}
+          </ul>
+        </div>
+        {% else %}
         <span class="badge bg-white
           {% if event.event_type == 'gig' %}text-danger
           {% elif event.event_type == 'rehearsal' %}text-primary
@@ -24,6 +42,7 @@
           {% else %}text-secondary{% endif %}">
           {{ event.get_event_type_display }}
         </span>
+        {% endif %}
         {% if is_finance_user %}
           <div class="d-flex gap-2">
             <a href="{% url 'portal_event_edit' event.id %}" class="btn btn-sm btn-light">
@@ -445,6 +464,23 @@
       }, 3000);
     });
   })();
+  </script>
+  <script>
+  function getCsrf() {
+    var el = document.querySelector('input[name=csrfmiddlewaretoken]');
+    return el ? el.value : '';
+  }
+  function changeEventType(eventId, newType, newLabel) {
+    if (!confirm('Change event type to "' + newLabel + '"?')) return;
+    fetch('/portal/calendar/events/' + eventId + '/type/', {
+      method: 'POST',
+      headers: { 'X-CSRFToken': getCsrf(), 'Content-Type': 'application/x-www-form-urlencoded' },
+      body: 'event_type=' + encodeURIComponent(newType),
+    })
+    .then(function (r) { if (!r.ok) throw new Error('failed'); return r.json(); })
+    .then(function () { location.reload(); })
+    .catch(function () { alert('Failed to update event type. Please try again.'); });
+  }
   </script>
   {% endif %}
 

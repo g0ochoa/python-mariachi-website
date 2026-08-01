@@ -54,7 +54,7 @@
            class="cal-ev cal-ev-{{ span.event.event_type }}{% if span.continues_from %} cal-cont-from{% endif %}{% if span.continues_after %} cal-cont-after{% endif %}{% if span.event.needs_pay %} cal-ev-unpaid{% endif %}"
            style="grid-column:{{ span.col_start }}/span {{ span.col_span }};"
            title="{{ span.event.title }}{% if span.event.needs_pay %} — pay not recorded{% endif %}">
-          {% if span.event.needs_pay %}<i class="bi bi-cash-coin me-1"></i>{% endif %}{% if not span.continues_from and span.event.start_time %}{{ span.event.start_time|time:"g:i A" }} · {% endif %}{{ span.event.title }}
+          {% if not span.continues_from and span.event.start_time %}{{ span.event.start_time|time:"g:i A" }} · {% endif %}{{ span.event.title }}
         </a>
         {% endfor %}
       </div>

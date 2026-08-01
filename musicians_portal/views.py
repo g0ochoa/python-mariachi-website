@@ -99,7 +99,6 @@ def _do_ical_sync():
 
         defaults = {
             'title':      summary[:200],
-            'event_type': _detect_event_type(summary),
             'date':       event_date,
             'end_date':   event_end_date,
             'start_time': start_time,
@@ -113,6 +112,11 @@ def _do_ical_sync():
             defaults=defaults,
         )
         if was_created:
+            # event_type has no Google Calendar equivalent — auto-detect once
+            # on creation only, so it doesn't clobber a manual reclassification
+            # (e.g. Gig -> Absence) on every later re-sync.
+            obj.event_type = _detect_event_type(summary)
+            obj.save(update_fields=['event_type'])
             created += 1
         else:
             updated += 1
@@ -723,6 +727,33 @@ def event_delete(request, event_id):
     event.delete()
     _delete_gcal(gcal_id)
     return redirect(f'/portal/calendar/?year={year}&month={month}')
+
+
+@login_required
+@require_POST
+def event_type_update(request, event_id):
+    """Quick event-type change (Gig/Rehearsal/Absence/Other) from the event
+    detail page, without the full edit-form round-trip."""
+    _require_portal(request)
+    if not _is_finance_user(request.user):
+        raise PermissionDenied
+
+    event = get_object_or_404(Event, id=event_id)
+    new_type = request.POST.get('event_type', '')
+    if new_type not in dict(Event.TYPE_CHOICES):
+        return JsonResponse({'error': 'invalid event_type'}, status=400)
+
+    event.event_type = new_type
+    if new_type == 'absence':
+        event.rate_per_hour = None
+        event.total_charged = None
+        event.billed_hours  = None
+    event.save()
+
+    return JsonResponse({
+        'event_type':         event.event_type,
+        'event_type_display': event.get_event_type_display(),
+    })
 
 
 @login_required

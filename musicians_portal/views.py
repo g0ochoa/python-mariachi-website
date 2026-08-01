@@ -919,6 +919,13 @@ def gig_log(request):
         date_val        = p.get('date', '')
         start_time_val  = p.get('start_time') or None
         end_time_val    = p.get('end_time')   or None
+        # Parse to real time objects — Gig/Event.objects.create() saves raw
+        # strings to the DB fine, but the in-memory objects passed to
+        # _push_to_gcal() below need actual datetime.time for combine().
+        if start_time_val:
+            start_time_val = datetime.strptime(start_time_val, '%H:%M').time()
+        if end_time_val:
+            end_time_val = datetime.strptime(end_time_val, '%H:%M').time()
         venue           = p.get('venue', '').strip()
         city            = p.get('city', '').strip()
         musicians_count = int(p.get('musicians_count') or 1)

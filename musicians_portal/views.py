@@ -318,8 +318,9 @@ def _annotate_pay_status(events, gig_ids, is_finance):
     independently — mark_event_paid() and musician_pay_bulk() always keep
     every MusicianPay.is_paid in lockstep with it, so there's no meaningful
     distinction yet between "client hasn't paid" and "musicians not paid out."
-    Returns the count of gigs with at least one MusicianPay row (same count the
-    "X/Y paid" badge uses)."""
+    Returns (paid_count, planned_count): gigs settled (Event.is_paid) vs.
+    gigs with pay recorded but not yet settled — the three-way split with
+    gig_count (paid / planned / not yet planned) drives the header badges."""
     paid_gig_ids = set()
     if is_finance and gig_ids:
         paid_gig_ids = set(
@@ -330,12 +331,18 @@ def _annotate_pay_status(events, gig_ids, is_finance):
     today    = timezone.localdate()
     now_time = timezone.localtime().time()
 
+    paid_count = planned_count = 0
     for ev in events:
         is_gig = is_finance and ev.event_type == 'gig'
+        if is_gig:
+            if ev.is_paid:
+                paid_count += 1
+            elif ev.id in paid_gig_ids:
+                planned_count += 1
         played = is_gig and _event_has_played(ev, today, now_time)
         ev.needs_pay  = is_gig and ev.id not in paid_gig_ids
         ev.gig_unpaid = played and not ev.is_paid
-    return len(paid_gig_ids)
+    return paid_count, planned_count
 
 
 def _played_q(prefix, today, now_time):
@@ -489,7 +496,7 @@ def calendar_month_partial(request):
 
     gig_count = sum(1 for ev in events_this_month if ev.event_type == 'gig')
     gig_ids = [ev.id for ev in events_this_month if ev.event_type == 'gig']
-    gigs_with_pay = _annotate_pay_status(events_this_month, gig_ids, _is_finance_user(request.user))
+    paid_count, planned_count = _annotate_pay_status(events_this_month, gig_ids, _is_finance_user(request.user))
     week_events = _build_week_events(cal, year, month, events_by_day)
     cal_weeks = [{'days': w, 'event_spans': we} for w, we in zip(cal, week_events)]
 
@@ -499,7 +506,8 @@ def calendar_month_partial(request):
         'prev_year': prev_month.year, 'prev_month': prev_month.month,
         'next_year': next_month.year, 'next_month': next_month.month,
         'gig_count': gig_count,
-        'gigs_with_pay': gigs_with_pay,
+        'paid_count': paid_count,
+        'planned_count': planned_count,
         'month_stats': _month_financial_stats(request.user, year, month, today),
     }
     return render(request, 'musicians_portal/partials/calendar_month.html', context)
@@ -561,7 +569,7 @@ def event_calendar(request):
 
     gig_count = sum(1 for ev in events_this_month if ev.event_type == 'gig')
     gig_ids = [ev.id for ev in events_this_month if ev.event_type == 'gig']
-    gigs_with_pay = _annotate_pay_status(events_this_month, gig_ids, _is_finance_user(request.user))
+    paid_count, planned_count = _annotate_pay_status(events_this_month, gig_ids, _is_finance_user(request.user))
     week_events = _build_week_events(cal, year, month, events_by_day)
     cal_weeks = [{'days': w, 'event_spans': we} for w, we in zip(cal, week_events)]
 
@@ -582,7 +590,8 @@ def event_calendar(request):
         'next_year':     next_month.year,
         'next_month':    next_month.month,
         'gig_count':     gig_count,
-        'gigs_with_pay': gigs_with_pay,
+        'paid_count': paid_count,
+        'planned_count': planned_count,
         'month_stats':   _month_financial_stats(request.user, year, month, today),
     }
     return render(request, 'musicians_portal/calendar.html', context)

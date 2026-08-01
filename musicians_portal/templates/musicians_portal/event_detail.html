@@ -30,7 +30,7 @@
               <i class="bi bi-pencil"></i> Edit
             </a>
             <form method="post" action="{% url 'portal_event_delete' event.id %}"
-                  onsubmit="return confirm('Delete this event?')">
+                  onsubmit="return confirm('Delete &quot;{{ event.title|escapejs }}&quot; on {{ event.date|date:"M j, Y" }}? This cannot be undone.')">
               {% csrf_token %}
               <button type="submit" class="btn btn-sm btn-outline-light">
                 <i class="bi bi-trash"></i>

@@ -311,20 +311,21 @@ def _event_has_played(ev, today, now_time):
 
 
 def _annotate_pay_status(events, gig_ids, is_finance):
-    """Attach three calendar-marker flags to each gig Event (finance users only):
-      - needs_pay:        no MusicianPay recorded yet at all
-      - band_unpaid:       already played and the client hasn't paid (Event.is_paid)
-      - musicians_unpaid:  already played and at least one recorded musician's pay
-                            is still unpaid
+    """Attach two calendar-marker flags to each gig Event (finance users only):
+      - needs_pay:  no MusicianPay recorded yet at all
+      - gig_unpaid: already played and Event.is_paid is still False
+    Event.is_paid is the only settlement flag the app actually tracks
+    independently — mark_event_paid() and musician_pay_bulk() always keep
+    every MusicianPay.is_paid in lockstep with it, so there's no meaningful
+    distinction yet between "client hasn't paid" and "musicians not paid out."
     Returns the count of gigs with at least one MusicianPay row (same count the
     "X/Y paid" badge uses)."""
     paid_gig_ids = set()
-    unpaid_musician_gig_ids = set()
     if is_finance and gig_ids:
-        for event_id, is_paid in MusicianPay.objects.filter(event_id__in=gig_ids).values_list('event_id', 'is_paid'):
-            paid_gig_ids.add(event_id)
-            if not is_paid:
-                unpaid_musician_gig_ids.add(event_id)
+        paid_gig_ids = set(
+            MusicianPay.objects.filter(event_id__in=gig_ids)
+            .values_list('event_id', flat=True).distinct()
+        )
 
     today    = timezone.localdate()
     now_time = timezone.localtime().time()
@@ -332,9 +333,8 @@ def _annotate_pay_status(events, gig_ids, is_finance):
     for ev in events:
         is_gig = is_finance and ev.event_type == 'gig'
         played = is_gig and _event_has_played(ev, today, now_time)
-        ev.needs_pay       = is_gig and ev.id not in paid_gig_ids
-        ev.band_unpaid      = played and not ev.is_paid
-        ev.musicians_unpaid = played and ev.id in unpaid_musician_gig_ids
+        ev.needs_pay  = is_gig and ev.id not in paid_gig_ids
+        ev.gig_unpaid = played and not ev.is_paid
     return len(paid_gig_ids)
 
 

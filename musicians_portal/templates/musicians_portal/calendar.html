@@ -332,7 +332,7 @@
   color: #000;
 }
 .cal-ev-flag-needpay { background: #ffc107; }
-.cal-ev-flag-unpaid   { background: #ffc107; }
+.cal-ev-flag-unpaid   { background: #fd7e14; }
 /* Multi-day continuation edges (no rounded corner where bar continues) */
 .cal-ev.cal-cont-from                      { border-radius: 0 4px 4px 0; margin-left: 0; }
 .cal-ev.cal-cont-after                     { border-radius: 4px 0 0 4px; margin-right: 0; }
@@ -354,7 +354,7 @@ function showDayEvents(day, monthData) {
     `<a href="${ev.url}" class="list-group-item list-group-item-action py-3">
       <div class="d-flex justify-content-between align-items-start gap-2">
         <div>
-          <div class="fw-semibold">${ev.needsPay ? '<i class="bi bi-currency-dollar me-1" style="color:#ffc107" title="Pay not recorded"></i>' : ''}${ev.gigUnpaid ? '<i class="bi bi-cash-stack me-1" style="color:#ffc107" title="Not marked as paid"></i>' : ''}${ev.title}</div>
+          <div class="fw-semibold">${ev.needsPay ? '<i class="bi bi-currency-dollar me-1" style="color:#ffc107" title="Pay not recorded"></i>' : ''}${ev.gigUnpaid ? '<i class="bi bi-cash-stack me-1" style="color:#fd7e14" title="Not marked as paid"></i>' : ''}${ev.title}</div>
           <div class="text-muted small mt-1">
             ${ev.start ? '<i class="bi bi-clock me-1"></i>' + ev.start + (ev.end ? ' – ' + ev.end : '') + '&nbsp;&nbsp;' : ''}
             ${ev.venue ? '<i class="bi bi-geo-alt me-1"></i>' + ev.venue : ''}

@@ -51,9 +51,16 @@
         <!-- Event bars — CSS Grid auto-places these after the 7 day cells -->
         {% for span in week_data.event_spans %}
         <a href="/portal/calendar/events/{{ span.event.id }}/"
-           class="cal-ev cal-ev-{{ span.event.event_type }}{% if span.continues_from %} cal-cont-from{% endif %}{% if span.continues_after %} cal-cont-after{% endif %}{% if span.event.needs_pay %} cal-ev-unpaid{% endif %}"
+           class="cal-ev cal-ev-{{ span.event.event_type }}{% if span.continues_from %} cal-cont-from{% endif %}{% if span.continues_after %} cal-cont-after{% endif %}{% if span.event.needs_pay or span.event.band_unpaid or span.event.musicians_unpaid %} cal-ev-has-flags{% endif %}"
            style="grid-column:{{ span.col_start }}/span {{ span.col_span }};"
-           title="{{ span.event.title }}{% if span.event.needs_pay %} — pay not recorded{% endif %}">
+           title="{{ span.event.title }}{% if span.event.needs_pay %} — pay not recorded{% endif %}{% if span.event.band_unpaid %} — client hasn't paid{% endif %}{% if span.event.musicians_unpaid %} — musicians not paid out{% endif %}">
+          {% if span.event.needs_pay or span.event.band_unpaid or span.event.musicians_unpaid %}
+          <span class="cal-ev-flags">
+            {% if span.event.needs_pay %}<span class="cal-ev-flag cal-ev-flag-needpay"><i class="bi bi-currency-dollar"></i></span>{% endif %}
+            {% if span.event.band_unpaid %}<span class="cal-ev-flag cal-ev-flag-bandunpaid"><i class="bi bi-building"></i></span>{% endif %}
+            {% if span.event.musicians_unpaid %}<span class="cal-ev-flag cal-ev-flag-musicunpaid"><i class="bi bi-people-fill"></i></span>{% endif %}
+          </span>
+          {% endif %}
           {% if not span.continues_from and span.event.start_time %}{{ span.event.start_time|time:"g:i A" }} · {% endif %}{{ span.event.title }}
         </a>
         {% endfor %}
@@ -69,6 +76,11 @@
     <span class="badge bg-dark px-3 py-2"><i class="bi bi-slash-circle me-1"></i>Absence</span>
     <span class="badge bg-secondary px-3 py-2"><i class="bi bi-calendar me-1"></i>Other</span>
     <span class="badge bg-warning text-dark px-3 py-2">Today</span>
+    {% if month_stats.is_finance %}
+    <span class="badge px-3 py-2" style="background:#ffc107;color:#000;"><i class="bi bi-currency-dollar me-1"></i>Pay not recorded</span>
+    <span class="badge px-3 py-2" style="background:#fd7e14;color:#000;"><i class="bi bi-building me-1"></i>Client hasn't paid</span>
+    <span class="badge px-3 py-2" style="background:#d63384;color:#fff;"><i class="bi bi-people-fill me-1"></i>Musicians not paid out</span>
+    {% endif %}
   </div>
 
   <!-- Update global currentMonthData for showDayEvents() -->
@@ -77,7 +89,7 @@
     year: {{ year }}, month: {{ month }},
     days: {
       {% for day, evs in events_by_day.items %}
-      "{{ day }}": [{% for ev in evs %}{"id":{{ ev.id }},"title":"{{ ev.title|escapejs }}","type":"{{ ev.event_type }}","typeLabel":"{{ ev.get_event_type_display }}","start":"{% if ev.start_time %}{{ ev.start_time|time:'g:i A' }}{% endif %}","end":"{% if ev.end_time %}{{ ev.end_time|time:'g:i A' }}{% endif %}","venue":"{{ ev.venue|escapejs }}","url":"/portal/calendar/events/{{ ev.id }}/","needsPay":{% if ev.needs_pay %}true{% else %}false{% endif %}}{% if not forloop.last %},{% endif %}{% endfor %}]{% if not forloop.last %},{% endif %}
+      "{{ day }}": [{% for ev in evs %}{"id":{{ ev.id }},"title":"{{ ev.title|escapejs }}","type":"{{ ev.event_type }}","typeLabel":"{{ ev.get_event_type_display }}","start":"{% if ev.start_time %}{{ ev.start_time|time:'g:i A' }}{% endif %}","end":"{% if ev.end_time %}{{ ev.end_time|time:'g:i A' }}{% endif %}","venue":"{{ ev.venue|escapejs }}","url":"/portal/calendar/events/{{ ev.id }}/","needsPay":{% if ev.needs_pay %}true{% else %}false{% endif %},"bandUnpaid":{% if ev.band_unpaid %}true{% else %}false{% endif %},"musiciansUnpaid":{% if ev.musicians_unpaid %}true{% else %}false{% endif %}}{% if not forloop.last %},{% endif %}{% endfor %}]{% if not forloop.last %},{% endif %}
       {% endfor %}
     }
   };

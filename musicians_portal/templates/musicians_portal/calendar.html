@@ -372,22 +372,28 @@
 .cal-ev-rehearsal { background: #0d6efd; }
 .cal-ev-absence   { background: #212529; }
 .cal-ev-other     { background: #6c757d; }
-.cal-ev-unpaid::after {
-  content: "$";
+/* Pay-status flags — full-height strip(s) on the left edge of the bar */
+.cal-ev-has-flags { padding-left: 30px; }
+.cal-ev-flags {
   position: absolute;
-  top: -4px;
-  right: -4px;
-  width: 12px;
-  height: 12px;
-  background: #ffc107;
-  color: #000;
-  font-size: 8px;
-  font-weight: 700;
-  line-height: 12px;
-  text-align: center;
-  border-radius: 2px;
-  box-shadow: 0 0 0 1px rgba(0,0,0,.35);
+  top: 0;
+  left: 0;
+  bottom: 0;
+  display: flex;
+  border-radius: 4px 0 0 4px;
+  overflow: hidden;
 }
+.cal-ev-flag {
+  width: 15px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 10px;
+  color: #000;
+}
+.cal-ev-flag-needpay     { background: #ffc107; }
+.cal-ev-flag-bandunpaid  { background: #fd7e14; }
+.cal-ev-flag-musicunpaid { background: #d63384; color: #fff; }
 /* Multi-day continuation edges (no rounded corner where bar continues) */
 .cal-ev.cal-cont-from                      { border-radius: 0 4px 4px 0; margin-left: 0; }
 .cal-ev.cal-cont-after                     { border-radius: 4px 0 0 4px; margin-right: 0; }
@@ -409,7 +415,7 @@ function showDayEvents(day, monthData) {
     `<a href="${ev.url}" class="list-group-item list-group-item-action py-3">
       <div class="d-flex justify-content-between align-items-start gap-2">
         <div>
-          <div class="fw-semibold">${ev.needsPay ? '<i class="bi bi-cash-coin text-warning me-1" title="Pay not recorded"></i>' : ''}${ev.title}</div>
+          <div class="fw-semibold">${ev.needsPay ? '<i class="bi bi-currency-dollar me-1" style="color:#ffc107" title="Pay not recorded"></i>' : ''}${ev.bandUnpaid ? '<i class="bi bi-building me-1" style="color:#fd7e14" title="Client hasn\'t paid"></i>' : ''}${ev.musiciansUnpaid ? '<i class="bi bi-people-fill me-1" style="color:#d63384" title="Musicians not paid out"></i>' : ''}${ev.title}</div>
           <div class="text-muted small mt-1">
             ${ev.start ? '<i class="bi bi-clock me-1"></i>' + ev.start + (ev.end ? ' – ' + ev.end : '') + '&nbsp;&nbsp;' : ''}
             ${ev.venue ? '<i class="bi bi-geo-alt me-1"></i>' + ev.venue : ''}

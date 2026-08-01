@@ -1,4 +1,6 @@
 asgiref==3.11.0
+google-api-python-client>=2.0.0
+google-auth>=2.0.0
 Django==5.2.8
 django-htmx==1.27.0
 gunicorn==23.0.0

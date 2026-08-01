@@ -35,6 +35,7 @@ jobs:
           rsync -avz --delete \
             --exclude='.git/' \
             --exclude='.env' \
+            --exclude='*service-account*.json' \
             --exclude='venv/' \
             --exclude='venv-mac/' \
             --exclude='staticfiles/' \

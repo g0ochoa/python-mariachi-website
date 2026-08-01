@@ -297,6 +297,21 @@ def _is_finance_user(user):
     return user.role in ('admin', 'lead')
 
 
+def _annotate_pay_status(events, gig_ids, is_finance):
+    """Attach ev.needs_pay (bool) to each gig Event so the calendar can flag
+    ones with no MusicianPay recorded yet. Returns the count of gigs that do
+    have at least one MusicianPay row (same count the "X/Y paid" badge uses)."""
+    paid_gig_ids = set()
+    if is_finance and gig_ids:
+        paid_gig_ids = set(
+            MusicianPay.objects.filter(event_id__in=gig_ids)
+            .values_list('event_id', flat=True).distinct()
+        )
+    for ev in events:
+        ev.needs_pay = is_finance and ev.event_type == 'gig' and ev.id not in paid_gig_ids
+    return len(paid_gig_ids)
+
+
 def _played_q(prefix, today, now_time):
     """Q object matching events that have actually already happened (date passed,
     or today with a start_time that's already passed / no start_time on record)."""
@@ -448,11 +463,7 @@ def calendar_month_partial(request):
 
     gig_count = sum(1 for ev in events_this_month if ev.event_type == 'gig')
     gig_ids = [ev.id for ev in events_this_month if ev.event_type == 'gig']
-    gigs_with_pay = 0
-    if _is_finance_user(request.user) and gig_ids:
-        gigs_with_pay = MusicianPay.objects.filter(
-            event_id__in=gig_ids
-        ).values('event_id').distinct().count()
+    gigs_with_pay = _annotate_pay_status(events_this_month, gig_ids, _is_finance_user(request.user))
     week_events = _build_week_events(cal, year, month, events_by_day)
     cal_weeks = [{'days': w, 'event_spans': we} for w, we in zip(cal, week_events)]
 
@@ -524,11 +535,7 @@ def event_calendar(request):
 
     gig_count = sum(1 for ev in events_this_month if ev.event_type == 'gig')
     gig_ids = [ev.id for ev in events_this_month if ev.event_type == 'gig']
-    gigs_with_pay = 0
-    if _is_finance_user(request.user) and gig_ids:
-        gigs_with_pay = MusicianPay.objects.filter(
-            event_id__in=gig_ids
-        ).values('event_id').distinct().count()
+    gigs_with_pay = _annotate_pay_status(events_this_month, gig_ids, _is_finance_user(request.user))
     week_events = _build_week_events(cal, year, month, events_by_day)
     cal_weeks = [{'days': w, 'event_spans': we} for w, we in zip(cal, week_events)]
 

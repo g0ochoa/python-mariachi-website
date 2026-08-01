@@ -786,8 +786,19 @@ def _push_to_gcal(gig, title):
         return None
 
 
+def _resolve_gcal_event_id(service, raw_id):
+    """Events pulled in from the iCal read-sync store their iCal UID as
+    google_event_id, which is a different ID space than the Calendar API's
+    own opaque event IDs — a raw eventId call 404s for those. Resolve the
+    real event ID via an iCalUID lookup so update/delete can find it."""
+    result = service.events().list(calendarId=GCAL_CALENDAR_ID, iCalUID=raw_id).execute()
+    items = result.get('items', [])
+    return items[0]['id'] if items else None
+
+
 def _update_gcal(event):
     """Update an existing GCal event to match the Django Event. No-op if no google_event_id."""
+    from googleapiclient.errors import HttpError
     logger = logging.getLogger(__name__)
 
     if not event.google_event_id:
@@ -808,11 +819,16 @@ def _update_gcal(event):
             body['start'] = {'date': ev_date.isoformat()}
             body['end']   = {'date': ev_date.isoformat()}
 
-        service.events().update(
-            calendarId=GCAL_CALENDAR_ID,
-            eventId=event.google_event_id,
-            body=body,
-        ).execute()
+        event_id = event.google_event_id
+        try:
+            service.events().update(calendarId=GCAL_CALENDAR_ID, eventId=event_id, body=body).execute()
+        except HttpError as exc:
+            if exc.resp.status != 404:
+                raise
+            real_id = _resolve_gcal_event_id(service, event_id)
+            if not real_id:
+                raise
+            service.events().update(calendarId=GCAL_CALENDAR_ID, eventId=real_id, body=body).execute()
         logger.info('GCal event updated: %s', event.google_event_id)
     except Exception as exc:
         logger.error('GCal update failed: %s', exc)
@@ -820,6 +836,7 @@ def _update_gcal(event):
 
 def _delete_gcal(google_event_id):
     """Delete a GCal event by its event ID. No-op if id is blank."""
+    from googleapiclient.errors import HttpError
     logger = logging.getLogger(__name__)
 
     if not google_event_id:
@@ -828,7 +845,15 @@ def _delete_gcal(google_event_id):
     if not service:
         return
     try:
-        service.events().delete(calendarId=GCAL_CALENDAR_ID, eventId=google_event_id).execute()
+        try:
+            service.events().delete(calendarId=GCAL_CALENDAR_ID, eventId=google_event_id).execute()
+        except HttpError as exc:
+            if exc.resp.status != 404:
+                raise
+            real_id = _resolve_gcal_event_id(service, google_event_id)
+            if not real_id:
+                raise
+            service.events().delete(calendarId=GCAL_CALENDAR_ID, eventId=real_id).execute()
         logger.info('GCal event deleted: %s', google_event_id)
     except Exception as exc:
         logger.error('GCal delete failed: %s', exc)

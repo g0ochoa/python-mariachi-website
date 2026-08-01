@@ -297,6 +297,29 @@ def _is_finance_user(user):
     return user.role in ('admin', 'lead')
 
 
+def _played_q(prefix, today, now_time):
+    """Q object matching events that have actually already happened (date passed,
+    or today with a start_time that's already passed / no start_time on record)."""
+    date_f  = f'{prefix}date'
+    time_f  = f'{prefix}start_time'
+    return (
+        Q(**{f'{date_f}__lt': today}) |
+        Q(**{date_f: today, f'{time_f}__isnull': True}) |
+        Q(**{date_f: today, f'{time_f}__lte': now_time})
+    )
+
+
+def _carryover_label(months, year):
+    """Format a list of (year, month) tuples into a short 'from X' label."""
+    if not months:
+        return None
+    if len(months) == 1:
+        cy, cm = months[0]
+        fmt = '%b' if cy == year else '%b %Y'
+        return date(cy, cm, 1).strftime(fmt)
+    return 'prior months'
+
+
 def _month_financial_stats(user, year, month, today):
     """Compute monthly and YTD financial stats.
     Admin/lead get personal + business totals.
@@ -305,21 +328,35 @@ def _month_financial_stats(user, year, month, today):
     if user.role not in ('admin', 'lead', 'musician'):
         return None
     is_finance = user.role in ('admin', 'lead')
-    jan_first = date(today.year, 1, 1)
+    jan_first  = date(today.year, 1, 1)
+    first_day  = date(year, month, 1)
+    now_time   = timezone.localtime().time()
 
-    # Single query: earned, owed (played but unpaid), upcoming (future, unpaid)
+    # A gig only counts as "owed" once it's actually been played (date/time
+    # has passed) — a same-day gig scheduled for later today is still upcoming.
+    played_personal = _played_q('event__', today, now_time)
+
+    # Single query: earned, owed (played but unpaid), upcoming (not yet played, unpaid)
     personal_month = MusicianPay.objects.filter(
         musician=user,
         event__date__year=year,
         event__date__month=month,
     ).aggregate(
         earned=Sum(Case(When(is_paid=True, then='amount'), output_field=DecimalField())),
-        owed=Sum(Case(When(is_paid=False, event__date__lte=today, then='amount'), output_field=DecimalField())),
-        upcoming=Sum(Case(When(is_paid=False, event__date__gt=today, then='amount'), output_field=DecimalField())),
+        owed=Sum(Case(When(played_personal & Q(is_paid=False), then='amount'), output_field=DecimalField())),
+        upcoming=Sum(Case(When(~played_personal & Q(is_paid=False), then='amount'), output_field=DecimalField())),
     )
     my_earned   = personal_month['earned']   or 0
     my_owed     = personal_month['owed']     or 0
     my_upcoming = personal_month['upcoming'] or 0
+
+    # Unpaid + already-played pay from before the viewed month — surfaced as a
+    # carryover badge so it isn't silently invisible once you navigate away.
+    my_carry_qs = MusicianPay.objects.filter(
+        musician=user, event__date__lt=first_day, is_paid=False,
+    ).filter(played_personal)
+    my_owed_carryover = my_carry_qs.aggregate(t=Sum('amount'))['t'] or 0
+    my_carry_months = sorted(set(my_carry_qs.values_list('event__date__year', 'event__date__month')))
 
     # Single query for YTD
     my_ytd = MusicianPay.objects.filter(
@@ -330,26 +367,36 @@ def _month_financial_stats(user, year, month, today):
     ).aggregate(t=Sum('amount'))['t'] or 0
 
     result = {
-        'is_finance': is_finance,
-        'my_earned':  my_earned,
-        'my_owed':    my_owed,
+        'is_finance':  is_finance,
+        'my_earned':   my_earned,
+        'my_owed':     my_owed,
         'my_upcoming': my_upcoming,
-        'my_ytd':     my_ytd,
+        'my_ytd':      my_ytd,
+        'my_owed_carryover':       my_owed_carryover,
+        'my_owed_carryover_label': _carryover_label(my_carry_months, year),
     }
 
     if is_finance:
+        played_biz = _played_q('', today, now_time)
+
         # Single query: earned, owed, upcoming for band revenue this month
         biz_month = Event.objects.filter(
             date__year=year, date__month=month,
             total_charged__isnull=False,
         ).aggregate(
             earned=Sum(Case(When(is_paid=True, then='total_charged'), output_field=DecimalField())),
-            owed=Sum(Case(When(is_paid=False, date__lte=today, then='total_charged'), output_field=DecimalField())),
-            upcoming=Sum(Case(When(is_paid=False, date__gt=today, then='total_charged'), output_field=DecimalField())),
+            owed=Sum(Case(When(played_biz & Q(is_paid=False), then='total_charged'), output_field=DecimalField())),
+            upcoming=Sum(Case(When(~played_biz & Q(is_paid=False), then='total_charged'), output_field=DecimalField())),
         )
         biz_earned   = biz_month['earned']   or 0
         biz_owed     = biz_month['owed']     or 0
         biz_upcoming = biz_month['upcoming'] or 0
+
+        biz_carry_qs = Event.objects.filter(
+            date__lt=first_day, is_paid=False, total_charged__isnull=False,
+        ).filter(played_biz)
+        biz_owed_carryover = biz_carry_qs.aggregate(t=Sum('total_charged'))['t'] or 0
+        biz_carry_months = sorted(set(biz_carry_qs.values_list('date__year', 'date__month')))
 
         biz_ytd = Event.objects.filter(
             date__gte=jan_first,
@@ -362,6 +409,8 @@ def _month_financial_stats(user, year, month, today):
         result['biz_owed']     = biz_owed
         result['biz_upcoming'] = biz_upcoming
         result['biz_ytd']      = biz_ytd
+        result['biz_owed_carryover']       = biz_owed_carryover
+        result['biz_owed_carryover_label'] = _carryover_label(biz_carry_months, year)
 
     return result
 

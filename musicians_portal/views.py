@@ -13,6 +13,7 @@ from icalendar import Calendar as iCalendar
 BAND_TZ = ZoneInfo('America/Chicago')
 
 from django.shortcuts import render, get_object_or_404, redirect
+from django.contrib import messages
 from django.contrib.auth.decorators import login_required
 from django.core.cache import cache
 from django.core.exceptions import PermissionDenied
@@ -414,6 +415,15 @@ def _month_financial_stats(user, year, month, today):
         is_paid=True,
     ).aggregate(t=Sum('amount'))['t'] or 0
 
+    # What today's gigs could earn — whether or not they've been played yet —
+    # surfaced on the "Owed to me" pill so today's money doesn't just silently
+    # sit inside "Upcoming" until the day is already over.
+    my_expected_today = 0
+    if year == today.year and month == today.month:
+        my_expected_today = MusicianPay.objects.filter(
+            musician=user, event__date=today, is_paid=False,
+        ).aggregate(t=Sum('amount'))['t'] or 0
+
     result = {
         'is_finance':  is_finance,
         'my_earned':   my_earned,
@@ -422,6 +432,7 @@ def _month_financial_stats(user, year, month, today):
         'my_ytd':      my_ytd,
         'my_owed_carryover':       my_owed_carryover,
         'my_owed_carryover_label': _carryover_label(my_carry_months, year),
+        'my_expected_today':       my_expected_today,
     }
 
     if is_finance:
@@ -453,12 +464,19 @@ def _month_financial_stats(user, year, month, today):
             total_charged__isnull=False,
         ).aggregate(t=Sum('total_charged'))['t'] or 0
 
+        biz_expected_today = 0
+        if year == today.year and month == today.month:
+            biz_expected_today = Event.objects.filter(
+                date=today, is_paid=False, total_charged__isnull=False,
+            ).aggregate(t=Sum('total_charged'))['t'] or 0
+
         result['biz_earned']   = biz_earned
         result['biz_owed']     = biz_owed
         result['biz_upcoming'] = biz_upcoming
         result['biz_ytd']      = biz_ytd
         result['biz_owed_carryover']       = biz_owed_carryover
         result['biz_owed_carryover_label'] = _carryover_label(biz_carry_months, year)
+        result['biz_expected_today']       = biz_expected_today
 
     return result
 
@@ -658,6 +676,7 @@ def event_detail(request, event_id):
         'all_musicians':  all_musicians,
         'pay_map':        pay_map,
         'event_hours':    event_hours,
+        'has_pay_entered': any(p.amount > 0 for p in pay_records),
         'is_finance_user': _is_finance_user(request.user),
         'active_contract': _active_contract(event) if _is_finance_user(request.user) else None,
     }
@@ -1125,6 +1144,10 @@ def mark_event_paid(request, event_id):
         raise PermissionDenied
 
     event = get_object_or_404(Event, id=event_id)
+    if not MusicianPay.objects.filter(event=event, amount__gt=0).exists():
+        messages.error(request, 'Enter pay for at least one musician before marking this event as paid.')
+        return redirect('portal_event_detail', event_id=event_id)
+
     event.is_paid = True
     event.save(update_fields=['is_paid'])
     MusicianPay.objects.filter(event=event).update(is_paid=True)

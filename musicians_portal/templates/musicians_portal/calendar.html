@@ -63,6 +63,7 @@
             <div class="text-muted mb-1" style="font-size:.7rem;"><i class="bi bi-cash-coin me-1 text-danger"></i>Owed to me</div>
             <div class="fw-bold text-danger" style="font-size:1rem;" id="stat-my-owed">${{ month_stats.my_owed|floatformat:2 }}</div>
             <span class="badge bg-warning text-dark mt-1" id="stat-my-owed-carry" style="font-size:.6rem; {% if not month_stats.my_owed_carryover %}display:none;{% endif %}" title="Unpaid from before this month">+${{ month_stats.my_owed_carryover|floatformat:2 }} from {{ month_stats.my_owed_carryover_label }}</span>
+            <span class="badge bg-primary mt-1" id="stat-my-expected-today" style="font-size:.6rem; {% if not month_stats.my_expected_today %}display:none;{% endif %}" title="What today's gigs could earn you, played or not">${{ month_stats.my_expected_today|floatformat:2 }} today</span>
           </div>
         </div>
         <div class="col-3">
@@ -94,6 +95,7 @@
             <div class="text-muted mb-1" style="font-size:.7rem;"><i class="bi bi-cash-coin me-1 text-danger"></i>Owed to band</div>
             <div class="fw-bold text-danger" style="font-size:1rem;" id="stat-biz-owed">${{ month_stats.biz_owed|floatformat:2 }}</div>
             <span class="badge bg-warning text-dark mt-1" id="stat-biz-owed-carry" style="font-size:.6rem; {% if not month_stats.biz_owed_carryover %}display:none;{% endif %}" title="Unpaid from before this month">+${{ month_stats.biz_owed_carryover|floatformat:2 }} from {{ month_stats.biz_owed_carryover_label }}</span>
+            <span class="badge bg-primary mt-1" id="stat-biz-expected-today" style="font-size:.6rem; {% if not month_stats.biz_expected_today %}display:none;{% endif %}" title="What today's gigs could bring in, played or not">${{ month_stats.biz_expected_today|floatformat:2 }} today</span>
           </div>
         </div>
         <div class="col-3">
@@ -411,6 +413,19 @@ function updateTopStats(data) {
   });
   updateCarryBadge('stat-my-owed-carry', data.my_owed_carryover, data.my_owed_carryover_label);
   updateCarryBadge('stat-biz-owed-carry', data.biz_owed_carryover, data.biz_owed_carryover_label);
+  updateTodayBadge('stat-my-expected-today', data.my_expected_today);
+  updateTodayBadge('stat-biz-expected-today', data.biz_expected_today);
+}
+
+function updateTodayBadge(id, amount) {
+  var el = document.getElementById(id);
+  if (!el) return;
+  if (amount && parseFloat(amount) > 0) {
+    el.textContent = '$' + amount + ' today';
+    el.style.display = '';
+  } else {
+    el.style.display = 'none';
+  }
 }
 
 function updateCarryBadge(id, amount, label) {

@@ -373,9 +373,14 @@
           <button type="button" class="btn btn-outline-success btn-sm" disabled>
             <i class="bi bi-patch-check-fill me-1"></i>Paid ✓
           </button>
-          {% else %}
+          {% elif has_pay_entered %}
           <button type="submit" class="btn btn-warning btn-sm"
                   onclick="return confirm('Mark all musicians as paid for this event?')">
+            <i class="bi bi-cash-coin me-1"></i>Mark All as Paid
+          </button>
+          {% else %}
+          <button type="button" class="btn btn-outline-secondary btn-sm" disabled
+                  title="Enter pay for at least one musician first">
             <i class="bi bi-cash-coin me-1"></i>Mark All as Paid
           </button>
           {% endif %}

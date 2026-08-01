@@ -20,13 +20,15 @@
       my_upcoming:  '{{ month_stats.my_upcoming|floatformat:2 }}',
       my_ytd:       '{{ month_stats.my_ytd|floatformat:2 }}',
       my_owed_carryover:       '{{ month_stats.my_owed_carryover|floatformat:2 }}',
-      my_owed_carryover_label: '{{ month_stats.my_owed_carryover_label|default:"" }}'{% if month_stats.is_finance %},
+      my_owed_carryover_label: '{{ month_stats.my_owed_carryover_label|default:"" }}',
+      my_expected_today:       '{{ month_stats.my_expected_today|floatformat:2 }}'{% if month_stats.is_finance %},
       biz_earned:   '{{ month_stats.biz_earned|floatformat:2 }}',
       biz_owed:     '{{ month_stats.biz_owed|floatformat:2 }}',
       biz_upcoming: '{{ month_stats.biz_upcoming|floatformat:2 }}',
       biz_ytd:      '{{ month_stats.biz_ytd|floatformat:2 }}',
       biz_owed_carryover:       '{{ month_stats.biz_owed_carryover|floatformat:2 }}',
-      biz_owed_carryover_label: '{{ month_stats.biz_owed_carryover_label|default:"" }}'{% endif %}
+      biz_owed_carryover_label: '{{ month_stats.biz_owed_carryover_label|default:"" }}',
+      biz_expected_today:       '{{ month_stats.biz_expected_today|floatformat:2 }}'{% endif %}
     });
   }
   </script>

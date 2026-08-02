@@ -898,14 +898,17 @@ def _update_gcal(event):
         tz       = 'America/Chicago'
         location = ', '.join(filter(None, [event.venue or '', event.city if hasattr(event, 'city') else '']))
         ev_date  = event.date if isinstance(event.date, date) else date.fromisoformat(str(event.date))
+        end_date = event.end_date if event.end_date else ev_date
 
         body = {'summary': event.title, 'location': location, 'description': event.notes or ''}
         if event.start_time and event.end_time:
-            body['start'] = {'dateTime': datetime.combine(ev_date, event.start_time).isoformat(), 'timeZone': tz}
-            body['end']   = {'dateTime': datetime.combine(ev_date, event.end_time).isoformat(),   'timeZone': tz}
+            body['start'] = {'dateTime': datetime.combine(ev_date, event.start_time).isoformat(),  'timeZone': tz}
+            body['end']   = {'dateTime': datetime.combine(end_date, event.end_time).isoformat(),    'timeZone': tz}
         else:
             body['start'] = {'date': ev_date.isoformat()}
-            body['end']   = {'date': ev_date.isoformat()}
+            # Google's all-day end date is exclusive (matches the +1-day
+            # adjustment the read-sync makes going the other direction).
+            body['end']   = {'date': (end_date + timedelta(days=1)).isoformat()}
 
         event_id = event.google_event_id
         try:

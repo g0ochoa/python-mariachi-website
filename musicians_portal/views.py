@@ -711,13 +711,21 @@ def event_create(request):
         p = request.POST
         event_type = p.get('event_type', 'gig')
         is_absence = event_type == 'absence'
+        # Parse to real time objects — the in-memory event passed to
+        # _push_event_to_gcal() needs datetime.time for combine()
+        start_time_val = p.get('start_time') or None
+        end_time_val   = p.get('end_time')   or None
+        if start_time_val:
+            start_time_val = datetime.strptime(start_time_val, '%H:%M').time()
+        if end_time_val:
+            end_time_val = datetime.strptime(end_time_val, '%H:%M').time()
         event = Event.objects.create(
             title         = p['title'],
             event_type    = event_type,
             date          = p['date'],
             end_date      = p.get('end_date') or None,
-            start_time    = p.get('start_time') or None,
-            end_time      = p.get('end_time')   or None,
+            start_time    = start_time_val,
+            end_time      = end_time_val,
             venue         = p.get('venue', ''),
             client        = p.get('client', ''),
             notes         = p.get('notes', ''),
@@ -726,9 +734,21 @@ def event_create(request):
             billed_hours  = None if is_absence else (p.get('billed_hours')  or None),
             created_by    = request.user,
         )
+        # Push to the shared Google Calendar so the band sees it there too
+        gcal_id = _push_event_to_gcal(event)
+        if gcal_id:
+            event.google_event_id = gcal_id
+            event.save()
         return redirect('portal_event_detail', event_id=event.id)
 
-    context = {'page_title': 'Add Event'}
+    selected_type = request.GET.get('type', 'gig')
+    if selected_type not in dict(Event.TYPE_CHOICES):
+        selected_type = 'gig'
+    type_labels = {'gig': 'Gig', 'rehearsal': 'Rehearsal', 'absence': 'Absence', 'other': 'Event'}
+    context = {
+        'page_title': f'Add {type_labels[selected_type]}',
+        'selected_type': selected_type,
+    }
     return render(request, 'musicians_portal/event_form.html', context)
 
 
@@ -760,7 +780,7 @@ def event_edit(request, event_id):
         _update_gcal(event)
         return redirect('portal_event_detail', event_id=event.id)
 
-    context = {'page_title': 'Edit Event', 'event': event}
+    context = {'page_title': 'Edit Event', 'event': event, 'selected_type': event.event_type}
     return render(request, 'musicians_portal/event_form.html', context)
 
 
@@ -871,6 +891,39 @@ def _push_to_gcal(gig, title):
         return result.get('id')
     except Exception as exc:
         logging.getLogger(__name__).error('GCal push failed: %s', exc)
+        return None
+
+
+def _push_event_to_gcal(event):
+    """Create a GCal event from a Django Event (timed or all-day).
+    Returns the GCal event ID or None."""
+    logger = logging.getLogger(__name__)
+
+    service = _gcal_service()
+    if not service:
+        logger.warning('GCal write skipped: credentials not configured')
+        return None
+
+    try:
+        tz       = 'America/Chicago'
+        ev_date  = event.date if isinstance(event.date, date) else date.fromisoformat(str(event.date))
+        end_date = event.end_date if event.end_date else ev_date
+        if not isinstance(end_date, date):
+            end_date = date.fromisoformat(str(end_date))
+
+        body = {'summary': event.title, 'location': event.venue or '', 'description': event.notes or ''}
+        if event.start_time and event.end_time:
+            body['start'] = {'dateTime': datetime.combine(ev_date, event.start_time).isoformat(),  'timeZone': tz}
+            body['end']   = {'dateTime': datetime.combine(end_date, event.end_time).isoformat(),   'timeZone': tz}
+        else:
+            body['start'] = {'date': ev_date.isoformat()}
+            # Google's all-day end date is exclusive (matches _update_gcal)
+            body['end']   = {'date': (end_date + timedelta(days=1)).isoformat()}
+
+        result = service.events().insert(calendarId=GCAL_CALENDAR_ID, body=body).execute()
+        return result.get('id')
+    except Exception as exc:
+        logger.error('GCal push failed: %s', exc)
         return None
 
 

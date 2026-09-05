@@ -956,3 +956,19 @@ body.home-modern .footer-vintage a:hover { color: var(--gold-soft); }
     gap: 0.6rem;
     justify-content: center;
 }
+
+/* ── Cards that hold a dropdown ──────────────────────────────────────────
+   `.card:hover` applies a transform, and any transform turns the card into a
+   stacking context — so the card that follows in the DOM paints over an open
+   dropdown menu (on Pay Summary the table buried the musician filter list,
+   and the 5px lift made it feel glitchy). `.card-flat` opts a card out of the
+   lift; `.card-filters` also raises the filter bar above what follows it. */
+.card.card-flat,
+.card.card-flat:hover {
+    transform: none;
+    box-shadow: 0 4px 16px rgba(0, 0, 0, 0.05);
+}
+.card.card-filters {
+    position: relative;
+    z-index: 1030;
+}

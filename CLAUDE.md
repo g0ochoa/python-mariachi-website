@@ -28,6 +28,55 @@ Push to `main` → GitHub Actions (`.github/workflows/deploy-staging.yml`) rsync
 
 ⚠️ **Static-file cache busting:** nginx serves `/django-static/` with `Cache-Control: immutable` for 30 days. Whenever `static/css/style.css` or `static/js/main.js` changes, **bump the `?v=` date in `templates/base.html`** or every returning visitor keeps the stale file for up to a month (this has bitten before — a homepage restyle rendered half-broken for visitors with the old CSS cached).
 
+### ⚠️ TLS: `certbot --nginx` does NOT work on this box — use DNS-01
+
+**The VPS is self-hosted on a residential Cox line (72.204.116.227), and inbound port 80
+is blocked.** Every HTTP-01 challenge therefore fails, which is why `certbot --nginx` has
+burned time repeatedly. Every certificate on this server was issued with **DNS-01 via the
+`certbot-dns-dynu` plugin** (`authenticator = dns-dynu` in
+`/etc/letsencrypt/renewal/*.conf`).
+
+Working command for a new cert:
+
+```bash
+sudo certbot certonly \
+  --authenticator dns-dynu \
+  --dns-dynu-credentials /root/certbot-dynu/dynu.ini \
+  --dns-dynu-propagation-seconds 60 \
+  -d <domain>
+```
+
+`certonly` does not touch nginx — add the `ssl_certificate` lines by hand afterwards.
+Auto-renewal is already handled by `certbot.timer` (enabled + active) and reuses DNS-01.
+
+**Prerequisite: the domain's DNS must be served by Dynu**, or the plugin cannot create the
+`_acme-challenge` TXT record where Let's Encrypt looks for it.
+
+### nginx here is 1.24.0
+
+Use `listen 443 ssl http2;` — the newer `http2 on;` directive is nginx 1.25.1+ and fails
+with `unknown directive "http2"`. Also note `/etc/letsencrypt/ssl-dhparams.pem` does **not**
+exist on this box; only `include /etc/letsencrypt/options-ssl-nginx.conf;` is available.
+
+General rule for this server: **copy the pattern from a site that already serves correctly**
+rather than writing nginx config from scratch.
+
+### DNS is split across three providers
+
+| Domain | Nameservers | Points at |
+|---|---|---|
+| mariachitodoterreno.com | Dynu (`ns1-6.dynu.com`) | 72.204.116.227 (this box) |
+| mariachiesencia.com | Dynu | 72.204.116.227 (this box) |
+| ochoaevents.com | Google Cloud DNS (legacy) | 72.204.116.227 (this box) |
+| camilaevents.com | Squarespace | Squarespace hosting |
+| gerrysarcade.com | Google Cloud DNS (legacy) | Render (216.24.57.1) |
+
+⚠️ The `ns-cloud-*.googledomains.com` nameservers are **not managed in Google Cloud
+Console** — those domains were bought on Google Domains, which Squarespace acquired in 2023
+while keeping Google's DNS infrastructure. **Manage them at
+`account.squarespace.com/domains`**, not the GCP console. This wastes time every time it
+comes up.
+
 Two domains front the same app: **mariachitodoterreno.com** (customer-facing) and **mariachiesencia.com** (also hosts the scores files + a legacy PHP API). The SSH host/user/project-path are **not in the repo** (it's public): they're GitHub Actions variables `STAGING_HOST` / `STAGING_USER` / `STAGING_PROJECT_PATH` plus the `STAGING_SSH_KEY` secret (`gh variable list` to view). Full pipeline + server layout: `deployment/README.md`.
 
 ## Architecture
@@ -75,3 +124,14 @@ All datetimes normalize to `America/Chicago` (`BAND_TZ`).
 ### Financial dashboards
 
 `_month_financial_stats` powers the calendar header: personal earned/owed/upcoming + YTD for every member; admin/lead additionally get band revenue aggregates from `Event.total_charged`/`is_paid`. "Owed" = unpaid with event date in the past; "upcoming" = unpaid, future-dated.
+
+## Encyclopedia
+
+This project is a case study in the learning encyclopedia at **learn.gerrysarcade.com**
+(repo: `repos/encyclopedia`). Chapters teach a concept and use this project as one of
+several worked examples.
+
+**When meaningful work lands here — an architectural change, a new failure worth
+learning from, a decision with a reason — update the matching chapter in the same
+session.** See `repos/encyclopedia/PROGRESS.md` for what exists and
+`repos/encyclopedia/CLAUDE.md` for the chapter structure.
